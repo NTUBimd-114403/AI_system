@@ -1,0 +1,10 @@
+# Python 編譯後的位元碼檔案
+__pycache__/
+*.pyc
+
+# Django 專案常用需要忽略的檔案 (建議一併加入)
+*.log
+*.sqlite3
+.env
+/media/
+/static/
