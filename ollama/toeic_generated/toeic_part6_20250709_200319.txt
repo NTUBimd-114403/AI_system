@@ -1,0 +1,21 @@
+Here are two TOEIC Part 6 Text Completion question sets:
+
+**Set 1**
+
+【Passage Title】: Memo to All Staff
+
+【Passage】:
+As we approach the end of the quarter, I would like to remind everyone that our company's policy is (1) ____________________ to ensure accurate financial reporting. This includes verifying all expense reports and invoices before submitting them for reimbursement. Furthermore, please note that any discrepancies or errors found during this process will need to be corrected immediately. Failure to comply with these procedures may result in delays in payment processing.
+
+【Questions and Options】:
+
+Q1. What is the company's policy regarding financial reporting?
+A. flexible
+B. strict
+C. optional
+D. irrelevant
+
+... 
+
+【Answer Key】:
+Q1: B

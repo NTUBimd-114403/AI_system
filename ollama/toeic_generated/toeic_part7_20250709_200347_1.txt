@@ -1,0 +1,26 @@
+Here is a TOEIC Reading Comprehension question set:
+
+---
+【Article Type】: News Article
+【Article Title】: "New Airline Routes to Boost Tourism"
+【Article Content】:
+In an effort to boost tourism, the government has announced that three new airline routes will be added this year. The new routes will connect major cities in Asia and Europe, providing travelers with more options for exploring the region. According to industry insiders, the new routes are expected to increase travel demand by 20% annually. The airline industry is also optimistic about the development, stating that it will create more job opportunities and stimulate economic growth. The new routes will commence in March and will be operated by a major Asian carrier.
+
+【Questions and Options】:
+Q1: What is the main purpose of the government's announcement?
+A. To increase travel demand
+B. To boost tourism
+C. To create more job opportunities
+D. To stimulate economic growth
+
+Q2: According to industry insiders, what is expected to happen with travel demand?
+A. It will decrease by 20% annually
+B. It will stay the same as last year
+C. It will increase by 20% annually
+D. It will remain unknown
+
+Q3: When do the new airline routes commence?
+A. In January
+B. In March
+C. In April
+D. In June

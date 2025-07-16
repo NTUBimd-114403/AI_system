@@ -1,0 +1,36 @@
+Here is a TOEIC Reading Comprehension (Part 7) question set:
+
+---
+**Article Type**: News Article
+**Article Title**: New High-Speed Train Line Opens in Japan
+**Article Content**:
+Tokyo, November 15 - A new high-speed train line connecting Tokyo and Osaka has officially opened to the public. The bullet train, which is capable of reaching speeds of up to 320 kilometers per hour, is expected to significantly reduce travel time between the two cities. The journey from Tokyo's Shinjuku station to Osaka's Shin-Osaka station now takes just over three hours, down from four and a half hours previously.
+
+The new line is part of Japan's efforts to improve its transportation infrastructure and increase connectivity between major cities. The government has invested heavily in the development of high-speed rail networks, which are expected to have a significant impact on the country's economy.
+
+Passengers traveling on the new train line can expect comfortable seating and ample legroom, as well as on-board amenities such as food and beverage services and free Wi-Fi.
+
+**Questions and Options**:
+
+Q1. What is the maximum speed of the new bullet train?
+A. 240 kilometers per hour
+B. 320 kilometers per hour
+C. 400 kilometers per hour
+D. 500 kilometers per hour
+
+Q2. How long does the journey from Tokyo to Osaka take now that the new high-speed train line has opened?
+A. Two and a half hours
+B. Three and a half hours
+C. Four and a half hours
+D. Just over three hours
+
+Q3. What is one of the amenities passengers can expect on the new train line?
+A. Priority boarding for business class passengers
+B. Free Wi-Fi and food and beverage services
+C. Comfortable seating with ample legroom only
+D. On-board entertainment system with movies and games
+
+**Answer Key**:
+Q1: B
+Q2: D
+Q3: B

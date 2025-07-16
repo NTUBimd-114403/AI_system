@@ -1,0 +1,31 @@
+Here is a TOEIC Reading Comprehension (Part 7) question set:
+
+---
+Article Type: News Article
+Article Title: New Regulations on Air Travel Effective March 1st
+Article Content:
+In an effort to enhance air travel safety, the International Civil Aviation Organization (ICAO) has implemented new regulations that will take effect starting March 1st. According to the new rules, all airlines must ensure that at least 80% of their pilots are trained in advanced weather radar systems and emergency procedures. Additionally, a minimum of two crew members on each flight will be required to have experience with crisis management. The ICAO has also emphasized the importance of regular maintenance checks for aircraft engines and other critical components. These new regulations aim to reduce the risk of accidents and improve overall air travel safety.
+
+Questions and Options:
+Q1: What is the main purpose of the new regulations on air travel?
+A. To increase airline profits
+B. To enhance air travel safety
+C. To reduce flight delays
+D. To improve in-flight entertainment
+
+Q2: According to the article, what percentage of pilots will be required to have training in advanced weather radar systems and emergency procedures?
+A. 50%
+B. 60%
+C. 80%
+D. 90%
+
+Q3: What is one of the additional requirements for flight crew members under the new regulations?
+A. They must speak fluent English
+B. They must have experience with crisis management
+C. They must be able to perform a specific medical procedure
+D. They must hold a degree in aviation
+
+Answer Key:
+Q1: B
+Q2: C
+Q3: B

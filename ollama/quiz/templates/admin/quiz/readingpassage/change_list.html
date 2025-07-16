@@ -1,0 +1,10 @@
+{% extends "admin/change_list.html" %}
+
+{% block object-tools %}
+    <div style="margin-bottom: 1em;">
+        <a class="button" href="generate_part5/">生成 Part 5 題目</a>
+        <a class="button" href="generate_part6/">生成 Part 6 題目</a>
+        <a class="button" href="generate_part7/">生成 Part 7 題目</a>
+    </div>
+    {{ block.super }}
+{% endblock %}

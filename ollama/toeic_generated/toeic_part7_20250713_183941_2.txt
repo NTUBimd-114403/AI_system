@@ -1,0 +1,36 @@
+Here is a TOEIC Reading Comprehension question set:
+
+---
+【Article Type】: Email
+【Article Title】: New Product Line
+【Article Content】:
+Dear All,
+
+As you know, our company has been working on developing a new product line that will revolutionize the way we do business. I am excited to announce that the first products from this line are now available.
+
+The new line of smart pens is designed to make writing and drawing easier and more efficient. With advanced features such as wireless connectivity and automatic data backup, these pens are sure to become an essential tool for many professionals.
+
+We will be launching a promotional campaign soon to showcase the benefits of our new products. In the meantime, I encourage you all to take some time to learn more about this exciting new line by visiting our website or talking to your sales representative.
+
+Best regards,
+John
+
+【Questions and Options】:
+
+Q1: What is the main topic of the email?
+A. A new product line has been developed
+B. A promotional campaign will be launched soon
+C. The company is looking for feedback on their products
+D. The company is experiencing a period of growth
+
+Q2: What feature does the smart pen have that makes it unique?
+A. It can connect to the internet
+B. It can store data automatically
+C. It has a built-in calculator
+D. It is made of a special material
+
+Q3: Who should you contact for more information about the new product line?
+A. The sales team
+B. The marketing department
+C. Your supervisor
+D. The customer service representative

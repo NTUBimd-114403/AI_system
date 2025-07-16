@@ -1,0 +1,41 @@
+Here is a TOEIC Reading Comprehension question set:
+
+---
+Article Type: Email
+Article Title:
+Article Content:
+Subject: New Travel Policy for Employees
+
+Dear All,
+
+As you are aware, our company has been expanding its global presence in recent years. As we continue to grow, it's essential that we have a clear travel policy in place to ensure the safety and well-being of our employees while they're traveling on company business.
+
+Effective immediately, all employees who need to travel for work must fill out a new Travel Request Form (TRF) at least 72 hours prior to departure. This form will help us track employee travel plans more efficiently and make necessary arrangements for accommodations, transportation, and insurance.
+
+Additionally, please note that all international travel must be approved by the HR department before booking flights or making any other travel arrangements. A new Travel Policy Handbook is being distributed to all employees and can also be accessed on our company intranet site.
+
+If you have any questions or concerns about this new policy, please don't hesitate to reach out to your supervisor or HR representative.
+
+Best regards,
+John Smith
+Global Travel Manager
+
+---
+Questions and Options:
+Q1. What is the main purpose of the email?
+A. To announce a new employee benefits package
+B. To introduce a new travel policy for employees
+C. To remind employees about the company's holiday schedule
+D. To update employees on the latest company news
+
+Q2. According to the email, what must employees do before traveling internationally?
+A. Fill out a TRF at least 72 hours prior to departure
+B. Book flights and make travel arrangements directly with airlines
+C. Get approval from HR department before booking flights or making any other travel arrangements
+D. Notify their supervisor of their travel plans
+
+Q3. Where can employees access the Travel Policy Handbook?
+A. On our company's external website
+B. On our company intranet site
+C. At the HR department office
+D. In the employee handbook

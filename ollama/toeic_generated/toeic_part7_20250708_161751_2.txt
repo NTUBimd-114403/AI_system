@@ -1,0 +1,33 @@
+Here is a TOEIC Reading Comprehension (Part 7) question set:
+
+---
+【Article Type】: News Article
+【Article Title】: New Airport Terminal Opens in Tokyo
+【Article Content】:
+Tokyo's newest airport terminal, Terminal 3, officially opened yesterday after years of construction. The state-of-the-art facility is designed to accommodate the growing demand for air travel in Japan and offer a more efficient and comfortable experience for passengers. With a total floor area of over 150,000 square meters, Terminal 3 features multiple shops, restaurants, and entertainment options, as well as advanced security screening technology.
+
+The new terminal is expected to handle up to 30 million passengers annually, making it one of the busiest airport terminals in Asia. The opening of Terminal 3 marks a significant milestone for Tokyo's Narita International Airport, which has been undergoing major expansions to keep pace with growing air travel demand.
+
+【Questions and Options】:
+Q1. When did Terminal 3 officially open?
+A. Yesterday
+B. After years of construction
+C. Last year
+D. In the near future
+
+Q2. What is the total floor area of Terminal 3?
+A. Over 100,000 square meters
+B. Around 150,000 square meters
+C. Under 50,000 square meters
+D. Exactly 200,000 square meters
+
+Q3. How many passengers does Terminal 3 expect to handle annually?
+A. Up to 10 million
+B. Up to 20 million
+C. Up to 30 million
+D. Over 40 million
+
+【Answer Key】:
+Q1: A
+Q2: B
+Q3: C

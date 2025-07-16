@@ -1,0 +1,41 @@
+Here is a TOEIC Reading Comprehension question set:
+
+---
+**Article Type:** Email
+**Article Title:** Upcoming Conference Details
+**Article Content:**
+Dear All,
+
+As previously announced, our company's annual conference will take place on October 15th and 16th at the Hilton Hotel in downtown Tokyo. We are excited to share more details with you.
+
+The conference program has been finalized, featuring a keynote speech by Dr. John Smith on "Innovations in Renewable Energy" and several breakout sessions covering topics such as marketing strategies, product development, and leadership skills. Our CEO will also be hosting a special session on the company's vision and future plans.
+
+Registration for the conference is now open, and we encourage all employees to participate. The deadline for registration is September 30th, so please don't hesitate to sign up at your earliest convenience.
+
+We have arranged a special room rate for attendees at the Hilton Hotel. Please quote our company code (ABC123) when booking your accommodation.
+
+Looking forward to seeing you all there!
+
+Best regards,
+[Your Name]
+
+---
+**Questions and Options:**
+
+Q1. Where will the annual conference take place?
+A. The Grand Hyatt Hotel in Osaka
+B. The Hilton Hotel in downtown Tokyo
+C. A university campus in Kyoto
+D. An online platform
+
+Q2. What is the topic of Dr. John Smith's keynote speech?
+A. "Innovations in Artificial Intelligence"
+B. "Marketing Strategies for Startups"
+C. "Innovations in Renewable Energy"
+D. "Leadership Skills in Modern Business"
+
+Q3. When is the deadline for conference registration?
+A. September 15th
+B. September 30th
+C. October 1st
+D. October 14th

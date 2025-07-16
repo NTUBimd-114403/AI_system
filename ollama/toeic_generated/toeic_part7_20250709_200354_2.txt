@@ -1,0 +1,43 @@
+Here is a TOEIC Reading Comprehension question set:
+
+---
+【Article Type】: Email
+【Article Title】: New Travel Policy Update
+【Article Content】:
+Dear All,
+
+As of March 15th, our company has implemented a new travel policy to enhance employee safety and efficiency. The key changes include:
+
+* Prior approval is now required for all business trips exceeding three days in duration.
+* All employees traveling on company business must obtain a Global Entry Card or equivalent prior to departure.
+* Travel expenses will only be reimbursed if submitted within 30 days of the trip.
+
+These changes aim to streamline our travel procedures while ensuring compliance with new regulations. For more information, please contact your supervisor or HR department.
+
+Best regards,
+John Lee
+Travel Coordinator
+
+【Questions and Options】:
+Q1: What is the main purpose of the email?
+A. To announce a change in company policy
+B. To request feedback on current travel procedures
+C. To provide details on employee benefits
+D. To introduce new security protocols for employees
+
+Q2: According to the email, what documentation is now required for all business trips?
+A. Visa and passport only
+B. Global Entry Card or equivalent
+C. Travel insurance and itinerary
+D. Boarding pass and flight confirmation
+
+Q3: What is the deadline for submitting travel expenses for reimbursement?
+A. 15 days after the trip
+B. 30 days after the trip
+C. Upon return from the trip
+D. At any time during the year
+
+【Answer Key】:
+Q1: A
+Q2: B
+Q3: B

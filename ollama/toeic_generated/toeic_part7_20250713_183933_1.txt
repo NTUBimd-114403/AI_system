@@ -1,0 +1,32 @@
+Here is a TOEIC Reading Comprehension question set:
+
+---
+【Article Type】: News Article
+【Article Title】: New Hotel Chain Expands to Asia-Pacific Region
+【Article Content】:
+Tokyo, Japan – March 15, 2023 – Global hospitality giant, Grand Plaza Hotels, announced today its plans to expand into the Asia-Pacific region. The company, known for its high-end luxury hotels, will be opening three new properties in the next two years. The first hotel is scheduled to open in Singapore later this year, followed by locations in Hong Kong and Shanghai. The expansion marks a significant milestone for Grand Plaza Hotels as it continues to grow its global presence.
+
+【Questions and Options】:
+
+Q1. Where will the first new hotel be located?
+A. Hong Kong
+B. Shanghai
+C. Singapore
+D. Tokyo
+
+Q2. What is the reputation of Grand Plaza Hotels?
+A. Budget-friendly accommodations
+B. High-end luxury hotels
+C. Family-friendly resorts
+D. Business-focused hotels
+
+Q3. How many new properties will be opened in the next two years?
+A. Two
+B. Three
+C. Four
+D. Five
+
+【Answer Key】:
+Q1: C
+Q2: B
+Q3: B
