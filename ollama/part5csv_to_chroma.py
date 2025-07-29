@@ -11,7 +11,7 @@ COLLECTION_NAME = "toeic_questions"
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # 📄 載入題庫 CSV
-df = pd.read_csv("toeic_dataset.csv", encoding="big5")
+df = pd.read_csv("part5.csv", encoding="big5")
 
 # 🧠 啟動 ChromaDB
 client = chromadb.PersistentClient(path=CHROMA_PATH)
