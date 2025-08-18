@@ -1,62 +1,152 @@
-h1 {
-    margin-top: 40px;
-    margin-bottom: 20px;
-}
+/*==================================================
+  通用樣式
+==================================================*/
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
+
+
+/*==================================================
+  卡片容器 (Container)
+==================================================*/
 .container {
     display: flex;
-    flex-wrap: wrap; /* 允許項目換行 */
-    justify-content: center; /* 水平居中對齊項目，如果不足三格也能居中 */
-    gap: 20px; /* 設定區塊間的間距 (行與列之間都有20px間距) */
-    padding: 20px; /* 增加一些內邊距，避免內容太靠近邊緣 */
-    max-width: 1000px; /* 限制容器最大寬度，避免在超寬螢幕上拉伸過大 */
-    margin: 50px auto; /* 讓整個容器在頁面中水平居中並與其他內容有間距 */
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px; /* 統一間距為 30px */
+    max-width: 1200px; /* 限制容器最大寬度 */
+    margin: 80px auto; /* 頁面上方留出 50px 間距 */
+    padding: 0 20px; /* 左右內邊距 */
 }
 
+/*==================================================
+  單一卡片樣式 (Test-Box) - 終極版本
+==================================================*/
 .test-box {
-    /* 計算每個 test-box 的寬度，使其在有 20px 的 gap 時能排成三列 */
-    /* 總寬度100% - 左右兩邊的 gap (2 * 20px) / 3 個項目 = 大約 33.33% - 額外調整 */
-    flex: 1 1 calc(33.33% - 20px); /* 關鍵：設置彈性項目的大小 */
-    /* 1 1: flex-grow, flex-shrink - 允許增長和縮小 */
-    /* calc(33.33% - 20px): 計算基礎寬度，考慮到 gap */
-    
-    min-width: 280px; /* 防止在小螢幕上縮得太小 */
+    flex: 1 1 calc(33.33% - 20px);
+    min-width: 300px;
 
+    background: #ffffff; /* 白色背景 */
+    color: #333;
     padding: 40px;
-    text-align: center;
-    background: #86c0e6;
-    color: white;
-    border-radius: 10px;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05); /* 更柔和的陰影 */
+    transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
     cursor: pointer;
-    transition: transform 0.3s, background 0.3s, box-shadow 0.3s; /* 增加 box-shadow 過渡 */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    /* 確保每個盒子在高度上盡量一致 (如果內容高度不同，會保持一致) */
+    
     display: flex;
     flex-direction: column;
-    justify-content: center; /* 讓 h2 在 test-box 內部垂直居中 */
-    align-items: center; /* 讓 h2 在 test-box 內部水平居中 */
+    justify-content: center;
+    align-items: center;
+
+    position: relative;
+    overflow: hidden;
+    height: 250px;
+    border: 2px solid transparent; /* 為邊框過渡做準備 */
 }
 
+/* 懸停效果 */
 .test-box:hover {
-    background: #73a5d3;
-    transform: scale(1.03); /* 輕微放大效果，更柔和 */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* 懸停時陰影加深 */
+    transform: translateY(-12px); /* 向上抬升效果 */
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15); /* 更明顯的陰影 */
+    border-color: #2c5774; /* 懸停時出現藍色邊框 */
 }
 
-h2 {
-    margin: 0; /* 移除 test-box 內部 h2 的預設 margin */
-    font-size: 1.8em; /* 讓標題更大一點 */
+/* 幾何圖形背景裝飾 */
+.test-box::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    left: -30%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(134, 192, 230, 0.15), transparent);
+    border-radius: 50%;
+    transform: rotate(45deg);
+    transition: transform 0.5s ease;
 }
 
-/* 針對較小螢幕的響應式調整 (可選) */
-@media (max-width: 900px) {
+.test-box:hover::before {
+    transform: rotate(90deg) scale(1.2);
+}
+
+.test-box::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    right: -30%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(-45deg, rgba(134, 192, 230, 0.25), transparent);
+    border-radius: 50%;
+    transform: rotate(-30deg);
+    transition: transform 0.5s ease;
+}
+
+.test-box:hover::after {
+    transform: rotate(-60deg) scale(1.2);
+}
+
+/* 圖標與文字樣式 */
+.test-box i {
+    font-size: 4.5rem; /* 圖標更大 */
+    color: #86c0e6;
+    margin-bottom: 25px;
+    position: relative;
+    z-index: 10;
+}
+
+.test-box h2 {
+    margin: 0;
+    font-size: 2.2em; /* 標題更大 */
+    font-weight: 700;
+    color: #34495e;
+}
+
+.test-box p {
+    font-size: 1rem;
+    opacity: 0.7;
+    margin-top: 10px;
+    line-height: 1.6;
+    color: #555;
+    max-width: 80%; /* 限制描述寬度，避免過長 */
+}
+
+/* 針對「綜合測驗」的特殊樣式 */
+.test-box.special {
+    flex: 1 1 100%;
+    max-width: 700px; /* 綜合測驗卡片更寬 */
+    height: 300px;
+    margin: 0 auto 30px;
+}
+.test-box.special i {
+    color: #2ecc71; /* 綠色 */
+}
+.test-box.special:hover {
+    border-color: #2ecc71;
+}
+
+/*==================================================
+  響應式設計 (Responsive Design)
+==================================================*/
+@media (max-width: 992px) {
     .test-box {
-        flex: 1 1 calc(50% - 20px); /* 在中等螢幕上變成兩列 */
+        flex: 1 1 calc(50% - 15px);
+        min-width: unset; /* 移除最小寬度限制，讓排版更靈活 */
     }
 }
 
 @media (max-width: 600px) {
+    h1 {
+        font-size: 2.2rem;
+        margin-top: 60px;
+        margin-bottom: 40px;
+    }
     .test-box {
-        flex: 1 1 100%; /* 在小螢幕上變成單列 */
+        flex: 1 1 100%;
+        padding: 30px;
+        height: auto; /* 手機版高度自適應 */
+    }
+    .test-box.special {
+        max-width: 100%;
     }
 }
