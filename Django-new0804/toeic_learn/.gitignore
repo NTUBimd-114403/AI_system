@@ -8,7 +8,6 @@ venv/
 *.sqlite3
 
 # Django-specific
-media/
 staticfiles/
 
 # IDE
