@@ -14,6 +14,7 @@ from django.db.models import Count, Q, F, FloatField, ExpressionWrapper
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
 from django.utils import timezone
+from django.contrib.auth import logout
 
 from .forms import RegisterForm
 from .models import (
@@ -63,6 +64,25 @@ def login_view(request):
             return render(request, 'login.html')
 
     return render(request, 'login.html')
+
+def logout_view(request):
+    """
+    自訂的登出視圖，確保清除所有快閃訊息。
+    """
+    # 使用 Django 內建的登出函數。
+    # 這會結束目前的使用者會話。
+    logout(request)
+
+    # 明確地從會話中清除所有訊息。
+    # 這可以防止舊的訊息出現在下一個頁面。
+    storage = messages.get_messages(request)
+    storage.used = True 
+    
+    # 創建一個新的成功訊息，用於登出操作。
+    messages.success(request, '您已成功登出！')
+    
+    # 重新導向到登入頁面。
+    return redirect('login')
 
 def register_view(request):
     if request.method == 'POST':
@@ -276,6 +296,8 @@ def submit_test_answer(request):
                         'id': passage_id_str,
                         'content': passage.content,
                         'translation': passage.translation,
+                        # ✨ 新增這一行：將文章的 part 屬性加入
+                        'material_part': f'part{question.part}', 
                     })
                     reading_material_ids.add(passage_id_str)
 
