@@ -351,3 +351,24 @@
     line-height: 1.4;
     font-style: italic;
 }
+
+.status-message {
+    position: fixed; /* 讓元素相對於視窗固定定位 */
+    top: 70px; /* 距離頂部 70px，這可以根據您導覽列的高度調整 */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #2ecc71;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000; /* 確保它位於所有其他內容之上 */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.status-message.show {
+    opacity: 1;
+    visibility: visible;
+}
