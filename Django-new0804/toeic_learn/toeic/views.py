@@ -15,16 +15,20 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
 from django.utils import timezone
 from django.contrib.auth import logout
+import logging
+from django.db import transaction
 
 from .forms import RegisterForm
 from .models import (
     ReadingPassage, Question, QUESTION_CATEGORY_CHOICES, UserAnswer,
     ExamResult, Exam, ExamQuestion, ExamSession, DailyVocabulary,
-    UserVocabularyRecord, ListeningMaterial,
+    UserVocabularyRecord, ListeningMaterial,PointTransaction
 )
 
 # 獲取當前使用的使用者模型
 User = get_user_model()
+
+logger = logging.getLogger(__name__)
 
 # 首頁、使用者頁面、登入、註冊、測試頁面等不變
 
@@ -190,6 +194,7 @@ def submit_test_answer(request):
 
         try:
             session = ExamSession.objects.get(session_id=session_id)
+            user = session.user
         except ExamSession.DoesNotExist:
             return JsonResponse({'success': False, 'error': '找不到考試紀錄'})
 
@@ -199,16 +204,14 @@ def submit_test_answer(request):
         answer_time = timezone.now()
         question_details = []
 
-        # 初始化統計
         total_questions = 0
         correct_total = 0
         part_analysis = {}
         category_analysis = {}
 
-        # 儲存文字稿、翻譯和閱讀文章
         transcripts = {}
         translations = {}
-        reading_passages = [] # 新增：用於儲存 Part 6/7 文章
+        reading_passages = []
         part3_material_ids = set()
         reading_material_ids = set()
 
@@ -273,7 +276,6 @@ def submit_test_answer(request):
                 {'value': 'd', 'text': question.option_d_text},
             ]
 
-# 處理聽力部分 (Part 2, 3)
             if question.material:
                 material = question.material
                 material_id_str = str(material.material_id)
@@ -286,7 +288,6 @@ def submit_test_answer(request):
                     translations[qid] = material.translation
                     part3_material_ids.add(material_id_str)
             
-            # 處理閱讀部分 (Part 6, 7)
             if question.passage:
                 passage = question.passage
                 passage_id_str = str(passage.passage_id)
@@ -296,7 +297,6 @@ def submit_test_answer(request):
                         'id': passage_id_str,
                         'content': passage.content,
                         'translation': passage.translation,
-                        # ✨ 新增這一行：將文章的 part 屬性加入
                         'material_part': f'part{question.part}', 
                     })
                     reading_material_ids.add(passage_id_str)
@@ -328,23 +328,48 @@ def submit_test_answer(request):
 
         is_passed = total_score >= float(exam.passing_score)
 
-        ExamResult.objects.create(
-            session=session,
-            total_questions=total_questions,
-            correct_answers=correct_total,
-            total_score=total_score,
-            is_passed=is_passed,
-            reading_score=reading_score,
-            listen_score=listen_score,
-            completed_at=timezone.now(),
-        )
+        # 點數發放邏輯
+        points_to_award = 0
+        point_reason = ''
+        if total_score >= 80:
+            points_to_award = 10
+            point_reason = 'test_completion'
+        elif total_score >= 60:
+            points_to_award = 5
+            point_reason = 'test_completion'
 
-        session.status = 'completed'
-        session.end_time = timezone.now()
-        session.save()
+        with transaction.atomic():
+            # 儲存測驗結果
+            ExamResult.objects.create(
+                session=session,
+                total_questions=total_questions,
+                correct_answers=correct_total,
+                total_score=total_score,
+                is_passed=is_passed,
+                reading_score=reading_score,
+                listen_score=listen_score,
+                completed_at=timezone.now(),
+            )
+
+            # 更新使用者點數並記錄交易
+            if points_to_award > 0:
+                user.point += points_to_award
+                user.save()
+
+                PointTransaction.objects.create(
+                    user=user,
+                    change_amount=points_to_award,
+                    reason=point_reason
+                )
+                logger.info(f"User {user.email} awarded {points_to_award} points for test completion. Total points: {user.point}")
+            
+            # 更新測驗狀態
+            session.status = 'completed'
+            session.end_time = timezone.now()
+            session.save()
 
         test_type = exam.get_exam_type_display()
-
+        
         response_data = {
             'success': True,
             'data': {
@@ -358,15 +383,16 @@ def submit_test_answer(request):
                 'test_type': test_type,
                 'transcripts': transcripts,
                 'translations': translations,
-                'reading_passages': reading_passages, # 新增此欄位
+                'reading_passages': reading_passages,
                 'part_analysis': part_analysis,
                 'category_analysis': category_analysis,
+                'points_awarded': points_to_award
             }
         }
         return JsonResponse(response_data)
 
     except Exception as e:
-        print(f"Error in submit_test_answer: {str(e)}")
+        logger.error(f"Error in submit_test_answer: {str(e)}", exc_info=True)
         return JsonResponse({'success': False, 'error': str(e)})
 
 def get_listening_transcript(exam):
@@ -800,6 +826,25 @@ def update_exam_status(request):
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})    
 
+
+@login_required
+def get_points_history(request):
+    """
+    提供使用者點數變動記錄的 API 接口
+    """
+    user = request.user
+    transactions = PointTransaction.objects.filter(user=user).order_by('-created_at')
+
+    data = [
+        {
+            'date': transaction.created_at.strftime('%Y-%m-%d %H:%M'),
+            'reason': transaction.get_reason_display(),
+            'amount': transaction.change_amount
+        }
+        for transaction in transactions
+    ]
+    return JsonResponse({'success': True, 'transactions': data})
+
 @login_required
 def record(request):
     user = request.user
@@ -813,7 +858,7 @@ def record(request):
     )
 
     # 設定每頁顯示的筆數
-    items_per_page = 15
+    items_per_page = 10
     paginator = Paginator(exam_results, items_per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)

@@ -610,7 +610,8 @@
 
             if (logoutForm) {
                 logoutForm.addEventListener('submit', function() {
-                    // 保留聊天紀錄，不執行任何操作
+                    // 在登出前，清除當前使用者的聊天紀錄
+                    localStorage.removeItem(storageKey);
                 });
             }
 

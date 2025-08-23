@@ -34,6 +34,7 @@ urlpatterns = [
     # path("logout/", LogoutView.as_view(next_page="login"), name="logout"),
     path("logout/", views.logout_view, name="logout"),
     path('record/', views.record, name='record'),
+    path('get-points-history/', views.get_points_history, name='get_points_history'),
     path('api/submit_test_answer/', views.submit_test_answer, name='submit_test_answer'),
     path('test_result/', views.test_result, name='test_result'),
     path('all_test/', views.all_test, name='all_test'),
