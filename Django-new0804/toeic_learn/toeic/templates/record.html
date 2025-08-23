@@ -56,11 +56,44 @@
     </div>
 
     <div class="container">
-        <div class="profile">
-            <img src="{% static 'img/user.jpg' %}" alt="使用者頭像">
-            <h2>歡迎，<span id="username">{{ user.nickname }}</span></h2>
-            <p>總學習時數：<span id="study-hours">{{ study_hours }}</span> 小時</p>
-        </div>
+    <div class="profile">
+        <img src="{% static 'img/user.jpg' %}" alt="使用者頭像">
+        <h2>歡迎，<span id="username">{{ user.nickname }}</span></h2>
+        <div class="info-row">
+            <div class="info-item">
+                <i class="fas fa-clock icon-blue"></i>
+                <p>總學習時數：</p>
+                <span id="study-hours" class="pill-display">{{ study_hours }} 小時</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-star icon-orange"></i>
+                <p>我的點數：</p>
+                <span id="user-points" class="pill-display">{{ user.point }} 點</span>
+                <button id="show-points-history" class="history-btn"><i class="fas fa-list-ul"></i></button>
+            </div>
+            </div>
+    </div>
+    
+    
+
+<div id="points-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h3>點數變動記錄</h3>
+        <table id="points-table">
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>原因</th>
+                    <th>變動點數</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </div>
+</div>
+
 
         <div class="interest-selection-section">
     <h3><i class="fas fa-graduation-cap"></i> 選擇您的學習興趣</h3>
@@ -210,9 +243,16 @@
             </div>
         </div>
     </div>
+    </div>
 
- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        return parts.length === 2 ? parts.pop().split(';').shift() : '';
+    }
+
     function bindPaginationEvents() {
         const paginationLinks = document.querySelectorAll('.pagination a');
         const examResultsContainer = document.getElementById('exam-results-container');
@@ -228,21 +268,13 @@
                     .then(data => {
                         const newContent = new DOMParser().parseFromString(data, 'text/html').querySelector('#exam-results-container');
                         examResultsContainer.innerHTML = newContent.innerHTML;
-
                         const newPagination = new DOMParser().parseFromString(data, 'text/html').querySelector('.pagination');
                         document.querySelector('.pagination').innerHTML = newPagination.innerHTML;
-
                         bindPaginationEvents();
                     })
                     .catch(error => console.error('Error fetching pagination data:', error));
             });
         });
-    }
-
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        return parts.length === 2 ? parts.pop().split(';').shift() : '';
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -253,14 +285,8 @@
         if (scriptTag) {
             const partPerformanceData = JSON.parse(scriptTag.textContent);
             if (Object.keys(partPerformanceData).length > 0) {
-                const labels = [];
-                const dataPoints = [];
-                for (const key in partPerformanceData) {
-                    if (partPerformanceData.hasOwnProperty(key)) {
-                        labels.push(partPerformanceData[key].display_name);
-                        dataPoints.push(partPerformanceData[key].percentage);
-                    }
-                }
+                const labels = Object.values(partPerformanceData).map(data => data.display_name);
+                const dataPoints = Object.values(partPerformanceData).map(data => data.percentage);
                 const ctx = document.getElementById('part-radar-chart').getContext('2d');
                 new Chart(ctx, {
                     type: 'radar',
@@ -288,23 +314,15 @@
                             title: {
                                 display: true,
                                 text: '各 Part 表現分析雷達圖',
-                                font: {
-                                    size: 16
-                                }
+                                font: { size: 16 }
                             }
                         },
                         scales: {
                             r: {
-                                angleLines: {
-                                    display: false
-                                },
+                                angleLines: { display: false },
                                 suggestedMin: 0,
                                 suggestedMax: 100,
-                                pointLabels: {
-                                    font: {
-                                        size: 12
-                                    }
-                                }
+                                pointLabels: { font: { size: 12 } }
                             }
                         }
                     }
@@ -312,8 +330,7 @@
             }
         }
         
-        // 興趣選擇相關程式碼
-        // 確保頁面載入時，已選的興趣被勾選
+        // 處理學習興趣選擇的邏輯
         const userInterests = "{{ user.learning_interests }}".split(',').filter(item => item !== '');
         const checkboxes = document.querySelectorAll('.interest-options input[type="checkbox"]');
         
@@ -323,11 +340,9 @@
             }
         });
 
-        // 處理表單提交
         const interestForm = document.getElementById('interest-form');
         interestForm.addEventListener('submit', function(e) {
             e.preventDefault();
-
             const selectedInterests = Array.from(checkboxes)
                 .filter(checkbox => checkbox.checked)
                 .map(checkbox => checkbox.value)
@@ -350,10 +365,78 @@
                 }
             })
             .catch(error => {
-                    console.error('Error updating interests:', error);
-                    alert('更新過程中發生錯誤。');
+                console.error('Error updating interests:', error);
+                alert('更新過程中發生錯誤。');
             });
         });
+
+        // 點數記錄彈出視窗的 JavaScript 邏輯
+        const showHistoryBtn = document.getElementById('show-points-history');
+        const pointsModal = document.getElementById('points-modal');
+        const closeBtn = pointsModal.querySelector('.close-btn');
+        const pointsTableBody = document.querySelector('#points-table tbody');
+
+        if (showHistoryBtn) {
+            showHistoryBtn.addEventListener('click', function() {
+                pointsModal.style.display = 'flex'; // 顯示彈出視窗
+                fetchPointsHistory(); // 載入資料
+            });
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                pointsModal.style.display = 'none'; // 隱藏彈出視窗
+            });
+        }
+
+        window.addEventListener('click', function(event) {
+            if (event.target == pointsModal) {
+                pointsModal.style.display = 'none'; // 點擊視窗外背景時隱藏
+            }
+        });
+
+        function fetchPointsHistory() {
+            if (pointsTableBody.innerHTML.trim() !== '' && pointsTableBody.innerHTML.trim() !== '<tr><td colspan="3">載入中...</td></tr>') {
+                return;
+            }
+            
+            pointsTableBody.innerHTML = '<tr><td colspan="3">載入中...</td></tr>';
+            
+            fetch("/get-points-history/", {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    pointsTableBody.innerHTML = '';
+                    if (data.transactions.length > 0) {
+                        data.transactions.forEach(transaction => {
+                            const row = `
+                                <tr>
+                                    <td>${transaction.date}</td>
+                                    <td>${transaction.reason}</td>
+                                    <td>${transaction.amount}</td>
+                                </tr>
+                            `;
+                            pointsTableBody.innerHTML += row;
+                        });
+                    } else {
+                        pointsTableBody.innerHTML = '<tr><td colspan="3">尚無點數變動記錄。</td></tr>';
+                    }
+                } else {
+                    console.error('Failed to fetch points history:', data.error);
+                    pointsTableBody.innerHTML = '<tr><td colspan="3">載入記錄失敗。</td></tr>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                pointsTableBody.innerHTML = '<tr><td colspan="3">發生錯誤，無法載入記錄。</td></tr>';
+            });
+        }
     });
 </script>
     <footer class="footer">

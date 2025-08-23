@@ -79,6 +79,7 @@ CATEGORY_CHOICES = [
 
 POINT_REASON_CHOICES = [
     ('exam_exchange', '測驗次數兌換'),
+    ('test_completion', '完成測驗'),
     ('other', '其他')
 ]
 
