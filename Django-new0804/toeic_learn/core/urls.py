@@ -16,7 +16,7 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import path,include
 from toeic import views
 from django.contrib.auth.views import LogoutView
 from django.conf import settings
@@ -27,11 +27,14 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("login/", views.login_view, name="login"),
     path("register/",views.register_view, name="register"),
+    path('profile-settings/', views.profile_settings, name='profile-settings'),
+    path('update-profile/', views.update_profile, name='update-profile'), # 確保此行存在
+    path('change-password/', views.change_password, name='change-password'),
+    # path('accounts/', include('django.contrib.auth.urls')),
     
     path('test/', views.test_page, name='test'),
     path('reading_test/', views.reading_test, name='reading_test'),
     path('reading_test/<int:passage_id>/', views.reading_test, name='reading_test_detail'),
-    # path("logout/", LogoutView.as_view(next_page="login"), name="logout"),
     path("logout/", views.logout_view, name="logout"),
     path('record/', views.record, name='record'),
     path('get-points-history/', views.get_points_history, name='get_points_history'),

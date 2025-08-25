@@ -15,43 +15,48 @@
         <h1>TOEIC學習平台</h1>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <div class="nav-buttons">
-            <a href="{% url 'home' %}" target="_self">
-                <button class="nav-btn {% if request.path == '/' %}current{% endif %}">
-                    <i class="fas fa-home"></i> 首頁
-                </button>
-            </a>
-        
-            <a href="{% url 'test' %}" target="_self">
-                <button class="nav-btn {% if request.path == '/test/' %}current{% endif %}">
-                    <i class="fas fa-file-alt"></i> 測驗平台
-                </button>
-            </a>
-        
-            {% if user.is_authenticated %}
-                <a href="{% url 'history' %}" target="_self">
-                    <button class="nav-btn {% if request.path == '/history/' %}current{% endif %}">
-                        <i class="fas fa-history"></i> 歷史單字
-                    </button>
-                </a>
-                <a href="{% url 'record' %}" target="_self">
-                    <button class="nav-btn {% if request.path == '/record/' %}current{% endif %}">
-                        <i class="fas fa-user"></i> 歡迎, {{ user.nickname }}
-                    </button>
-                </a>
-                <form id="logout-form" action="{% url 'logout' %}" method="POST" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="nav-btn">
-                        <i class="fas fa-sign-out-alt"></i> 登出
-                    </button>
-                </form>
-            {% else %}
-                <a href="{% url 'login' %}" target="_self">
-                    <button class="nav-btn {% if request.path == '/login/' %}current{% endif %}">
-                        <i class="fas fa-user"></i> 會員註冊/登入
-                    </button>
-                </a>
-            {% endif %}
-        </div>
+    <a href="{% url 'home' %}" target="_self">
+        <button class="nav-btn {% if request.path == '/' %}current{% endif %}">
+            <i class="fas fa-home"></i> 首頁
+        </button>
+    </a>
+
+    <a href="{% url 'test' %}" target="_self">
+        <button class="nav-btn {% if request.path == '/test/' %}current{% endif %}">
+            <i class="fas fa-file-alt"></i> 測驗平台
+        </button>
+    </a>
+
+    {% if user.is_authenticated %}
+        <a href="{% url 'history' %}" target="_self">
+            <button class="nav-btn {% if request.path == '/history/' %}current{% endif %}">
+                <i class="fas fa-history"></i> 歷史單字
+            </button>
+        </a>
+        <a href="{% url 'record' %}" target="_self">
+            <button class="nav-btn {% if request.path == '/record/' %}current{% endif %}">
+                <i class="fas fa-user"></i> 學習歷程
+            </button>
+        </a>
+        <a href="{% url 'profile-settings' %}" target="_self">
+            <button class="nav-btn {% if request.path == '/profile-settings/' %}current{% endif %}">
+                <i class="fas fa-cog"></i> 歡迎, {{ user.nickname }}
+            </button>
+        </a>
+        <form id="logout-form" action="{% url 'logout' %}" method="POST" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="nav-btn">
+                <i class="fas fa-sign-out-alt"></i> 登出
+            </button>
+        </form>
+    {% else %}
+        <a href="{% url 'login' %}" target="_self">
+            <button class="nav-btn {% if request.path == '/login/' %}current{% endif %}">
+                <i class="fas fa-user"></i> 會員註冊/登入
+            </button>
+        </a>
+    {% endif %}
+</div>
     </div>
     </div>
 

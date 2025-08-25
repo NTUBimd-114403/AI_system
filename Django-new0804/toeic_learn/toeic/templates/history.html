@@ -33,9 +33,14 @@
                 </a>
                 <a href="{% url 'record' %}" target="_self">
                     <button class="nav-btn">
-                        <i class="fas fa-user"></i> 歡迎, {{ user.nickname }}
+                        <i class="fas fa-user"></i> 學習歷程
                     </button>
                 </a>
+                <a href="{% url 'profile-settings' %}" target="_self">
+            <button class="nav-btn {% if request.path == '/profile-settings/' %}current{% endif %}">
+                <i class="fas fa-cog"></i> 歡迎, {{ user.nickname }}
+            </button>
+        </a>
                 <form id="logout-form" action="{% url 'logout' %}" method="POST" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="nav-btn">
