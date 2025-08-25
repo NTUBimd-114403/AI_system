@@ -17,6 +17,8 @@ from django.utils import timezone
 from django.contrib.auth import logout
 import logging
 from django.db import transaction
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 
 from .forms import RegisterForm
 from .models import (
@@ -47,6 +49,54 @@ def home(request):
 
 def user(request):
     return render(request, 'user.html')
+
+@login_required
+def profile_settings(request):
+    # 這個視圖只需要渲染模板，不需要額外傳遞資料
+    return render(request, 'profile_settings.html')
+
+@login_required
+@require_POST
+def update_profile(request):
+    try:
+        data = json.loads(request.body)
+        nickname = data.get('nickname', '').strip()
+        if not nickname:
+            return JsonResponse({'success': False, 'error': '暱稱不能為空。'}, status=400)
+            
+        request.user.nickname = nickname
+        request.user.save()
+        messages.success(request, '暱稱更新成功！')
+        return JsonResponse({'success': True})
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': '無效的 JSON 資料。'}, status=400)
+
+@login_required
+@require_POST
+def change_password(request):
+    try:
+        data = json.loads(request.body)
+        old_password = data.get('old_password')
+        new_password1 = data.get('new_password1')
+        new_password2 = data.get('new_password2')
+        
+        # 建立 PasswordChangeForm 實例並傳入資料
+        form = PasswordChangeForm(user=request.user, data={
+            'old_password': old_password,
+            'new_password1': new_password1,
+            'new_password2': new_password2,
+        })
+        
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, '密碼已成功變更。')
+            return JsonResponse({'success': True})
+        else:
+            errors = [f'{field}: {", ".join(error_list)}' for field, error_list in form.errors.items()]
+            return JsonResponse({'success': False, 'error': '; '.join(errors)}, status=400)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': '無效的 JSON 資料。'}, status=400)
 
 def login_view(request):
     if request.method == 'POST':
