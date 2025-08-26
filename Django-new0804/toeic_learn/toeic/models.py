@@ -161,7 +161,9 @@ class DailyTestRecord(models.Model):
     date = models.DateField(default=timezone.now, verbose_name="測驗日期")
     mixed_test_count = models.IntegerField(default=0, verbose_name="綜合測驗次數")
     other_part_test_count = models.IntegerField(default=0, verbose_name="單一Part測驗次數")
-
+    mixed_test_limit = models.IntegerField(default=1) 
+    other_part_test_limit = models.IntegerField(default=3)
+     
     class Meta:
         unique_together = ('user', 'date')
         verbose_name = "每日測驗紀錄"
