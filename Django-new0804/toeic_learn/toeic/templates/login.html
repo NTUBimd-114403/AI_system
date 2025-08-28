@@ -2,93 +2,95 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TOEIC學習平台 - 會員登入</title>
-  <link rel="stylesheet" href="{% static 'css/common.css' %}">
-  <link rel="stylesheet" href="{% static 'css/login.css' %}">
-  <script src="{% static 'script/all.js' %}"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      overflow-x: hidden;
-    }
-    img {
-      max-width: 100%;
-      height: auto;
-    }
-    iframe {
-      max-width: 100%;
-      width: 100%;
-    }
-  </style>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>TOEIC學習平台 - 會員登入</title>
+ <link rel="stylesheet" href="{% static 'css/common.css' %}">
+ <link rel="stylesheet" href="{% static 'css/login.css' %}">
+ <script src="{% static 'script/all.js' %}"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+ <style>
+  * {
+   box-sizing: border-box;
+  }
+  body {
+   overflow-x: hidden;
+  }
+  img {
+   max-width: 100%;
+   height: auto;
+  }
+  iframe {
+   max-width: 100%;
+   width: 100%;
+  }
+ </style>
 </head>
 <body>
-  <div class="header">
-    <button class="menu-btn" id="menu-btn">☰</button>
-    <h1>TOEIC學習平台</h1>
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <span class="user-title">會員登入</span>
+ <div class="header">
+  <button class="menu-btn" id="menu-btn">☰</button>
+  <h1>TOEIC學習平台</h1>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <span class="user-title">會員登入</span>
+ </div>
+
+ <div class="container">
+  <div class="form-container">
+   <h2>會員登入</h2>
+
+      {% if messages %}
+    <ul class="messages">
+     {% for message in messages %}
+      <li class="{{ message.tags }}">{{ message }}</li>
+     {% endfor %}
+    </ul>
+   {% endif %}
+
+   <form method="POST" action="{% url 'login' %}">
+    {% csrf_token %}
+    <input type="email" name="email" placeholder="電子郵件" required>
+    <input type="password" name="password" placeholder="密碼" required>
+    <button type="submit">登入</button>
+   </form>
+   <p>還沒有帳號？<a href="{% url 'register' %}">立即註冊</a></p>
+      <!-- 在這裡新增忘記密碼連結 -->
+      <p><a href="{% url 'password_reset' %}">忘記密碼？</a></p>
   </div>
+ </div>
 
-  <div class="container">
-    <div class="form-container">
-      <h2>會員登入</h2>
+ <a href="{% url 'home' %}" id="backButton">回到首頁</a>
 
-            {% if messages %}
-        <ul class="messages">
-          {% for message in messages %}
-            <li class="{{ message.tags }}">{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-
-      <form method="POST" action="{% url 'login' %}">
-        {% csrf_token %}
-        <input type="email" name="email" placeholder="電子郵件" required>
-        <input type="password" name="password" placeholder="密碼" required>
-        <button type="submit">登入</button>
-      </form>
-      <p>還沒有帳號？<a href="{% url 'register' %}">立即註冊</a></p>
-    </div>
+ <script>
+  // 確保當前頁面按鈕高亮
+  const currentPage = window.location.pathname.split("/").pop();
+  const navLinks = document.querySelectorAll(".nav-buttons a");
+  navLinks.forEach(link => {
+   const page = link.getAttribute("href");
+   if (page === currentPage) {
+    link.querySelector(".nav-btn").classList.add("current");
+   }
+  });
+ </script>
+ <footer class="footer">
+  <div class="footer-container">
+      <div class="contact-us">
+    <h3>聯絡我們</h3>
+    <ul>
+     <li><i class="fas fa-phone"></i><a href="tel:02 3322 2777"> 電話：02 3322 2777</a></li>
+     <li><i class="fas fa-map"></i><a href="https://maps.app.goo.gl/3NMVwufcbbTrfQNz6" target="_blank"> 地址：100台北市中正區濟南路一段321號</a></li>
+     <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d14459.01851827243!2d121.5254698!3d25.0423998!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442a970a11a84ad%3A0x58e05f2528812097!2z5ZyL56uL6Ie65YyX5ZWG5qWt5aSn5a24!5e0!3m2!1szh-TW!2stw!4v1728891709611!5m2!1szh-TW!2stw" 
+      height="250"
+      style="border:0;"
+      allowfullscreen=""
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade">
+     </iframe>
+    </ul>
+   </div>
   </div>
-
-  <a href="{% url 'home' %}" id="backButton">回到首頁</a>
-
-  <script>
-    // 確保當前頁面按鈕高亮
-    const currentPage = window.location.pathname.split("/").pop();
-    const navLinks = document.querySelectorAll(".nav-buttons a");
-    navLinks.forEach(link => {
-      const page = link.getAttribute("href");
-      if (page === currentPage) {
-        link.querySelector(".nav-btn").classList.add("current");
-      }
-    });
-  </script>
-  <footer class="footer">
-    <div class="footer-container">
-            <div class="contact-us">
-        <h3>聯絡我們</h3>
-        <ul>
-          <li><i class="fas fa-phone"></i><a href="tel:02 3322 2777"> 電話：02 3322 2777</a></li>
-          <li><i class="fas fa-map"></i><a href="https://maps.app.goo.gl/3NMVwufcbbTrfQNz6" target="_blank"> 地址：100台北市中正區濟南路一段321號</a></li>
-          <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d14459.01851827243!2d121.5254698!3d25.0423998!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442a970a11a84ad%3A0x58e05f2528812097!2z5ZyL56uL6Ie65YyX5ZWG5qWt5aSn5a24!5e0!3m2!1szh-TW!2stw!4v1728891709611!5m2!1szh-TW!2stw" 
-            height="250"
-            style="border:0;"
-            allowfullscreen=""
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade">
-          </iframe>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>© 2025 TOEIC學習平台 版權所有</p>
-    </div>
-  </footer>
+  <div class="footer-bottom">
+   <p>© 2025 TOEIC學習平台 版權所有</p>
+  </div>
+ </footer>
 </body>
 </html>

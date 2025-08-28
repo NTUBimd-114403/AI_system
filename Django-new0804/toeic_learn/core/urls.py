@@ -18,7 +18,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path,include
 from toeic import views
-from django.contrib.auth.views import LogoutView
+from django.contrib.auth import views as auth_views # 引入 Django 認證視圖
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -30,8 +30,27 @@ urlpatterns = [
     path('profile-settings/', views.profile_settings, name='profile-settings'),
     path('update-profile/', views.update_profile, name='update-profile'), # 確保此行存在
     path('change-password/', views.change_password, name='change-password'),
-    # path('accounts/', include('django.contrib.auth.urls')),
+    # path('accounts/', include('django.contrib.auth.urls')), # 註解此行以避免衝突
     
+    # 增加密碼重設流程的 URL
+    path('password_reset/', auth_views.PasswordResetView.as_view(
+        template_name='password_reset_form.html',
+        email_template_name='password_reset_email.html',
+        subject_template_name='password_reset_subject.txt',
+    ), name='password_reset'),
+    
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(
+        template_name='password_reset_done.html'
+    ), name='password_reset_done'),
+    
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
+        template_name='password_reset_confirm.html'
+    ), name='password_reset_confirm'),
+    
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(
+        template_name='password_reset_complete.html'
+    ), name='password_reset_complete'),
+
     path('test/', views.test_page, name='test'),
     path('reading_test/', views.reading_test, name='reading_test'),
     path('reading_test/<int:passage_id>/', views.reading_test, name='reading_test_detail'),
@@ -55,5 +74,3 @@ urlpatterns = [
     path('update-interests/', views.update_learning_interests, name='update_interests'),
     path('history/', views.history_view, name='history'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-
