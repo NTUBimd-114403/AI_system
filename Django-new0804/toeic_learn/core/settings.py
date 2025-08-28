@@ -86,11 +86,11 @@ if os.environ.get('DJANGO_ENV') == 'production':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.environ.get('DB_NAME', '114_system'),
-            'USER': os.environ.get('DB_USER', 'root'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', '12345678'),
-            'HOST': os.environ.get('DB_HOST', 'localhost'),
-            'PORT': os.environ.get('DB_PORT', '3306'),
+            'NAME': os.environ.get('DB_NAME'),
+            'USER': os.environ.get('DB_USER'),
+            'PASSWORD': os.environ.get('DB_PASSWORD'),
+            'HOST': os.environ.get('DB_HOST'),
+            'PORT': os.environ.get('DB_PORT'),
             'OPTIONS': {
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
                 'charset': 'utf8mb4',
@@ -107,13 +107,12 @@ else:
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-# 你的 SMTP 伺服器設定 (使用 Gmail)
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = '11146077@ntub.edu.tw'  # <-- 換成你的 Gmail 帳號
-EMAIL_HOST_PASSWORD = 'ttvrxlevzltncfya' # <-- 貼上你剛剛產生的 16 位元應用程式密碼
-DEFAULT_FROM_EMAIL = '11146077@ntub.edu.tw' # <-- 換成你的 Gmail 帳號
+EMAIL_HOST_USER = os.environ.get('EMAIL_USER', 'your_gmail_account@ntub.edu.tw')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASSWORD', 'your_newly_generated_app_password')
+DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_USER', 'your_gmail_account@ntub.edu.tw')
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
