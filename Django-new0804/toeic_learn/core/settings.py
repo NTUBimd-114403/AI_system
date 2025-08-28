@@ -31,7 +31,7 @@ AUTH_USER_MODEL = 'toeic.User'
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost',
-    'http://127.0.0.1',  # <-- 新增這行
+    'http://127.0.0.1', 
 ]
 
 
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "toeic",
+    # "sendgrid_backend", # 暫時註解掉這行
 ]
 
 MIDDLEWARE = [
@@ -104,6 +105,16 @@ else:
         }
     }
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# 你的 SMTP 伺服器設定 (使用 Gmail)
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = '11146077@ntub.edu.tw'  # <-- 換成你的 Gmail 帳號
+EMAIL_HOST_PASSWORD = 'ttvrxlevzltncfya' # <-- 貼上你剛剛產生的 16 位元應用程式密碼
+DEFAULT_FROM_EMAIL = '11146077@ntub.edu.tw' # <-- 換成你的 Gmail 帳號
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -140,7 +151,7 @@ USE_TZ = False
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [
-    BASE_DIR / "toeic/static",  # 指定靜態檔案目錄
+    BASE_DIR / "toeic/static",
 ]
 
 LOGIN_URL = '/login/' 
