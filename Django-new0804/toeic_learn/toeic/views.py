@@ -20,12 +20,12 @@ import logging
 from django.db import transaction
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
-
+from datetime import date
 from .forms import RegisterForm
 from .models import (
     ReadingPassage, Question, QUESTION_CATEGORY_CHOICES, UserAnswer,
     ExamResult, Exam, ExamQuestion, ExamSession, DailyVocabulary,
-    UserVocabularyRecord, ListeningMaterial,PointTransaction,DailyTestRecord
+    UserVocabularyRecord, ListeningMaterial,PointTransaction,DailyTestRecord,Phrase
 )
 
 # 獲取當前使用的使用者模型
@@ -39,16 +39,46 @@ DAILY_OTHER_PART_TEST_LIMIT = 3
 EXCHANGE_POINTS_FOR_MIXED_TEST = 50
 EXCHANGE_POINTS_FOR_OTHER_PART_TEST = 20
 
+
+logging.basicConfig(level=logging.INFO)
+# 將您的主頁視圖函式更新為此
 def home(request):
+    """
+    渲染主頁面，並在頁面上隨機顯示每日片語，同時傳遞用戶資訊。
+    """
     username = None
     if request.user.is_authenticated:
         username = request.user.email
-    
-    context = {
-        'user': request.user,
-        'username': username # 將 username 變數傳到模板
-    }
-    return render(request, 'home.html', context)
+
+    try:
+        # 取得所有片語
+        all_phrases = list(Phrase.objects.all())
+
+        # 根據今天的日期設定隨機種子，確保每日片語一致
+        # 這個方法可以保證在同一天內，使用者每次刷新頁面都看到相同的片語
+        today = date.today()
+        random.seed(today.day + today.month + today.year)
+        
+        # 隨機選擇3個片語，如果片語總數少於3個則選擇全部
+        if len(all_phrases) >= 3:
+            daily_phrases = random.sample(all_phrases, 3)
+        else:
+            daily_phrases = all_phrases
+        
+        context = {
+            'daily_phrases': daily_phrases,
+            'user': request.user,
+            'username': username
+        }
+    except Exception as e:
+        context = {
+            'error_message': f'無法載入片語：{e}',
+            'user': request.user,
+            'username': username
+        }
+        daily_phrases = []
+
+    return render(request, "home.html", context)
 
 def user(request):
     return render(request, 'user.html')

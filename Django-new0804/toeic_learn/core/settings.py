@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -105,14 +106,17 @@ else:
         }
     }
 
+# 郵件設定
+# 確保 EMAIL_BACKEND 設定為 Django 內建的 SMTP 後端
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
+# 從環境變數中讀取郵件設定
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_USER', 'your_gmail_account@ntub.edu.tw')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASSWORD', 'your_newly_generated_app_password')
-DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_USER', 'your_gmail_account@ntub.edu.tw')
+EMAIL_HOST_USER = os.environ.get('EMAIL_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASSWORD')
+DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_USER')
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

@@ -136,6 +136,7 @@ class DailyVocabulary(models.Model):
 class Phrase(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=255)
+    title_translation= models.CharField(max_length=255, null=True, blank=True)
     english_passage = models.TextField()
     chinese_translation = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
