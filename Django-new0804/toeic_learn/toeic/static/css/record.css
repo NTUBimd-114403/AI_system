@@ -545,3 +545,56 @@ th {
 .points-table-container.visible {
     display: block;
 }
+
+/* 按鈕容器 */
+        .button-container {
+            display: flex;
+            gap: 1rem;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 基礎按鈕樣式 */
+        .analysis-btn {
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 9999px; /* 圓角 */
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* 預設按鈕樣式 */
+        .analysis-btn.default-style {
+            background-color: var(--default-color);
+            color: var(--default-text-color);
+        }
+        .analysis-btn.default-style:hover {
+            background-color: var(--default-hover-color);
+            transform: translateY(-2px); /* 新增：向上輕微移動 */
+            box-shadow: 0 6px 12px -2px rgba(0,0,0,0.1), 0 3px 6px -2px rgba(0,0,0,0.06); /* 新增：陰影變化 */
+        }
+
+        /* 啟用按鈕樣式 (active) */
+        .analysis-btn.active-style {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 10px 15px -3px var(--primary-shadow-color), 0 4px 6px -2px var(--primary-shadow-color);
+        }
+        .analysis-btn.active-style:hover {
+            background-color: var(--primary-hover-color);
+            transform: translateY(-2px); /* 新增：向上輕微移動 */
+            box-shadow: 0 12px 20px -5px var(--primary-shadow-color), 0 6px 8px -3px var(--primary-shadow-color); /* 新增：陰影變化 */
+        }
+
+        /* 確保 focus 樣式與 hover 效果一致 */
+        .analysis-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px var(--primary-shadow-color);
+            background-color: #007bff;
+            color: white;
+        }

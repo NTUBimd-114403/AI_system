@@ -15,120 +15,116 @@
         <h1>TOEIC學習平台</h1>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <div class="nav-buttons">
-    <a href="{% url 'home' %}" target="_self">
-        <button class="nav-btn {% if request.path == '/' %}current{% endif %}">
-            <i class="fas fa-home"></i> 首頁
-        </button>
-    </a>
+            <a href="{% url 'home' %}" target="_self">
+                <button class="nav-btn {% if request.path == '/' %}current{% endif %}">
+                    <i class="fas fa-home"></i> 首頁
+                </button>
+            </a>
 
-    <a href="{% url 'test' %}" target="_self">
-        <button class="nav-btn {% if request.path == '/test/' %}current{% endif %}">
-            <i class="fas fa-file-alt"></i> 測驗平台
-        </button>
-    </a>
+            <a href="{% url 'test' %}" target="_self">
+                <button class="nav-btn {% if request.path == '/test/' %}current{% endif %}">
+                    <i class="fas fa-file-alt"></i> 測驗平台
+                </button>
+            </a>
 
-    {% if user.is_authenticated %}
-        <a href="{% url 'history' %}" target="_self">
-            <button class="nav-btn {% if request.path == '/history/' %}current{% endif %}">
-                <i class="fas fa-history"></i> 歷史單字
-            </button>
-        </a>
-        <a href="{% url 'record' %}" target="_self">
-            <button class="nav-btn {% if request.path == '/record/' %}current{% endif %}">
-                <i class="fas fa-user"></i> 學習歷程
-            </button>
-        </a>
-        <a href="{% url 'profile-settings' %}" target="_self">
-            <button class="nav-btn {% if request.path == '/profile-settings/' %}current{% endif %}">
-                <i class="fas fa-cog"></i> 歡迎, {{ user.nickname }}
-            </button>
-        </a>
-        <form id="logout-form" action="{% url 'logout' %}" method="POST" style="display: inline;">
-            {% csrf_token %}
-            <button type="submit" class="nav-btn">
-                <i class="fas fa-sign-out-alt"></i> 登出
-            </button>
-        </form>
-    {% else %}
-        <a href="{% url 'login' %}" target="_self">
-            <button class="nav-btn {% if request.path == '/login/' %}current{% endif %}">
-                <i class="fas fa-user"></i> 會員註冊/登入
-            </button>
-        </a>
-    {% endif %}
-</div>
-    </div>
+            {% if user.is_authenticated %}
+                <a href="{% url 'history' %}" target="_self">
+                    <button class="nav-btn {% if request.path == '/history/' %}current{% endif %}">
+                        <i class="fas fa-history"></i> 歷史單字
+                    </button>
+                </a>
+                <a href="{% url 'record' %}" target="_self">
+                    <button class="nav-btn {% if request.path == '/record/' %}current{% endif %}">
+                        <i class="fas fa-user"></i> 學習歷程
+                    </button>
+                </a>
+                <a href="{% url 'profile-settings' %}" target="_self">
+                    <button class="nav-btn {% if request.path == '/profile-settings/' %}current{% endif %}">
+                        <i class="fas fa-cog"></i> 歡迎, {{ user.nickname }}
+                    </button>
+                </a>
+                <form id="logout-form" action="{% url 'logout' %}" method="POST" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-btn">
+                        <i class="fas fa-sign-out-alt"></i> 登出
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" target="_self">
+                    <button class="nav-btn {% if request.path == '/login/' %}current{% endif %}">
+                        <i class="fas fa-user"></i> 會員註冊/登入
+                    </button>
+                </a>
+            {% endif %}
+        </div>
     </div>
 
     <div class="container">
-    <div class="profile">
-        <img src="{% static 'img/user.jpg' %}" alt="使用者頭像">
-        <h2>歡迎，<span id="username">{{ user.nickname }}</span></h2>
-        <div class="info-row">
-            <div class="info-item">
-                <i class="fas fa-clock icon-blue"></i>
-                <p>總學習時數：</p>
-                <span id="study-hours" class="pill-display">{{ study_hours }} 小時</span>
+        <div class="profile">
+            <img src="{% static 'img/user.jpg' %}" alt="使用者頭像">
+            <h2>歡迎，<span id="username">{{ user.nickname }}</span></h2>
+            <div class="info-row">
+                <div class="info-item">
+                    <i class="fas fa-clock icon-blue"></i>
+                    <p>總學習時數：</p>
+                    <span id="study-hours" class="pill-display">{{ study_hours }} 小時</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-star icon-orange"></i>
+                    <p>我的點數：</p>
+                    <span id="user-points" class="pill-display">{{ user.point }} 點</span>
+                    <button id="show-points-history" class="history-btn"><i class="fas fa-list-ul"></i></button>
+                </div>
             </div>
-            <div class="info-item">
-                <i class="fas fa-star icon-orange"></i>
-                <p>我的點數：</p>
-                <span id="user-points" class="pill-display">{{ user.point }} 點</span>
-                <button id="show-points-history" class="history-btn"><i class="fas fa-list-ul"></i></button>
-            </div>
-            </div>
-    </div>
-    
-    
+        </div>
 
-<div id="points-modal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h3>點數變動記錄</h3>
-        <table id="points-table">
-            <thead>
-                <tr>
-                    <th>日期</th>
-                    <th>原因</th>
-                    <th>變動點數</th>
-                </tr>
-            </thead>
-            <tbody>
-                </tbody>
-        </table>
-    </div>
-</div>
-
+        <div id="points-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <h3>點數變動記錄</h3>
+                <table id="points-table">
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>原因</th>
+                            <th>變動點數</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
         <div class="interest-selection-section">
-    <h3><i class="fas fa-graduation-cap"></i> 選擇您的學習興趣</h3>
-    <p>請選擇您感興趣的單字類型，我們會根據您的選擇推薦單字。</p>
-    <form id="interest-form">
-        <div class="interest-options">
-            <label>
-                <input type="checkbox" name="interest" value="Business">
-                <span>商業與職場</span>
-            </label>
-            <label>
-                <input type="checkbox" name="interest" value="Technology">
-                <span>科技與資訊</span>
-            </label>
-            <label>
-                <input type="checkbox" name="interest" value="DailyLife">
-                <span>日常生活</span>
-            </label>
-            <label>
-                <input type="checkbox" name="interest" value="Academic">
-                <span>學術與教育</span>
-            </label>
-            <label>
-                <input type="checkbox" name="interest" value="Travel">
-                <span>旅遊與文化</span>
-            </label>
+            <h3><i class="fas fa-graduation-cap"></i> 選擇您的學習興趣</h3>
+            <p>請選擇您感興趣的單字類型，我們會根據您的選擇推薦單字。</p>
+            <form id="interest-form">
+                <div class="interest-options">
+                    <label>
+                        <input type="checkbox" name="interest" value="Business">
+                        <span>商業與職場</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" name="interest" value="Technology">
+                        <span>科技與資訊</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" name="interest" value="DailyLife">
+                        <span>日常生活</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" name="interest" value="Academic">
+                        <span>學術與教育</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" name="interest" value="Travel">
+                        <span>旅遊與文化</span>
+                    </label>
+                </div>
+                <button type="submit" class="save-btn"><i class="fas fa-save"></i> 儲存設定</button>
+            </form>
         </div>
-        <button type="submit" class="save-btn"><i class="fas fa-save"></i> 儲存設定</button>
-    </form>
-</div>
 
         <div class="progress-section">
             <h3><i class="fas fa-chart-line"></i>作答情況（正確數/總作答題數）</h3> 
@@ -145,14 +141,19 @@
                 <div class="progress" style="width: {{ listening_progress }}%; background: #2196f3;"></div>
             </div>
         </div>
-        
-        <div class="part-analysis-section">
-            <h3><i class="fas fa-list-ol"></i> Part 作答分析</h3>
-            {% if part_performance %}
-            <div class="chart-container" style="margin-top: 30px;">
-                    <canvas id="part-radar-chart"></canvas>
-                </div>
-                <div class="analysis-list">
+
+        <div class="analysis-section">
+            <h3><i class="fas fa-chart-bar"></i> 作答表現分析</h3>
+            <div class="analysis-controls">
+                <button class="analysis-btn active" data-analysis="part">Part 作答分析</button>
+                <button class="analysis-btn" data-analysis="category">題目類別作答分析</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="analysis-radar-chart"></canvas>
+            </div>
+            
+            <div id="part-analysis-list" class="analysis-list active">
+                {% if part_performance %}
                     {% for part, data in part_performance.items %}
                         <div class="analysis-item">
                             <div class="analysis-item-content">
@@ -162,20 +163,13 @@
                             <span class="percentage">{{ data.percentage }}%</span>
                         </div>
                     {% endfor %}
-                </div>
+                {% else %}
+                    <p>尚無 Part 作答紀錄。</p>
+                {% endif %}
+            </div>
 
-                {{ part_performance|json_script:"part-performance-data" }}
-
-                
-            {% else %}
-                <p>尚無 Part 作答紀錄。</p>
-            {% endif %}
-        </div>
-
-        <div class="category-analysis-section">
-            <h3><i class="fas fa-tags"></i> 題目類別作答分析</h3>
-            {% if category_performance %}
-                <div class="analysis-list">
+            <div id="category-analysis-list" class="analysis-list" style="display: none;">
+                {% if category_performance %}
                     {% for key, data in category_performance.items %}
                         <div class="analysis-item">
                             <div class="analysis-item-content">
@@ -185,13 +179,13 @@
                             <span class="percentage">{{ data.percentage }}%</span>
                         </div>
                     {% endfor %}
-                </div>
-            {% else %}
-                <p>尚無題目類別作答紀錄。</p>
-            {% endif %}
+                {% else %}
+                    <p>尚無題目類別作答紀錄。</p>
+                {% endif %}
+            </div>
         </div>
 
-        <div class="personalized-advice-section">
+        <!-- <div class="personalized-advice-section">
             <h3><i class="fas fa-lightbulb"></i> 個性化學習建議</h3>
             {% if learning_suggestions %}
                 <ul>
@@ -202,7 +196,7 @@
             {% else %}
                 <p>尚無建議，請先完成測驗以取得分析！</p>
             {% endif %}
-        </div>
+        </div> -->
 
         <div class="test-history">
             <h3><i class="fas fa-history"></i> 已完成測驗</h3>
@@ -217,15 +211,15 @@
                     </thead>
                     <tbody>
                         {% for result in page_obj %}
-                        <tr>
-                            <td>{{ result.part_display }}</td>
-                            <td>{{ result.completed_at|date:"Y/m/d" }}</td>
-                            <td>{{ result.total_score }}</td>
-                        </tr>
+                            <tr>
+                                <td>{{ result.part_display }}</td>
+                                <td>{{ result.completed_at|date:"Y/m/d" }}</td>
+                                <td>{{ result.total_score }}</td>
+                            </tr>
                         {% empty %}
-                        <tr>
-                            <td colspan="3">尚無測驗紀錄</td>
-                        </tr>
+                            <tr>
+                                <td colspan="3">尚無測驗紀錄</td>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -248,52 +242,89 @@
             </div>
         </div>
     </div>
-    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        return parts.length === 2 ? parts.pop().split(';').shift() : '';
-    }
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="contact-us">
+                <h3>聯絡我們</h3>
+                <ul>
+                    <li><i class="fas fa-phone"></i><a href="tel:02 3322 2777"> 電話：02 3322 2777</a></li>
+                    <li><i class="fas fa-map"></i><a href="https://maps.app.goo.gl/3NMVwufcbbTrfQNz6" target="_blank"> 地址：100台北市中正區濟南路一段321號</a></li>
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d14459.01851827243!2d121.5254698!3d25.0423998!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442a970a11a84ad%3A0x58e05f2528812097!2z5ZyL56uL6Ie65YyX5ZWG5qWt5aSn5a24!5e0!3m2!1szh-TW!2stw!4v1728891709611!5m2!1szh-TW!2stw"
+                        height="250"
+                        style="border:0;"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 TOEIC學習平台 版權所有</p>
+        </div>
+    </footer>
 
-    function bindPaginationEvents() {
-        const paginationLinks = document.querySelectorAll('.pagination a');
-        const examResultsContainer = document.getElementById('exam-results-container');
-        const currentUrl = window.location.href.split('?')[0];
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {{ part_performance|json_script:"part-performance-data" }}
+    {{ category_performance|json_script:"category-performance-data" }}
+    <script>
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            return parts.length === 2 ? parts.pop().split(';').shift() : '';
+        }
 
-        paginationLinks.forEach(link => {
-            link.addEventListener('click', function(event) {
-                event.preventDefault();
-                const pageNumber = this.dataset.page;
+        function bindPaginationEvents() {
+            const paginationLinks = document.querySelectorAll('.pagination a');
+            const examResultsContainer = document.getElementById('exam-results-container');
+            const currentUrl = window.location.href.split('?')[0];
 
-                fetch(`${currentUrl}?page=${pageNumber}`)
-                    .then(response => response.text())
-                    .then(data => {
-                        const newContent = new DOMParser().parseFromString(data, 'text/html').querySelector('#exam-results-container');
-                        examResultsContainer.innerHTML = newContent.innerHTML;
-                        const newPagination = new DOMParser().parseFromString(data, 'text/html').querySelector('.pagination');
-                        document.querySelector('.pagination').innerHTML = newPagination.innerHTML;
-                        bindPaginationEvents();
-                    })
-                    .catch(error => console.error('Error fetching pagination data:', error));
+            paginationLinks.forEach(link => {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const pageNumber = this.dataset.page;
+
+                    fetch(`${currentUrl}?page=${pageNumber}`)
+                        .then(response => response.text())
+                        .then(data => {
+                            const newContent = new DOMParser().parseFromString(data, 'text/html').querySelector('#exam-results-container');
+                            examResultsContainer.innerHTML = newContent.innerHTML;
+                            const newPagination = new DOMParser().parseFromString(data, 'text/html').querySelector('.pagination');
+                            document.querySelector('.pagination').innerHTML = newPagination.innerHTML;
+                            bindPaginationEvents();
+                        })
+                        .catch(error => console.error('Error fetching pagination data:', error));
+                });
             });
-        });
-    }
+        }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        bindPaginationEvents();
+        document.addEventListener('DOMContentLoaded', function() {
+            bindPaginationEvents();
 
-        // Chart.js 相關程式碼
-        const scriptTag = document.getElementById('part-performance-data');
-        if (scriptTag) {
-            const partPerformanceData = JSON.parse(scriptTag.textContent);
-            if (Object.keys(partPerformanceData).length > 0) {
-                const labels = Object.values(partPerformanceData).map(data => data.display_name);
-                const dataPoints = Object.values(partPerformanceData).map(data => data.percentage);
-                const ctx = document.getElementById('part-radar-chart').getContext('2d');
-                new Chart(ctx, {
+            const scriptTagPart = document.getElementById('part-performance-data');
+            const scriptTagCategory = document.getElementById('category-performance-data');
+            const partPerformanceData = scriptTagPart ? JSON.parse(scriptTagPart.textContent) : null;
+            const categoryPerformanceData = scriptTagCategory ? JSON.parse(scriptTagCategory.textContent) : null;
+            
+            const analysisButtons = document.querySelectorAll('.analysis-btn');
+            const analysisLists = document.querySelectorAll('.analysis-list');
+            const chartCanvas = document.getElementById('analysis-radar-chart').getContext('2d');
+            let myChart = null; // 用來儲存 Chart.js 實例
+
+            function updateChart(data) {
+                if (myChart) {
+                    myChart.destroy();
+                }
+
+                if (!data || Object.keys(data).length === 0) {
+                    return; // 如果沒有數據就不繪製圖表
+                }
+
+                const labels = Object.values(data).map(item => item.display_name);
+                const dataPoints = Object.values(data).map(item => item.percentage);
+                
+                myChart = new Chart(chartCanvas, {
                     type: 'radar',
                     data: {
                         labels: labels,
@@ -318,7 +349,7 @@
                             },
                             title: {
                                 display: true,
-                                text: '各 Part 表現分析雷達圖',
+                                text: '作答表現雷達圖',
                                 font: { size: 16 }
                             }
                         },
@@ -333,137 +364,142 @@
                     }
                 });
             }
-        }
-        
-        // 處理學習興趣選擇的邏輯
-        const userInterests = "{{ user.learning_interests }}".split(',').filter(item => item !== '');
-        const checkboxes = document.querySelectorAll('.interest-options input[type="checkbox"]');
-        
-        checkboxes.forEach(checkbox => {
-            if (userInterests.includes(checkbox.value)) {
-                checkbox.checked = true;
+
+            // 初始化時顯示 Part 作答分析
+            if (partPerformanceData) {
+                updateChart(partPerformanceData);
             }
-        });
 
-        const interestForm = document.getElementById('interest-form');
-        interestForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const selectedInterests = Array.from(checkboxes)
-                .filter(checkbox => checkbox.checked)
-                .map(checkbox => checkbox.value)
-                .join(',');
+            analysisButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    analysisButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
 
-            fetch('/update-interests/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({ interests: selectedInterests })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('學習興趣已成功更新！');
-                } else {
-                    alert('更新失敗，請稍後再試。');
-                }
-            })
-            .catch(error => {
-                console.error('Error updating interests:', error);
-                alert('更新過程中發生錯誤。');
-            });
-        });
-
-        // 點數記錄彈出視窗的 JavaScript 邏輯
-        const showHistoryBtn = document.getElementById('show-points-history');
-        const pointsModal = document.getElementById('points-modal');
-        const closeBtn = pointsModal.querySelector('.close-btn');
-        const pointsTableBody = document.querySelector('#points-table tbody');
-
-        if (showHistoryBtn) {
-            showHistoryBtn.addEventListener('click', function() {
-                pointsModal.style.display = 'flex'; // 顯示彈出視窗
-                fetchPointsHistory(); // 載入資料
-            });
-        }
-
-        if (closeBtn) {
-            closeBtn.addEventListener('click', function() {
-                pointsModal.style.display = 'none'; // 隱藏彈出視窗
-            });
-        }
-
-        window.addEventListener('click', function(event) {
-            if (event.target == pointsModal) {
-                pointsModal.style.display = 'none'; // 點擊視窗外背景時隱藏
-            }
-        });
-
-        function fetchPointsHistory() {
-            if (pointsTableBody.innerHTML.trim() !== '' && pointsTableBody.innerHTML.trim() !== '<tr><td colspan="3">載入中...</td></tr>') {
-                return;
-            }
-            
-            pointsTableBody.innerHTML = '<tr><td colspan="3">載入中...</td></tr>';
-            
-            fetch("/get-points-history/", {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    pointsTableBody.innerHTML = '';
-                    if (data.transactions.length > 0) {
-                        data.transactions.forEach(transaction => {
-                            const row = `
-                                <tr>
-                                    <td>${transaction.date}</td>
-                                    <td>${transaction.reason}</td>
-                                    <td>${transaction.amount}</td>
-                                </tr>
-                            `;
-                            pointsTableBody.innerHTML += row;
-                        });
-                    } else {
-                        pointsTableBody.innerHTML = '<tr><td colspan="3">尚無點數變動記錄。</td></tr>';
+                    const analysisType = this.dataset.analysis;
+                    analysisLists.forEach(list => {
+                        list.style.display = 'none';
+                    });
+                    
+                    let dataToDisplay = null;
+                    if (analysisType === 'part') {
+                        document.getElementById('part-analysis-list').style.display = 'block';
+                        dataToDisplay = partPerformanceData;
+                    } else if (analysisType === 'category') {
+                        document.getElementById('category-analysis-list').style.display = 'block';
+                        dataToDisplay = categoryPerformanceData;
                     }
-                } else {
-                    console.error('Failed to fetch points history:', data.error);
-                    pointsTableBody.innerHTML = '<tr><td colspan="3">載入記錄失敗。</td></tr>';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                pointsTableBody.innerHTML = '<tr><td colspan="3">發生錯誤，無法載入記錄。</td></tr>';
+                    updateChart(dataToDisplay);
+                });
             });
-        }
-    });
-</script>
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="contact-us">
-                <h3>聯絡我們</h3>
-                <ul>
-                    <li><i class="fas fa-phone"></i><a href="tel:02 3322 2777"> 電話：02 3322 2777</a></li>
-                    <li><i class="fas fa-map"></i><a href="https://maps.app.goo.gl/3NMVwufcbbTrfQNz6" target="_blank"> 地址：100台北市中正區濟南路一段321號</a></li>
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d14459.01851827243!2d121.5254698!3d25.0423998!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442a970a11a84ad%3A0x58e05f2528812097!2z5ZyL56uL6Ie65YyX5ZWG5qWt5aSn5a24!5e0!3m2!1szh-TW!2stw!4v1728891709611!5m2!1szh-TW!2stw"
-                        height="250"
-                        style="border:0;"
-                        allowfullscreen=""
-                        loading="lazy"
-                        referrerpolicy="no-referrer-when-downgrade">
-                    </iframe>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>© 2025 TOEIC學習平台 版權所有</p>
-        </div>
-    </footer>
+
+            // 處理學習興趣選擇的邏輯
+            const userInterests = "{{ user.learning_interests }}".split(',').filter(item => item !== '');
+            const checkboxes = document.querySelectorAll('.interest-options input[type="checkbox"]');
+            
+            checkboxes.forEach(checkbox => {
+                if (userInterests.includes(checkbox.value)) {
+                    checkbox.checked = true;
+                }
+            });
+
+            const interestForm = document.getElementById('interest-form');
+            interestForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const selectedInterests = Array.from(checkboxes)
+                    .filter(checkbox => checkbox.checked)
+                    .map(checkbox => checkbox.value)
+                    .join(',');
+
+                fetch('/update-interests/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ interests: selectedInterests })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 使用自訂訊息框替代 alert
+                        alert('學習興趣已成功更新！');
+                    } else {
+                        alert('更新失敗，請稍後再試。');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating interests:', error);
+                    alert('更新過程中發生錯誤。');
+                });
+            });
+
+            const showHistoryBtn = document.getElementById('show-points-history');
+            const pointsModal = document.getElementById('points-modal');
+            const closeBtn = pointsModal.querySelector('.close-btn');
+            const pointsTableBody = document.querySelector('#points-table tbody');
+
+            if (showHistoryBtn) {
+                showHistoryBtn.addEventListener('click', function() {
+                    pointsModal.style.display = 'flex';
+                    fetchPointsHistory();
+                });
+            }
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                    pointsModal.style.display = 'none';
+                });
+            }
+
+            window.addEventListener('click', function(event) {
+                if (event.target == pointsModal) {
+                    pointsModal.style.display = 'none';
+                }
+            });
+
+            function fetchPointsHistory() {
+                if (pointsTableBody.innerHTML.trim() !== '' && pointsTableBody.innerHTML.trim() !== '<tr><td colspan="3">載入中...</td></tr>') {
+                    return;
+                }
+                
+                pointsTableBody.innerHTML = '<tr><td colspan="3">載入中...</td></tr>';
+                
+                fetch("/get-points-history/", {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        pointsTableBody.innerHTML = '';
+                        if (data.transactions.length > 0) {
+                            data.transactions.forEach(transaction => {
+                                const row = `
+                                    <tr>
+                                        <td>${transaction.date}</td>
+                                        <td>${transaction.reason}</td>
+                                        <td>${transaction.amount}</td>
+                                    </tr>
+                                `;
+                                pointsTableBody.innerHTML += row;
+                            });
+                        } else {
+                            pointsTableBody.innerHTML = '<tr><td colspan="3">尚無點數變動記錄。</td></tr>';
+                        }
+                    } else {
+                        console.error('Failed to fetch points history:', data.error);
+                        pointsTableBody.innerHTML = '<tr><td colspan="3">載入記錄失敗。</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    pointsTableBody.innerHTML = '<tr><td colspan="3">發生錯誤，無法載入記錄。</td></tr>';
+                });
+            }
+        });
+    </script>
 </body>
 </html>

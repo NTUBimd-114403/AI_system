@@ -1036,6 +1036,15 @@ def get_points_history(request):
 def record(request):
     user = request.user
 
+    # 定義 Part 編號與名稱的映射關係
+    part_names = {
+        2: "應答問題",
+        3: "簡短對話",
+        5: "句子填空",
+        6: "段落填空",
+        7: "閱讀測驗",
+    }
+
     # 歷史測驗紀錄
     exam_results = (
         ExamResult.objects
@@ -1083,13 +1092,9 @@ def record(request):
         correct_in_part = part_answers.filter(is_correct=True).count()
         percentage_in_part = int((correct_in_part / total_in_part) * 100) if total_in_part else 0
         
-        # 顯示名稱可以從模型取得，但這裡我們先用固定字串
-        part_display_name = f'Part {part}'
-        if part in [2, 3]:
-            part_display_name += ' (聽力)'
-        elif part in [5, 6, 7]:
-            part_display_name += ' (閱讀)'
-
+        # 透過 part_names 字典來取得正確的顯示名稱
+        part_display_name = part_names.get(part, f'Part {part}')
+        
         if total_in_part > 0: # 只顯示有作答紀錄的 Part
             part_performance[part] = {
                 'display_name': part_display_name,
@@ -1098,7 +1103,6 @@ def record(request):
                 'percentage': percentage_in_part,
             }
     # --- Part 分析新增結束 ---
-
 
     # --- 新增：按題目類別分析作答情況 ---
     category_performance = {}
@@ -1137,6 +1141,7 @@ def record(request):
         'part_performance': part_performance, # <-- 將 Part 分析數據傳遞到模板
         'learning_suggestions': get_learning_suggestions(category_performance),
     }
+
     return render(request, 'record.html', context)
 
 def get_learning_suggestions(category_performance):
