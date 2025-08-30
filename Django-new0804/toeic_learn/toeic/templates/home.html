@@ -5,334 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TOEIC學習平台</title>
-    <link rel="stylesheet" href="{% static 'css/common.css' %}"> 
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <script src="{% static 'script/all.js' %}"></script>
-
-<style>
-    /* 頁面通用樣式 */
-    body {
-        font-family: sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f7f9fc;
-        color: #333;
-    }
-
-    /* 導覽列的黏性效果 */
-    .header {
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-    }
-
-    /* 英雄區塊 */
-    .hero-section {
-        margin-top: 50px; 
-        padding: 120px 20px 80px 20px; 
-        text-align: center;
-        color: #fff;
-        background: linear-gradient(rgba(0, 86, 179, 0.8), rgba(0, 86, 179, 0.8)), url('https://images.unsplash.com/photo-1542435503-9d2d0c2420f8') no-repeat center center/cover;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        position: relative;
-    }
-    .hero-section h1 {
-        font-size: 3.5rem;
-        margin-bottom: 1rem;
-        animation: fadeIn 1s ease-in-out;
-        color: #ffffff;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        transition: opacity 0.5s ease-in-out; /* 標語輪播的過渡效果 */
-    }
-    .hero-section p {
-        font-size: 1.2rem;
-        margin-bottom: 2rem;
-        animation: fadeIn 1.5s ease-in-out;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .cta-button {
-        display: inline-block;
-        background-color: #ff9900;
-        color: #fff;
-        padding: 15px 40px;
-        border-radius: 50px;
-        text-decoration: none;
-        font-weight: bold;
-        font-size: 1.1rem;
-        transition: background-color 0.3s, transform 0.3s;
-        box-shadow: 0 5px 15px rgba(255, 153, 0, 0.4);
-    }
-    .cta-button:hover {
-        background-color: #e68a00;
-        transform: translateY(-3px);
-    }
-    .cta-button:active {
-        transform: scale(0.98);
-        background-color: #d87d00;
-    }
-    .scroll-down-indicator {
-        position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        animation: bounce 2s infinite;
-    }
-    .scroll-down-indicator i {
-        font-size: 2em;
-        color: #fff;
-    }
-    @keyframes bounce {
-        0%, 20%, 50%, 80%, 100% {
-            transform: translateY(0);
-        }
-        40% {
-            transform: translateY(-10px);
-        }
-        60% {
-            transform: translateY(-5px);
-        }
-    }
-
-    /* 交錯佈局的功能展示區塊 */
-    .feature-showcase-section {
-        padding: 60px 20px 80px 20px;
-    }
-    .showcase-item {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 50px;
-        margin-bottom: 80px;
-        flex-wrap: wrap;
-        max-width: 1200px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .showcase-item.reverse {
-        flex-direction: row-reverse;
-    }
-    .showcase-image {
-        width: 100%;
-        max-width: 500px;
-        height: 350px;
-        background-size: cover;
-        background-position: center;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    }
-    .showcase-content {
-        max-width: 500px;
-        padding: 20px;
-    }
-    .showcase-content h2 {
-        font-size: 2rem;
-        color: #0056b3;
-        margin-bottom: 20px;
-    }
-    .showcase-content p {
-        font-size: 1.1rem;
-        line-height: 1.8;
-        color: #555;
-        margin-bottom: 30px;
-    }
-    .cta-button-small {
-        display: inline-block;
-        background-color: #0056b3;
-        color: #fff;
-        padding: 12px 30px;
-        border-radius: 50px;
-        text-decoration: none;
-        font-weight: bold;
-        font-size: 1rem;
-        transition: background-color 0.3s, transform 0.3s;
-    }
-    .cta-button-small:hover {
-        background-color: #004494;
-        transform: translateY(-2px);
-    }
-    @media (max-width: 900px) {
-        .showcase-item, .showcase-item.reverse {
-            flex-direction: column;
-            text-align: center;
-        }
-        .showcase-image {
-            margin-bottom: 30px;
-        }
-    }
-
-    /* 如何開始區塊 */
-    .how-to-start-section {
-        padding: 80px 20px;
-        text-align: center;
-    }
-    .how-to-start-section h2 {
-        font-size: 2.5rem;
-        margin-bottom: 60px;
-        color: #0056b3;
-    }
-    .steps-container {
-        display: flex;
-        justify-content: center;
-        gap: 50px;
-        flex-wrap: wrap;
-    }
-    .step-item {
-        max-width: 250px;
-        text-align: center;
-    }
-    .step-item .icon-circle {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background-color: #0056b3;
-        color: #fff;
-        font-size: 2rem;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    .step-item h3 {
-        font-size: 1.4rem;
-        margin-bottom: 10px;
-    }
-    .step-item p {
-        color: #777;
-    }
-    
-    /* 部落格區塊 */
-    .blog-section {
-        padding: 80px 20px;
-        background-color: #f0f4f8;
-        text-align: center;
-    }
-    .blog-section h2 {
-        font-size: 2.5rem;
-        margin-bottom: 60px;
-    }
-    .blog-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 30px;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-    .blog-card {
-        background-color: #ffffff;
-        padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-        transition: transform 0.3s, box-shadow 0.3s;
-        text-align: left;
-    }
-    .blog-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-    }
-    .blog-card h3 {
-        font-size: 1.5rem;
-        margin-bottom: 15px;
-        color: #0056b3;
-    }
-    .blog-card p {
-        color: #777;
-        line-height: 1.6;
-    }
-    .blog-card a.read-more {
-        display: inline-block;
-        margin-top: 15px;
-        color: #ff9900;
-        font-weight: bold;
-        text-decoration: none;
-    }
-    
-    /* 專案核心特色 (從features-section複製並修改) */
-    .features-section-moved {
-        padding: 80px 20px;
-        margin-top: 60px;
-        text-align: center;
-        background-color: #fff;
-        border-radius: 25px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        max-width: 1200px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .features-section-moved h2 {
-        font-size: 2.5rem;
-        margin-bottom: 60px;
-    }
-    .feature-grid-moved {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 40px;
-    }
-    .feature-card-moved {
-        background-color: #f7f9fc;
-        padding: 40px;
-        border-radius: 15px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-        transition: transform 0.3s, box-shadow 0.3s;
-    }
-    .feature-card-moved:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    }
-    .feature-card-moved i {
-        font-size: 3rem;
-        color: #0056b3;
-        margin-bottom: 20px;
-    }
-    .feature-card-moved h3 {
-        font-size: 1.5rem;
-        margin-bottom: 15px;
-    }
-    .feature-card-moved p {
-        color: #777;
-    }
-    .feature-image-placeholder-moved {
-        margin-top: 20px;
-        height: 200px;
-        background-color: #e9ecef;
-        border-radius: 10px;
-        overflow: hidden;
-        background-size: cover;
-        background-position: center;
-    }
-
-    /* 專題結語與展示區塊 */
-    .project-summary-section {
-        background-color: #f7f9fc;
-        padding: 80px 20px;
-        text-align: center;
-    }
-    .project-summary-section h2 {
-        font-size: 2.5rem;
-        margin-bottom: 20px;
-    }
-    .project-summary-section p {
-        max-width: 800px;
-        margin: 0 auto 40px;
-        font-size: 1.1rem;
-        line-height: 1.8;
-        color: #555;
-    }
-
-    /* 淡入滑入動畫效果 */
-    .fade-in-up {
-        opacity: 0;
-        transform: translateY(20px);
-        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-    }
-    .fade-in-up.is-visible {
-        opacity: 1;
-        transform: translateY(0);
-    }
-</style>
 </head>
 <body {% if not user.is_authenticated %}class="no-auth"{% endif %}>
     <div class="header">
@@ -383,18 +59,44 @@
             {% endif %}
         </div>
     </div>
-
     <div class="main-content">
         <div class="hero-section">
             <div class="hero-content">
                 <h1 id="slogan-text">智慧多益學習平台</h1>
                 <p>運用 AI 技術，為多益應試者提供個人化、高效的學習解決方案。</p>
-                <a href="{% if user.is_authenticated %}{% url 'test' %}{% else %}{% url 'login' %}{% endif %}" class="cta-button">開始探索</a>            </div>
+                <a href="{% if user.is_authenticated %}{% url 'test' %}{% else %}{% url 'login' %}{% endif %}" class="cta-button">開始探索</a>
+            </div>
             <div class="scroll-down-indicator">
                 <i class="fas fa-chevron-down"></i>
             </div>
         </div>
-        
+       <section class="daily-phrase-section">
+    <h2>今日片語</h2>
+    <div class="phrase-card-container">
+        {% if daily_phrases %}
+            {% for phrase in daily_phrases %}
+                <div class="phrase-card {% if forloop.first %}active{% endif %}">
+                    <div class="phrase-header">
+                        <span class="phrase-topic">{{ phrase.title }}</span>
+                        <span class="phrase-topic-translation">{{ phrase.title_translation }}</span>
+                    </div>
+                    <p class="english-phrase">{{ phrase.english_passage }}</p>
+                    <p class="chinese-translation">{{ phrase.chinese_translation }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="loading-message">
+                {% if error_message %}
+                    <span>{{ error_message }}</span>
+                {% else %}
+                    <div class="loading-spinner"></div>
+                    <span>今日片語載入中...</span>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+
         <div class="feature-showcase-section">
             <div class="showcase-item">
                 <img src="{% static 'img/logo.png' %}" alt="多益考試簡介圖示" class="showcase-inline-image">
@@ -424,7 +126,6 @@
                 </div>
             </div>
         </div>
-
         <div class="blog-section">
             <h2>最新多益學習資訊</h2>
             <div class="blog-grid">
@@ -448,7 +149,6 @@
             </div>
         </div>
     </div>
-
     <footer class="footer">
         <div class="footer-container">
             <div class="contact-us">
@@ -471,7 +171,6 @@
             <p>© 2025 TOEIC學習平台 版權所有</p>
         </div>
     </footer>
-    
     <div id="ai-chatbot-container" style="display: none;">
         <div id="chatbot-header">
             多益單字小幫手
@@ -485,7 +184,6 @@
         </div>
     </div>
     <button id="chatbot-toggle-btn">多益單字小幫手</button>
-
     <script>
         // 英雄區塊標語輪播
         const sloganText = document.getElementById('slogan-text');
@@ -503,7 +201,6 @@
                 sloganText.style.opacity = '1';
             }, 500);
         }, 5000);
-
         // 滾動時淡入滑入動畫
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -515,18 +212,14 @@
         }, {
             threshold: 0.2
         });
-
         document.querySelectorAll('.fade-in-up').forEach(element => {
             observer.observe(element);
         });
-
         // ✅ 根據後端傳來的使用者名稱，建立一個唯一的 localStorage key
         const currentUsername = "{{ user.username }}";
         const storageKey = `chatbot_history_${currentUsername}`;
         // 檢查使用者是否已登入
         const isAuthenticated = "{{ user.is_authenticated }}" === "True";
-
-
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -541,7 +234,6 @@
             }
             return cookieValue;
         }
-
         // 我將原本在 DOMContentLoaded 內的程式碼移到外面，並用一個新的 DOMContentLoaded 來包裹，以確保所有元素都已載入
         document.addEventListener('DOMContentLoaded', function() {
             const chatbotContainer = document.getElementById('ai-chatbot-container');
@@ -552,7 +244,22 @@
             const sendBtn = document.getElementById('send-btn');
             const csrfToken = getCookie('csrftoken');
             const logoutForm = document.getElementById('logout-form');
-
+            const cards = document.querySelectorAll('.phrase-card');
+            let currentCardIndex = 0;
+            const cardCount = cards.length;
+            if (cardCount > 1) {
+                // 函式：切換到下一張卡片
+                const showNextCard = () => {
+                    // 移除目前顯示卡片的 active 類別
+                    cards[currentCardIndex].classList.remove('active');
+                    // 計算下一個卡片的索引，並確保它在範圍內（使用模數運算實現循環）
+                    currentCardIndex = (currentCardIndex + 1) % cardCount;
+                    // 新增 active 類別以顯示下一張卡片
+                    cards[currentCardIndex].classList.add('active');
+                };
+                // 只有在卡片數量大於1時才啟動自動輪播
+                setInterval(showNextCard, 15000); // 每 15 秒切換一次
+            }
             // 如果使用者未登入，則直接結束，不執行 AI 機器人相關的邏輯
             if (!isAuthenticated) {
                 if (chatbotToggleBtn) {
@@ -560,7 +267,6 @@
                 }
                 return;
             }
-
             // 負責為所有單字卡片按鈕綁定事件
             function bindFamiliarButtonEvents() {
                 const buttons = chatbotMessages.querySelectorAll('.mark-familiar-btn');
@@ -573,7 +279,6 @@
                     });
                 });
             }
-
             // 從 localStorage 載入對話紀錄
             function loadChatHistory() {
                 const history = localStorage.getItem(storageKey);
@@ -584,12 +289,10 @@
                     addMessage('robot', '哈囉！我是你的 AI 學習小幫手。輸入「開始」來領取你今天的單字吧！');
                 }
             }
-
             // 將對話紀錄保存到 localStorage
             function saveChatHistory() {
                 localStorage.setItem(storageKey, chatbotMessages.innerHTML);
             }
-
             function addMessage(sender, htmlContent, isVocabCard = false) {
                 const messageDiv = document.createElement('div');
                 messageDiv.classList.add('chatbot-message', `${sender}-message`);
@@ -601,46 +304,38 @@
                     bindFamiliarButtonEvents();
                 }
             }
-
             chatbotToggleBtn.addEventListener('click', () => {
                 chatbotContainer.style.display = 'flex';
                 chatbotToggleBtn.style.display = 'none';
                 chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
             });
-
             chatbotCloseBtn.addEventListener('click', () => {
                 chatbotContainer.style.display = 'none';
                 chatbotToggleBtn.style.display = 'block';
             });
-
             if (logoutForm) {
                 logoutForm.addEventListener('submit', function() {
                     // 在登出前，清除當前使用者的聊天紀錄
                     localStorage.removeItem(storageKey);
                 });
             }
-
             function sendMessage() {
                 const message = userInput.value.trim();
                 if (message === '') return;
-
                 addMessage('user', message);
                 userInput.value = '';
-
                 if (message.toLowerCase() === '開始') {
                     fetchDailyVocabulary();
                 } else {
                     addMessage('robot', '抱歉，我目前只能識別「開始」指令來提供單字喔！');
                 }
             }
-
             sendBtn.addEventListener('click', sendMessage);
             userInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     sendMessage();
                 }
             });
-
             function fetchDailyVocabulary() {
                 fetch('/api/chatbot/vocabulary/', {
                     method: 'GET',
@@ -675,18 +370,15 @@
                     addMessage('robot', '糟糕！無法取得單字，請稍後再試。');
                 });
             }
-
             function markWordAsFamiliar(wordId) {
                 const button = chatbotMessages.querySelector(`button[data-word-id="${wordId}"]`);
                 if (!button) {
                     return;
                 }
-
                 const originalText = button.textContent;
                 button.disabled = true;
                 button.textContent = '處理中...';
                 button.classList.add('loading'); 
-
                 fetch('/api/chatbot/mark-familiar/', {
                     method: 'POST',
                     headers: {
@@ -715,7 +407,6 @@
                     addMessage('robot', '標記單字時發生錯誤，請稍後再試。');
                 });
             }
-
             loadChatHistory();
         });
     </script>
