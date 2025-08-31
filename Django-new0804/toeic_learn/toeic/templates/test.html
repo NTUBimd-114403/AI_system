@@ -146,74 +146,86 @@
         </div>
     </footer>
 
-    <script>
-    const testBoxes = document.querySelectorAll('.test-box');
-    const dialog = document.getElementById('exchange-dialog');
-    const dialogMessage = document.getElementById('dialog-message');
-    const pointsNeededSpan = document.getElementById('points-needed');
-    const confirmBtn = document.getElementById('confirm-exchange-btn');
-    const cancelBtn = document.getElementById('cancel-exchange-btn');
-    // 從 meta 標籤或其他方式獲取 CSRF Token，這裡假設它已經存在
-    // 如果沒有，請確認你的 HTML 裡有 <input type="hidden" name="csrfmiddlewaretoken" value="...">
-    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+      <script>
+        const testBoxes = document.querySelectorAll('.test-box');
+        const dialog = document.getElementById('exchange-dialog');
+        const dialogMessage = document.getElementById('dialog-message');
+        const pointsNeededSpan = document.getElementById('points-needed');
+        const confirmBtn = document.getElementById('confirm-exchange-btn');
+        const cancelBtn = document.getElementById('cancel-exchange-btn');
 
-    testBoxes.forEach(box => {
-        box.addEventListener('click', async function(event) {
-            event.preventDefault();
+        // 檢查使用者是否已登入，這個變數會由 Django 模板渲染
+        const isAuthenticated = "{{ user.is_authenticated|yesno:'true,false' }}" === 'true';
 
-            const url = this.dataset.url;
-            const partNumber = this.dataset.partNumber;
+        // 如果使用者已登入，才獲取 CSRF Token
+        let csrfToken = '';
+        if (isAuthenticated) {
+            csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+        }
 
-            // 1. 發送請求到後端檢查次數，這個邏輯是正確的
-            const response = await fetch('/check-test-limit/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({ part_number: partNumber })
+        testBoxes.forEach(box => {
+            box.addEventListener('click', async function(event) {
+                event.preventDefault();
+
+                const url = this.dataset.url;
+                const partNumber = this.dataset.partNumber;
+
+                // 1. 檢查登入狀態
+                if (!isAuthenticated) {
+                    // 若未登入，跳轉到登入頁面
+                    window.location.href = "{% url 'login' %}";
+                    return; // 結束函式
+                }
+
+                // 2. 若已登入，繼續執行原有的檢查測驗次數邏輯
+                const response = await fetch('/check-test-limit/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ part_number: partNumber })
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'ok') {
+                    window.location.href = url;
+                } else if (data.status === 'limit_reached') {
+                    dialogMessage.textContent = data.message;
+                    pointsNeededSpan.textContent = data.points_needed;
+
+                    confirmBtn.onclick = async function() {
+                        const exchangeResponse = await fetch('/exchange-test/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrfToken
+                            },
+                            body: JSON.stringify({
+                                exam_type: partNumber === '0' ? 'mixed' : 'part'
+                            })
+                        });
+
+                        const exchangeData = await exchangeResponse.json();
+                        alert(exchangeData.message);
+                        dialog.close();
+
+                        if (exchangeData.status === 'success') {
+                            window.location.href = url;
+                        }
+                    };
+                    
+                    cancelBtn.onclick = function() {
+                        dialog.close();
+                    };
+
+                    dialog.showModal();
+                } else {
+                    alert(data.message);
+                }
             });
-
-            const data = await response.json();
-
-            if (data.status === 'ok') {
-                window.location.href = url;
-            } else if (data.status === 'limit_reached') {
-                dialogMessage.textContent = data.message;
-                pointsNeededSpan.textContent = data.points_needed;
-
-                // 2. 修正「確認兌換」按鈕的點擊事件
-                confirmBtn.onclick = async function() {
-                    const exchangeResponse = await fetch('/exchange-test/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json', // <-- 修正為正確的 Content-Type
-                            'X-CSRFToken': csrfToken
-                        },
-                        body: JSON.stringify({ // <-- 修正為正確的 JSON 格式
-                            exam_type: partNumber === '0' ? 'mixed' : 'part'
-                        })
-                    });
-
-                    const exchangeData = await exchangeResponse.json();
-                    alert(exchangeData.message);
-                    dialog.close();
-
-                    if (exchangeData.status === 'success') {
-                        window.location.href = url;
-                    }
-                };
-                
-                cancelBtn.onclick = function() {
-                    dialog.close();
-                };
-
-                dialog.showModal();
-            } else {
-                alert(data.message);
-            }
         });
-    });
 </script>
 </body>
 </html>

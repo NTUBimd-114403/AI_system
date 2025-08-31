@@ -33,7 +33,8 @@ body {
 }
 
 .progress-section, .test-history, .learning-goals {
-    margin-bottom: 20px;
+    margin-bottom: 50px;
+    margin-top: 50px;
 }
 
 .progress-bar {
