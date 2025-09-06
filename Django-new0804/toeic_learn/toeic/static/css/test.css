@@ -2,151 +2,165 @@
   通用樣式
 ==================================================*/
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-
-
+body {
+    background-color: #f4f7f9; /* 柔和的淺灰色背景 */
+}
 
 /*==================================================
   卡片容器 (Container)
 ==================================================*/
 .container {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 30px; /* 統一間距為 30px */
-    max-width: 1200px; /* 限制容器最大寬度 */
-    margin: 80px auto; /* 頁面上方留出 50px 間距 */
-    padding: 0 20px; /* 左右內邊距 */
+    flex-direction: column;
+    align-items: center;
+    gap: 15px; /* 進一步縮小垂直間距 */
+    max-width: 1000px; /* 增加容器寬度，讓卡片更長 */
+    margin: 120px auto;
+    padding: 0 20px;
+    
+    /* ------------------------------------------- */
+    /* 以下是為左右排列新增的樣式 */
+    flex-wrap: wrap; /* 允許卡片換行 */
+    flex-direction: row; /* 將主軸方向改為水平 */
+    justify-content: center; /* 在容器內水平居中排列 */
+    align-items: flex-start; /* 垂直對齊在頂部 */
+    gap: 20px; /* 增加卡片間距 */
+    max-width: 1200px; /* 增加最大寬度以容納多欄 */
+    /* ------------------------------------------- */
 }
 
 /*==================================================
-  單一卡片樣式 (Test-Box) - 終極版本
+  長條型卡片樣式 (Test-Box)
 ==================================================*/
 .test-box {
-    flex: 1 1 calc(33.33% - 20px);
-    min-width: 300px;
+    flex: 1 1 100%;
+    width: 100%;
+    height: 150px;
 
-    background: #ffffff; /* 白色背景 */
+    background: #ffffff;
     color: #333;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05); /* 更柔和的陰影 */
+    padding: 15px 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.04);
     transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
     cursor: pointer;
     
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    
+    /* ------------------------------------------- */
+    /* 為了實現左右分欄，這裡的樣式需要修改 */
+    flex-direction: column; /* 將內容改為垂直排列 */
+    justify-content: center; /* 垂直居中 */
+    align-items: center; /* 水平居中 */
+    text-align: center; /* 新增，確保文字置中 */
+
+    /* 調整為兩欄排列 */
+    flex: 1 1 calc(50% - 20px); /* 兩欄排列，減去間距 */
+    /* ------------------------------------------- */
 
     position: relative;
     overflow: hidden;
-    height: 250px;
-    border: 2px solid transparent; /* 為邊框過渡做準備 */
+    border: 2px solid transparent;
 }
 
 /* 懸停效果 */
 .test-box:hover {
-    transform: translateY(-12px); /* 向上抬升效果 */
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15); /* 更明顯的陰影 */
-    border-color: #2c5774; /* 懸停時出現藍色邊框 */
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    border-color: #34495e;
 }
 
 /* 幾何圖形背景裝飾 */
 .test-box::before {
     content: '';
     position: absolute;
-    top: -30%;
-    left: -30%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, rgba(134, 192, 230, 0.15), transparent);
+    top: -120%;
+    left: -40%;
+    width: 180%;
+    height: 180%;
+    background: linear-gradient(45deg, rgba(85, 150, 255, 0.1), transparent);
     border-radius: 50%;
     transform: rotate(45deg);
-    transition: transform 0.5s ease;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    opacity: 0.8;
 }
 
 .test-box:hover::before {
-    transform: rotate(90deg) scale(1.2);
+    transform: rotate(90deg) scale(1.1);
+    opacity: 1;
 }
 
 .test-box::after {
     content: '';
     position: absolute;
-    bottom: -30%;
-    right: -30%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(-45deg, rgba(134, 192, 230, 0.25), transparent);
+    bottom: -120%;
+    right: -40%;
+    width: 180%;
+    height: 180%;
+    background: linear-gradient(-45deg, rgba(85, 150, 255, 0.15), transparent);
     border-radius: 50%;
     transform: rotate(-30deg);
-    transition: transform 0.5s ease;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    opacity: 0.8;
 }
 
 .test-box:hover::after {
-    transform: rotate(-60deg) scale(1.2);
+    transform: rotate(-60deg) scale(1.1);
+    opacity: 1;
 }
 
 /* 圖標與文字樣式 */
 .test-box i {
-    font-size: 4.5rem; /* 圖標更大 */
-    color: #86c0e6;
-    margin-bottom: 25px;
+    font-size: 1.8rem;
+    color: #5596ff;
+    
+    /* ------------------------------------------- */
+    /* 為了配合垂直居中，這裡的樣式需要修改 */
+    margin-right: 0;
+    margin-bottom: 10px; /* 在垂直排列時，將間距移到下方 */
+    /* ------------------------------------------- */
+
     position: relative;
     z-index: 10;
 }
-
 .test-box h2 {
-    margin: 0;
-    font-size: 2.2em; /* 標題更大 */
+    font-size: 2em;
     font-weight: 700;
     color: #34495e;
+    margin: 0;
 }
-
 .test-box p {
-    font-size: 1rem;
-    opacity: 0.7;
-    margin-top: 10px;
-    line-height: 1.6;
-    color: #555;
-    max-width: 80%; /* 限制描述寬度，避免過長 */
-}
-
-/* 針對「綜合測驗」的特殊樣式 */
-.test-box.special {
-    flex: 1 1 100%;
-    max-width: 700px; /* 綜合測驗卡片更寬 */
-    height: 300px;
-    margin: 0 auto 30px;
-}
-.test-box.special i {
-    color: #2ecc71; /* 綠色 */
-}
-.test-box.special:hover {
-    border-color: #2ecc71;
+    display: none;
 }
 
 /*==================================================
   響應式設計 (Responsive Design)
 ==================================================*/
-@media (max-width: 992px) {
+@media (max-width: 600px) {
+    .container {
+        margin: 40px auto;
+    }
     .test-box {
-        flex: 1 1 calc(50% - 15px);
-        min-width: unset; /* 移除最小寬度限制，讓排版更靈活 */
+        padding: 15px;
+        height: auto;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center; /* **新增手機版文字置中** */
+    }
+    .test-box i {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    .test-box h2 {
+        font-size: 1.2em;
     }
 }
 
-@media (max-width: 600px) {
-    h1 {
-        font-size: 2.2rem;
-        margin-top: 60px;
-        margin-bottom: 40px;
-    }
+/* ------------------------------------------- */
+/* 新增的響應式設計，讓平板也能正確顯示 */
+@media (min-width: 601px) and (max-width: 900px) {
     .test-box {
-        flex: 1 1 100%;
-        padding: 30px;
-        height: auto; /* 手機版高度自適應 */
-    }
-    .test-box.special {
-        max-width: 100%;
+        flex: 1 1 calc(50% - 20px); /* 在平板顯示兩欄 */
     }
 }
+/* ------------------------------------------- */
