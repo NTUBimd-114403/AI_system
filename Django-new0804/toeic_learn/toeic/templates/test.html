@@ -2,228 +2,257 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TOEIC學習平台</title>
-    <link rel="stylesheet" href="{% static 'css/common.css' %}">
-    <link rel="stylesheet" href="{% static 'css/test.css' %}">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <script src="{% static 'script/all.js' %}"></script>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-        body {
-            overflow-x: hidden;
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-        }
-        iframe {
-            max-width: 100%;
-            width: 100%;
-        }
-        
-        /* Modal dialog styles */
-        .modal {
-            border: none;
-            border-radius: 10px;
-            padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        .modal::backdrop {
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-        .modal-buttons {
-            margin-top: 1rem;
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOEIC學習平台</title>
+  <link rel="stylesheet" href="{% static 'css/common.css' %}">
+  <link rel="stylesheet" href="{% static 'css/test.css' %}">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <script src="{% static 'script/all.js' %}"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      overflow-x: hidden;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+    iframe {
+      max-width: 100%;
+      width: 100%;
+    }
+    
+    /* Modal dialog styles */
+    .modal {
+      border: none;
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    .modal::backdrop {
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal-buttons {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+  </style>
 </head>
 <body>
-    <div class="header">
-        <button class="menu-btn" id="menu-btn">☰</button>
-        <h1>TOEIC學習平台</h1>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <div class="nav-buttons">
-            <a href="{% url 'home' %}" target="_self">
-                <button class="nav-btn {% if request.path == '/' %}current{% endif %}">
-                    <i class="fas fa-home"></i> 首頁
+  <div class="header">
+    <button class="menu-btn" id="menu-btn">☰</button>
+    <h1>TOEIC學習平台</h1>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <div class="nav-buttons">
+      <a href="{% url 'home' %}" target="_self">
+        <button class="nav-btn {% if request.path == '/' %}current{% endif %}">
+          <i class="fas fa-home"></i> 首頁
+        </button>
+      </a>
+      <a href="{% url 'test' %}" target="_self">
+        <button class="nav-btn {% if request.path == '/test/' %}current{% endif %}">
+          <i class="fas fa-file-alt"></i> 測驗平台
+        </button>
+      </a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'history' %}" target="_self">
+          <button class="nav-btn {% if request.path == '/history/' %}current{% endif %}">
+            <i class="fas fa-history"></i> 歷史單字
+          </button>
+        </a>
+        <a href="{% url 'record' %}" target="_self">
+          <button class="nav-btn">
+            <i class="fas fa-user"></i> 學習歷程
+          </button>
+        </a>
+        <a href="{% url 'faq' %}" target="_self">
+                <button class="nav-btn {% if request.path == '/faq/' %}current{% endif %}">
+                    <i class="fas fa-question-circle"></i> 常見問題
                 </button>
             </a>
-            <a href="{% url 'test' %}" target="_self">
-                <button class="nav-btn {% if request.path == '/test/' %}current{% endif %}">
-                    <i class="fas fa-file-alt"></i> 測驗平台
-                </button>
-            </a>
-            {% if user.is_authenticated %}
-                <a href="{% url 'history' %}" target="_self">
-                    <button class="nav-btn {% if request.path == '/history/' %}current{% endif %}">
-                        <i class="fas fa-history"></i> 歷史單字
-                    </button>
-                </a>
-                <a href="{% url 'record' %}" target="_self">
-                    <button class="nav-btn">
-                        <i class="fas fa-user"></i> 學習歷程
-                    </button>
-                </a>
-                <a href="{% url 'profile-settings' %}" target="_self">
-                    <button class="nav-btn {% if request.path == '/profile-settings/' %}current{% endif %}">
-                        <i class="fas fa-cog"></i> 歡迎, {{ user.nickname }}
-                    </button>
-                </a>
-                <form id="logout-form" action="{% url 'logout' %}" method="POST" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="nav-btn">
-                        <i class="fas fa-sign-out-alt"></i> 登出
-                    </button>
-                </form>
-            {% else %}
-                <a href="{% url 'login' %}" target="_self">
-                    <button class="nav-btn {% if request.path == '/login/' %}current{% endif %}">
-                        <i class="fas fa-user"></i> 會員註冊/登入
-                    </button>
-                </a>
-            {% endif %}
-                <a href="{% url 'faq' %}" target="_self">
-                    <button class="nav-btn {% if request.path == '/faq/' %}current{% endif %}">
-                        <i class="fas fa-question-circle"></i> 常見問題
-                    </button>
-                </a>
-        </div>
+        <a href="{% url 'profile-settings' %}" target="_self">
+          <button class="nav-btn {% if request.path == '/profile-settings/' %}current{% endif %}">
+            <i class="fas fa-cog"></i> 歡迎, {{ user.nickname }}
+          </button>
+        </a>
+        <form id="logout-form" action="{% url 'logout' %}" method="POST" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="nav-btn">
+            <i class="fas fa-sign-out-alt"></i> 登出
+          </button>
+        </form>
+      {% else %}
+        <a href="{% url 'login' %}" target="_self">
+          <button class="nav-btn {% if request.path == '/login/' %}current{% endif %}">
+            <i class="fas fa-user"></i> 會員註冊/登入
+          </button>
+        </a>
+      {% endif %}
     </div>
+  </div>
 
-<h1>選擇測驗類型</h1>
-<div class="container">
-    <div class="test-box">
-        <i class="fas fa-file-alt"></i>
-        <h2>綜合測驗</h2>
+  <h1>選擇測驗類型</h1>
+  <div class="container">
+    <div class="test-box" data-url="{% url 'all_test' %}" data-part-number="0">
+      <h2>綜合測驗</h2>
     </div>
-    <div class="test-box">
-        <i class="fas fa-question-circle"></i>
-        <h2>應答問題</h2>
+    <div class="test-box" data-url="{% url 'part2' %}" data-part-number="2">
+      <h2>應答問題</h2>
     </div>
-    <div class="test-box">
-        <i class="fas fa-comments"></i>
-        <h2>簡短對話</h2>
+    <div class="test-box" data-url="{% url 'part3' %}" data-part-number="3">
+      <h2>簡短對話</h2>
     </div>
-    <div class="test-box">
-        <i class="fas fa-edit"></i>
-        <h2>句子填空</h2>
+    <div class="test-box" data-url="{% url 'part5' %}" data-part-number="5">
+      <h2>句子填空</h2>
     </div>
-    <div class="test-box">
-        <i class="fas fa-paragraph"></i>
-        <h2>段落填空</h2>
+    <div class="test-box" data-url="{% url 'part6' %}" data-part-number="6">
+      <h2>段落填空</h2>
     </div>
-    <div class="test-box">
-        <i class="fas fa-book-open"></i>
-        <h2>閱讀測驗</h2>
+    <div class="test-box" data-url="{% url 'part7' %}" data-part-number="7">
+      <h2>閱讀測驗    </div>
+  </div>
+  
+  <dialog id="exchange-dialog" class="modal">
+    <h3 id="dialog-message"></h3>
+    <p>您今日的免費測驗次數已用盡，是否要使用點數兌換一次新測驗？</p>
+    <p>所需點數：<span id="points-needed"></span> 點</p>
+    <div class="modal-buttons">
+      <button id="confirm-exchange-btn">確認兌換</button>
+      <button id="cancel-exchange-btn">取消</button>
     </div>
-</div>
+  </dialog>
 
-    <dialog id="exchange-dialog" class="modal">
-        <h3 id="dialog-message"></h3>
-        <p>您今日的免費測驗次數已用盡，是否要使用點數兌換一次新測驗？</p>
-        <p>所需點數：<span id="points-needed"></span> 點</p>
+    <!-- 新增的通用訊息提示框 -->
+    <dialog id="notification-dialog" class="modal">
+        <p id="notification-message"></p>
         <div class="modal-buttons">
-            <button id="confirm-exchange-btn">確認兌換</button>
-            <button id="cancel-exchange-btn">取消</button>
+            <button id="notification-ok-btn">確定</button>
         </div>
     </dialog>
 
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="contact-us">
-                <h3>聯絡我們</h3>
-                <ul>
-                    <li><i class="fas fa-phone"></i><a href="tel:02 3322 2777"> 電話：02 3322 2777</a></li>
-                    <li><i class="fas fa-map"></i><a href="https://maps.google.com/maps?q=100台北市中正區濟南路一段321號" target="_blank"> 地址：100台北市中正區濟南路一段321號</a></li>
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3614.779774567228!2d121.52495111500305!3d25.04253398396551!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442a96937e008c7%3A0x6b8c9d4b0d0a25b!2zMTAw5Y-w5b-Y5L-h5b-Y5L-h5YyX5bmz6LSi6LSi6JukMTUx6JukNTk26Juk!5e0!3m2!1szh-TW!2stw!4v1652199732731!5m2!1szh-TW!2stw"
-                        height="250"
-                        style="border:0;"
-                        allowfullscreen=""
-                        loading="lazy"
-                        referrerpolicy="no-referrer-when-downgrade">
-                    </iframe>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>© 2025 TOEIC學習平台 版權所有</p>
-        </div>
-    </footer>
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="contact-us">
+        <h3>聯絡我們</h3>
+        <ul>
+          <li><i class="fas fa-phone"></i><a href="tel:02 3322 2777"> 電話：02 3322 2777</a></li>
+          <li><i class="fas fa-map"></i><a href="https://maps.google.com/maps?q=100台北市中正區濟南路一段321號" target="_blank"> 地址：100台北市中正區濟南路一段321號</a></li>
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3614.779774567228!2d121.52495111500305!3d25.04253398396551!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442a96937e008c7%3A0x6b8c9d4b0d0a25b!2zMTAw5Y-w5b-Y5L-h5b-Y5L-h5YyX5bmz6LSi6LSi6JukMTUx6JukNTk26Juk!5e0!3m2!1szh-TW!2stw!4v1652199732731!5m2!1szh-TW!2stw"
+            height="250"
+            style="border:0;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 TOEIC學習平台 版權所有</p>
+    </div>
+  </footer>
 
-    <script>
+   <script>
     const testBoxes = document.querySelectorAll('.test-box');
     const dialog = document.getElementById('exchange-dialog');
     const dialogMessage = document.getElementById('dialog-message');
     const pointsNeededSpan = document.getElementById('points-needed');
     const confirmBtn = document.getElementById('confirm-exchange-btn');
     const cancelBtn = document.getElementById('cancel-exchange-btn');
-    // 從 meta 標籤或其他方式獲取 CSRF Token，這裡假設它已經存在
-    // 如果沒有，請確認你的 HTML 裡有 <input type="hidden" name="csrfmiddlewaretoken" value="...">
-    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+        // 新增通用提示框的 DOM 元素
+        const notificationDialog = document.getElementById('notification-dialog');
+        const notificationMessage = document.getElementById('notification-message');
+        const notificationOkBtn = document.getElementById('notification-ok-btn');
+
+        // 定義顯示通用提示框的函式
+        function showNotification(message) {
+            notificationMessage.textContent = message;
+            notificationDialog.showModal();
+        }
+
+        // 監聽通用提示框的「確定」按鈕
+        notificationOkBtn.onclick = function() {
+            notificationDialog.close();
+        };
+
+    // 檢查使用者是否已登入，這個變數會由 Django 模板渲染
+    const isAuthenticated = "{{ user.is_authenticated|yesno:'true,false' }}" === 'true';
+
+    // 如果使用者已登入，才獲取 CSRF Token
+    let csrfToken = '';
+    if (isAuthenticated) {
+      csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+    }
 
     testBoxes.forEach(box => {
-        box.addEventListener('click', async function(event) {
-            event.preventDefault();
+      box.addEventListener('click', async function(event) {
+        event.preventDefault();
 
-            const url = this.dataset.url;
-            const partNumber = this.dataset.partNumber;
+        const url = this.dataset.url;
+        const partNumber = this.dataset.partNumber;
 
-            // 1. 發送請求到後端檢查次數，這個邏輯是正確的
-            const response = await fetch('/check-test-limit/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({ part_number: partNumber })
+        // 1. 檢查登入狀態
+        if (!isAuthenticated) {
+          // 若未登入，跳轉到登入頁面
+          window.location.href = "{% url 'login' %}";
+          return; // 結束函式
+        }
+
+        // 2. 若已登入，繼續執行原有的檢查測驗次數邏輯
+        const response = await fetch('/check-test-limit/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          body: JSON.stringify({ part_number: partNumber })
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'ok') {
+          window.location.href = url;
+        } else if (data.status === 'limit_reached') {
+          dialogMessage.textContent = data.message;
+          pointsNeededSpan.textContent = data.points_needed;
+
+          confirmBtn.onclick = async function() {
+            const exchangeResponse = await fetch('/exchange-test/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+              },
+              body: JSON.stringify({
+                exam_type: partNumber === '0' ? 'mixed' : 'part'
+              })
             });
 
-            const data = await response.json();
+            const exchangeData = await exchangeResponse.json();
+            showNotification(exchangeData.message); // 使用自訂提示框
+            dialog.close();
 
-            if (data.status === 'ok') {
-                window.location.href = url;
-            } else if (data.status === 'limit_reached') {
-                dialogMessage.textContent = data.message;
-                pointsNeededSpan.textContent = data.points_needed;
-
-                // 2. 修正「確認兌換」按鈕的點擊事件
-                confirmBtn.onclick = async function() {
-                    const exchangeResponse = await fetch('/exchange-test/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json', // <-- 修正為正確的 Content-Type
-                            'X-CSRFToken': csrfToken
-                        },
-                        body: JSON.stringify({ // <-- 修正為正確的 JSON 格式
-                            exam_type: partNumber === '0' ? 'mixed' : 'part'
-                        })
-                    });
-
-                    const exchangeData = await exchangeResponse.json();
-                    alert(exchangeData.message);
-                    dialog.close();
-
-                    if (exchangeData.status === 'success') {
-                        window.location.href = url;
-                    }
-                };
-                
-                cancelBtn.onclick = function() {
-                    dialog.close();
-                };
-
-                dialog.showModal();
-            } else {
-                alert(data.message);
+            if (exchangeData.status === 'success') {
+              window.location.href = url;
             }
-        });
+          };
+          
+          cancelBtn.onclick = function() {
+            dialog.close();
+          };
+
+          dialog.showModal();
+        } else {
+          showNotification(data.message); // 使用自訂提示框
+        }
+      });
     });
 </script>
 </body>

@@ -1338,3 +1338,9 @@ def history_view(request):
         'current_search': search_term,
     }
     return render(request, 'history.html', context)
+
+def faq(request):
+    """
+    渲染常見問題頁面。
+    """
+    return render(request, 'faq.html')

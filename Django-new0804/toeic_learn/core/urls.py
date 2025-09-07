@@ -67,6 +67,7 @@ urlpatterns = [
     path('part7/', views.part7, name='part7'), 
     path('check-test-limit/', views.check_test_limit, name='check_test_limit'),
     path('exchange-test/', views.exchange_test, name='exchange_test'),
+    path('faq/', views.faq, name='faq'),
     # path('exam/part/<int:part_number>/', views.exam_part_view, name='exam_part_view'),
     path('api/update_exam_status/', views.update_exam_status, name='update_exam_status'),
     path('api/chatbot/vocabulary/', views.get_daily_vocabulary, name='get_daily_vocabulary'),
