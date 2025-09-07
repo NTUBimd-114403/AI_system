@@ -33,7 +33,8 @@ body {
 }
 
 .progress-section, .test-history, .learning-goals {
-    margin-bottom: 20px;
+    margin-bottom: 50px;
+    margin-top: 50px;
 }
 
 .progress-bar {
@@ -378,4 +379,267 @@ th {
 
 .save-btn i {
     margin-right: 8px;
+}
+
+/* 可愛膠囊狀顯示容器 */
+.pill-display {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 15px; /* 增加左右 padding 來形成膠囊狀 */
+    border-radius: 20px;
+    font-weight: bold;
+    margin: 0 8px; /* 增加間隔 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    white-space: nowrap; /* 防止內容換行 */
+}
+
+/* 學習時數的樣式 */
+#study-hours.pill-display {
+    background-color: #e6f7ff; /* 淺藍色背景 */
+    color: #007bff; /* 藍色文字 */
+    border: 1px solid #007bff; /* 藍色邊框 */
+}
+
+/* 點數的樣式 */
+#user-points.pill-display {
+    background-color: #fff7e6; /* 淺黃色背景 */
+    color: #ff9800; /* 橘色文字 */
+    border: 1px solid #ff9800; /* 橘色邊框 */
+}
+
+/* 改善個人資訊區塊的排版 */
+.profile {
+    border-radius: 15px;
+    text-align: center;
+    max-width: 600px;
+    margin: 30px auto;
+}
+
+.profile h2 {
+    margin-top: 20px;
+    font-size: 24px;
+    color: #333;
+}
+
+.profile img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.info-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    margin-top: 25px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    color: #555;
+}
+
+.info-item p {
+    margin: 0;
+}
+
+/* 圖示顏色 */
+.icon-blue {
+    color: #007bff;
+}
+
+.icon-orange {
+    color: #ff9800;
+}
+
+/* 顯示點數紀錄的按鈕 */
+.history-btn {
+    background-color: transparent;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 5px;
+    transition: color 0.3s;
+}
+
+.history-btn:hover {
+    color: #007bff;
+}
+
+/* 彈出視窗 (Modal) 的基本樣式 */
+.modal {
+    display: none; /* 預設隱藏 */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4); /* 半透明黑色背景 */
+    justify-content: center;
+    align-items: center;
+}
+
+/* 彈出視窗內容的樣式 */
+.modal-content {
+    background-color: #fff;
+    margin: 15% auto; /* 垂直置中 */
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    width: 90%;
+    max-width: 500px;
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+}
+
+/* 彈出動畫 */
+@keyframes animatetop {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+
+/* 關閉按鈕樣式 */
+.close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: #000;
+    text-decoration: none;
+}
+
+/* 表格樣式 */
+#points-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+#points-table th, #points-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+#points-table th {
+    background-color: #292f7c;
+}
+
+/* 隱藏和顯示表格的 CSS */
+.points-table-container.hidden {
+    display: none;
+}
+
+.points-table-container.visible {
+    display: block;
+}
+
+/* 按鈕容器 */
+        .button-container {
+            display: flex;
+            gap: 1rem;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 基礎按鈕樣式 */
+        .analysis-btn {
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 9999px; /* 圓角 */
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* 預設按鈕樣式 */
+        .analysis-btn.default-style {
+            background-color: var(--default-color);
+            color: var(--default-text-color);
+        }
+        .analysis-btn.default-style:hover {
+            background-color: var(--default-hover-color);
+            transform: translateY(-2px); /* 新增：向上輕微移動 */
+            box-shadow: 0 6px 12px -2px rgba(0,0,0,0.1), 0 3px 6px -2px rgba(0,0,0,0.06); /* 新增：陰影變化 */
+        }
+
+        /* 啟用按鈕樣式 (active) */
+        .analysis-btn.active-style {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 10px 15px -3px var(--primary-shadow-color), 0 4px 6px -2px var(--primary-shadow-color);
+        }
+        .analysis-btn.active-style:hover {
+            background-color: var(--primary-hover-color);
+            transform: translateY(-2px); /* 新增：向上輕微移動 */
+            box-shadow: 0 12px 20px -5px var(--primary-shadow-color), 0 6px 8px -3px var(--primary-shadow-color); /* 新增：陰影變化 */
+        }
+
+        /* 確保 focus 樣式與 hover 效果一致 */
+        .analysis-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px var(--primary-shadow-color);
+            background-color: #007bff;
+            color: white;
+        }
+
+/* 自訂訊息框樣式 */
+.custom-alert-overlay {
+  display: none; /* 預設隱藏 */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  justify-content: center;
+  align-items: center;
+}
+
+.custom-alert-modal {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 300px;
+  position: relative;
+}
+
+.custom-alert-modal p {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.custom-alert-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.custom-alert-close:hover {
+  color: #333;
 }

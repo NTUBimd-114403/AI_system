@@ -77,6 +77,12 @@ CATEGORY_CHOICES = [
         ('Travel', '旅遊與文化'),
     ]
 
+POINT_REASON_CHOICES = [
+    ('exam_exchange', '測驗次數兌換'),
+    ('test_completion', '完成測驗'),
+    ('other', '其他')
+]
+
 # ---------- Custom User Manager ----------
 
 class CustomUserManager(BaseUserManager):
@@ -127,6 +133,18 @@ class DailyVocabulary(models.Model):
     def __str__(self):
         return self.word
 
+class Phrase(models.Model):
+    id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=255)
+    title_translation= models.CharField(max_length=255, null=True, blank=True)
+    english_passage = models.TextField()
+    chinese_translation = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
 class UserVocabularyRecord(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="使用者")
     word = models.ForeignKey(DailyVocabulary, on_delete=models.CASCADE, verbose_name="單字")
@@ -139,13 +157,29 @@ class UserVocabularyRecord(models.Model):
         verbose_name = "使用者單字紀錄"
         verbose_name_plural = "使用者單字紀錄"
 
+class DailyTestRecord(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="使用者")
+    date = models.DateField(default=timezone.now, verbose_name="測驗日期")
+    mixed_test_count = models.IntegerField(default=0, verbose_name="綜合測驗次數")
+    other_part_test_count = models.IntegerField(default=0, verbose_name="單一Part測驗次數")
+    mixed_test_limit = models.IntegerField(default=1) 
+    other_part_test_limit = models.IntegerField(default=3)
+     
+    class Meta:
+        unique_together = ('user', 'date')
+        verbose_name = "每日測驗紀錄"
+        verbose_name_plural = "每日測驗紀錄"
+
+    def __str__(self):
+        return f"{self.user.email} - {self.date}"
+
 # ---------- Other Models ----------
 
 class PointTransaction(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, to_field='email')
     change_amount = models.IntegerField()
-    reason = models.CharField(max_length=255)
+    reason = models.CharField(max_length=255, choices=POINT_REASON_CHOICES) 
     created_at = models.DateTimeField(auto_now_add=True)
 
 

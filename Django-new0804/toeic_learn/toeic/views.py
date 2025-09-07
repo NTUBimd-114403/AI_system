@@ -2,6 +2,7 @@ import os
 import json
 import random
 from datetime import timedelta
+from datetime import datetime
 
 from django.conf import settings
 from django.shortcuts import render, redirect
@@ -14,34 +15,121 @@ from django.db.models import Count, Q, F, FloatField, ExpressionWrapper
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
 from django.utils import timezone
-
+from django.contrib.auth import logout
+import logging
+from django.db import transaction
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+from datetime import date
 from .forms import RegisterForm
 from .models import (
     ReadingPassage, Question, QUESTION_CATEGORY_CHOICES, UserAnswer,
     ExamResult, Exam, ExamQuestion, ExamSession, DailyVocabulary,
-    UserVocabularyRecord, ListeningMaterial,
+    UserVocabularyRecord, ListeningMaterial,PointTransaction,DailyTestRecord,Phrase
 )
 
 # 獲取當前使用的使用者模型
 User = get_user_model()
 
-# 首頁、使用者頁面、登入、註冊、測試頁面等不變
+logger = logging.getLogger(__name__)
 
+# 定義測驗次數上限和兌換點數
+DAILY_MIXED_TEST_LIMIT = 1
+DAILY_OTHER_PART_TEST_LIMIT = 3
+EXCHANGE_POINTS_FOR_MIXED_TEST = 50
+EXCHANGE_POINTS_FOR_OTHER_PART_TEST = 20
+
+
+logging.basicConfig(level=logging.INFO)
+# 將您的主頁視圖函式更新為此
 def home(request):
+    """
+    渲染主頁面，並在頁面上隨機顯示每日片語，同時傳遞用戶資訊。
+    """
     username = None
     if request.user.is_authenticated:
-        # ✅ 將這裡的 .username 替換為你的客製化使用者模型中的使用者名稱欄位
-        # 你的模型使用 email 作為 USERNAME_FIELD
         username = request.user.email
-    
-    context = {
-        'user': request.user,
-        'username': username # 將 username 變數傳到模板
-    }
-    return render(request, 'home.html', context)
+
+    try:
+        # 取得所有片語
+        all_phrases = list(Phrase.objects.all())
+
+        # 根據今天的日期設定隨機種子，確保每日片語一致
+        # 這個方法可以保證在同一天內，使用者每次刷新頁面都看到相同的片語
+        today = date.today()
+        random.seed(today.day + today.month + today.year)
+        
+        # 隨機選擇3個片語，如果片語總數少於3個則選擇全部
+        if len(all_phrases) >= 3:
+            daily_phrases = random.sample(all_phrases, 3)
+        else:
+            daily_phrases = all_phrases
+        
+        context = {
+            'daily_phrases': daily_phrases,
+            'user': request.user,
+            'username': username
+        }
+    except Exception as e:
+        context = {
+            'error_message': f'無法載入片語：{e}',
+            'user': request.user,
+            'username': username
+        }
+        daily_phrases = []
+
+    return render(request, "home.html", context)
 
 def user(request):
     return render(request, 'user.html')
+
+@login_required
+def profile_settings(request):
+    # 這個視圖只需要渲染模板，不需要額外傳遞資料
+    return render(request, 'profile_settings.html')
+
+@login_required
+@require_POST
+def update_profile(request):
+    try:
+        data = json.loads(request.body)
+        nickname = data.get('nickname', '').strip()
+        if not nickname:
+            return JsonResponse({'success': False, 'error': '暱稱不能為空。'}, status=400)
+            
+        request.user.nickname = nickname
+        request.user.save()
+        messages.success(request, '暱稱更新成功！')
+        return JsonResponse({'success': True})
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': '無效的 JSON 資料。'}, status=400)
+
+@login_required
+@require_POST
+def change_password(request):
+    try:
+        data = json.loads(request.body)
+        old_password = data.get('old_password')
+        new_password1 = data.get('new_password1')
+        new_password2 = data.get('new_password2')
+        
+        # 建立 PasswordChangeForm 實例並傳入資料
+        form = PasswordChangeForm(user=request.user, data={
+            'old_password': old_password,
+            'new_password1': new_password1,
+            'new_password2': new_password2,
+        })
+        
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, '密碼已成功變更。')
+            return JsonResponse({'success': True})
+        else:
+            errors = [f'{field}: {", ".join(error_list)}' for field, error_list in form.errors.items()]
+            return JsonResponse({'success': False, 'error': '; '.join(errors)}, status=400)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': '無效的 JSON 資料。'}, status=400)
 
 def login_view(request):
     if request.method == 'POST':
@@ -63,6 +151,25 @@ def login_view(request):
             return render(request, 'login.html')
 
     return render(request, 'login.html')
+
+def logout_view(request):
+    """
+    自訂的登出視圖，確保清除所有快閃訊息。
+    """
+    # 使用 Django 內建的登出函數。
+    # 這會結束目前的使用者會話。
+    logout(request)
+
+    # 明確地從會話中清除所有訊息。
+    # 這可以防止舊的訊息出現在下一個頁面。
+    storage = messages.get_messages(request)
+    storage.used = True 
+    
+    # 創建一個新的成功訊息，用於登出操作。
+    messages.success(request, '您已成功登出！')
+    
+    # 重新導向到登入頁面。
+    return redirect('login')
 
 def register_view(request):
     if request.method == 'POST':
@@ -122,38 +229,6 @@ def reading_test(request):
     })
 
 
-@require_http_methods(["POST"])
-def generate_reading_passage_api(request):
-    """
-    不再呼叫 n8n，直接模擬成功回應
-    """
-    try:
-        data = json.loads(request.body)
-        topic = data.get('topic')
-        reading_level = data.get('reading_level')
-
-        if not topic or not reading_level:
-            return JsonResponse({'success': False, 'error': '請提供主題和閱讀級別'})
-
-        # 模擬生成資料
-        simulated_data = {
-            'passage': {
-                'title': f'{topic} 文章',
-                'topic': topic,
-                'word_count': 120,
-                'reading_level': reading_level,
-                'content': f'這是一篇關於 {topic} 的 {reading_level} 文章。'
-            },
-            'questions': []
-        }
-
-        return JsonResponse({'success': True, 'data': simulated_data})
-
-    except json.JSONDecodeError:
-        return JsonResponse({'success': False, 'error': '無效的 JSON 格式'})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': f'服務器錯誤: {str(e)}'})
-
 @csrf_exempt
 @require_POST
 def submit_test_answer(request):
@@ -170,6 +245,7 @@ def submit_test_answer(request):
 
         try:
             session = ExamSession.objects.get(session_id=session_id)
+            user = session.user
         except ExamSession.DoesNotExist:
             return JsonResponse({'success': False, 'error': '找不到考試紀錄'})
 
@@ -179,16 +255,14 @@ def submit_test_answer(request):
         answer_time = timezone.now()
         question_details = []
 
-        # 初始化統計
         total_questions = 0
         correct_total = 0
         part_analysis = {}
         category_analysis = {}
 
-        # 儲存文字稿、翻譯和閱讀文章
         transcripts = {}
         translations = {}
-        reading_passages = [] # 新增：用於儲存 Part 6/7 文章
+        reading_passages = []
         part3_material_ids = set()
         reading_material_ids = set()
 
@@ -253,7 +327,6 @@ def submit_test_answer(request):
                 {'value': 'd', 'text': question.option_d_text},
             ]
 
-# 處理聽力部分 (Part 2, 3)
             if question.material:
                 material = question.material
                 material_id_str = str(material.material_id)
@@ -266,7 +339,6 @@ def submit_test_answer(request):
                     translations[qid] = material.translation
                     part3_material_ids.add(material_id_str)
             
-            # 處理閱讀部分 (Part 6, 7)
             if question.passage:
                 passage = question.passage
                 passage_id_str = str(passage.passage_id)
@@ -276,6 +348,7 @@ def submit_test_answer(request):
                         'id': passage_id_str,
                         'content': passage.content,
                         'translation': passage.translation,
+                        'material_part': f'part{question.part}', 
                     })
                     reading_material_ids.add(passage_id_str)
 
@@ -306,23 +379,48 @@ def submit_test_answer(request):
 
         is_passed = total_score >= float(exam.passing_score)
 
-        ExamResult.objects.create(
-            session=session,
-            total_questions=total_questions,
-            correct_answers=correct_total,
-            total_score=total_score,
-            is_passed=is_passed,
-            reading_score=reading_score,
-            listen_score=listen_score,
-            completed_at=timezone.now(),
-        )
+        # 點數發放邏輯
+        points_to_award = 0
+        point_reason = ''
+        if total_score >= 80:
+            points_to_award = 10
+            point_reason = 'test_completion'
+        elif total_score >= 60:
+            points_to_award = 5
+            point_reason = 'test_completion'
 
-        session.status = 'completed'
-        session.end_time = timezone.now()
-        session.save()
+        with transaction.atomic():
+            # 儲存測驗結果
+            ExamResult.objects.create(
+                session=session,
+                total_questions=total_questions,
+                correct_answers=correct_total,
+                total_score=total_score,
+                is_passed=is_passed,
+                reading_score=reading_score,
+                listen_score=listen_score,
+                completed_at=timezone.now(),
+            )
+
+            # 更新使用者點數並記錄交易
+            if points_to_award > 0:
+                user.point += points_to_award
+                user.save()
+
+                PointTransaction.objects.create(
+                    user=user,
+                    change_amount=points_to_award,
+                    reason=point_reason
+                )
+                logger.info(f"User {user.email} awarded {points_to_award} points for test completion. Total points: {user.point}")
+            
+            # 更新測驗狀態
+            session.status = 'completed'
+            session.end_time = timezone.now()
+            session.save()
 
         test_type = exam.get_exam_type_display()
-
+        
         response_data = {
             'success': True,
             'data': {
@@ -336,15 +434,16 @@ def submit_test_answer(request):
                 'test_type': test_type,
                 'transcripts': transcripts,
                 'translations': translations,
-                'reading_passages': reading_passages, # 新增此欄位
+                'reading_passages': reading_passages,
                 'part_analysis': part_analysis,
                 'category_analysis': category_analysis,
+                'points_awarded': points_to_award
             }
         }
         return JsonResponse(response_data)
 
     except Exception as e:
-        print(f"Error in submit_test_answer: {str(e)}")
+        logger.error(f"Error in submit_test_answer: {str(e)}", exc_info=True)
         return JsonResponse({'success': False, 'error': str(e)})
 
 def get_listening_transcript(exam):
@@ -381,29 +480,111 @@ def test_result(request):
     
     return render(request, 'result.html', context)
 
+def get_daily_record_and_counts(user):
+    """
+    取得使用者當天的每日測驗紀錄。
+    """
+    today = timezone.localdate(timezone.now())
+    record, created = DailyTestRecord.objects.get_or_create(user=user, date=today)
+    return record, record.mixed_test_count, record.other_part_test_count
+
+# 獲取當前台灣日期
+def get_taiwan_today():
+    """
+    取得台灣時區的當天日期，手動計算時差。
+    """
+    utc_now = datetime.utcnow()
+    taiwan_now = utc_now + timedelta(hours=8)
+    return taiwan_now.date()
+
+def get_daily_record_and_counts(user):
+    """
+    取得使用者當天的每日測驗紀錄。
+    """
+    today = get_taiwan_today()
+    record, created = DailyTestRecord.objects.get_or_create(user=user, date=today)
+    # 如果是新紀錄，設定預設的測驗次數上限
+    if created:
+        record.mixed_test_limit = DAILY_MIXED_TEST_LIMIT
+        record.other_part_test_limit = DAILY_OTHER_PART_TEST_LIMIT
+        record.save()
+    return record, record.mixed_test_count, record.other_part_test_count
+
+def check_and_update_test_count(user, part_number):
+    """
+    檢查並更新當天測驗次數。
+    回傳 (is_allowed, message)
+    """
+    record, mixed_count, other_part_count = get_daily_record_and_counts(user)
+    
+    if part_number == 0:  # 綜合測驗
+        if mixed_count >= record.mixed_test_limit:
+            return False, "今日綜合測驗次數已達上限。"
+        record.mixed_test_count += 1
+    else: # 單一 Part 測驗
+        if other_part_count >= record.other_part_test_limit:
+            return False, f"今日 Part {part_number} 測驗次數已達上限。"
+        record.other_part_test_count += 1
+    
+    record.save()
+    return True, "測驗次數已更新。"
+
+@login_required
+@require_POST
+def check_test_limit(request):
+    """
+    檢查使用者當日的測驗次數是否已達上限。
+    這個函式不進行測驗，只回傳狀態給前端。
+    """
+    try:
+        data = json.loads(request.body)
+        part_number_str = data.get('part_number')
+        part_number = int(part_number_str)
+    except (json.JSONDecodeError, ValueError, TypeError):
+        return JsonResponse({'status': 'error', 'message': '無效的請求數據'}, status=400)
+
+    user = request.user
+    today = get_taiwan_today()
+    record, _ = DailyTestRecord.objects.get_or_create(user=user, date=today)
+
+    if part_number == 0:
+        if record.mixed_test_count >= record.mixed_test_limit:
+            points_needed = EXCHANGE_POINTS_FOR_MIXED_TEST
+            message = f"今日綜合測驗次數已達上限 ({record.mixed_test_limit} 次)。"
+            return JsonResponse({'status': 'limit_reached', 'message': message, 'points_needed': points_needed})
+    else:
+        if record.other_part_test_count >= record.other_part_test_limit:
+            points_needed = EXCHANGE_POINTS_FOR_OTHER_PART_TEST
+            message = f"今日 Part {part_number} 測驗次數已達上限 ({record.other_part_test_limit} 次)。"
+            return JsonResponse({'status': 'limit_reached', 'message': message, 'points_needed': points_needed})
+
+    return JsonResponse({'status': 'ok', 'message': '次數充足'})
+
 @login_required
 def all_test(request):
     user = request.user
+    is_allowed, message = check_and_update_test_count(user, part_number=0)
+    
+    if not is_allowed:
+        return render(request, 'home.html', {'message': message})
     
     try:
-        # 關鍵修正：篩選 part=0 的考卷，代表綜合測驗
         available_exams = Exam.objects.filter(part=0)
-        
         if not available_exams.exists():
             return render(request, 'home.html', {'message': '找不到綜合測驗。請執行管理指令以建立。'})
-        
         exam = random.choice(available_exams)
-            
     except Exception as e:
         return render(request, 'home.html', {'message': f'發生錯誤：{e}'})
 
-    # ... (後續程式碼與之前相同，不需要修改) ...
+    # 手動處理時間戳記
+    utc_now = datetime.utcnow()
+    taiwan_now = utc_now + timedelta(hours=8)
     session = ExamSession.objects.create(
         exam=exam,
         user=user,
         time_limit_enabled=True,
-        start_time=timezone.now(),
-        end_time=timezone.now() + timedelta(minutes=exam.duration_minutes),
+        start_time=taiwan_now,
+        end_time=taiwan_now + timedelta(minutes=exam.duration_minutes),
         status='in_progress',
     )
     
@@ -467,10 +648,15 @@ def all_test(request):
     
     return render(request, 'all_test.html', context)
 
+@login_required
 def part2(request):
+    user = request.user
     part_number = 2
-
-    # 關鍵修正：只篩選 part=2 的考卷
+    is_allowed, message = check_and_update_test_count(user, part_number)
+    
+    if not is_allowed:
+        return render(request, 'part2.html', {'error': message})
+    
     available_exams = Exam.objects.filter(part=part_number)
     if not available_exams.exists():
         return render(request, 'part2.html', {'error': f'目前沒有 Part {part_number} 的專屬考卷'})
@@ -486,7 +672,7 @@ def part2(request):
         q = eq.question
         audio_url = None
         if q.material and q.material.audio_url:
-            audio_url = settings.MEDIA_URL + q.material.audio_url
+            audio_url = os.path.join(settings.MEDIA_URL, q.material.audio_url)
 
         questions_data.append({
             'question_id': str(q.question_id),
@@ -503,16 +689,16 @@ def part2(request):
         return render(request, 'part2.html', {'error': '考卷中未找到對應音檔'})
 
     questions_json = json.dumps(questions_data)
-    user = request.user
-    if not user.is_authenticated:
-        return redirect('login')
-
+    
+    # 手動處理時間戳記
+    utc_now = datetime.utcnow()
+    taiwan_now = utc_now + timedelta(hours=8)
     session = ExamSession.objects.create(
         exam=selected_exam,
         user=user,
         time_limit_enabled=True,
-        start_time=timezone.now(),
-        end_time=timezone.now(),
+        start_time=taiwan_now,
+        end_time=taiwan_now + timedelta(minutes=selected_exam.duration_minutes),
         status='in_progress',
     )
     context = {
@@ -522,14 +708,21 @@ def part2(request):
     }
     return render(request, 'part2.html', context)
 
-
+@login_required
 def part3(request):
+    user = request.user
     part_number = 3
+    is_allowed, message = check_and_update_test_count(user, part_number)
+    
+    if not is_allowed:
+        return render(request, 'part3.html', {'error': message})
+        
     available_exams = Exam.objects.filter(part=part_number)
     if not available_exams.exists():
         return render(request, 'part3.html', {'error': f'目前沒有 Part {part_number} 的專屬考卷'})
     selected_exam = random.choice(available_exams)
-    exam_questions = ExamQuestion.objects.filter(exam=selected_exam).select_related('question').order_by('question_order')
+    exam_questions = ExamQuestion.objects.filter(exam=selected_exam).select_related('question__material').order_by('question_order')
+    
     material = None
     questions_data = []
     for eq in exam_questions:
@@ -558,15 +751,16 @@ def part3(request):
         'listening_level': material.listening_level,
     }
     questions_json = json.dumps(questions_data)
-    user = request.user
-    if not user.is_authenticated:
-        return redirect('login')
+    
+    # 手動處理時間戳記
+    utc_now = datetime.utcnow()
+    taiwan_now = utc_now + timedelta(hours=8)
     session = ExamSession.objects.create(
         exam=selected_exam,
         user=user,
         time_limit_enabled=True,
-        start_time=timezone.now(),
-        end_time=timezone.now(),
+        start_time=taiwan_now,
+        end_time=taiwan_now + timedelta(minutes=selected_exam.duration_minutes),
         status='in_progress',
     )
     context = {
@@ -577,8 +771,15 @@ def part3(request):
     }
     return render(request, 'part3.html', context)
 
+@login_required
 def part5(request):
+    user = request.user
     part_number = 5
+    is_allowed, message = check_and_update_test_count(user, part_number)
+    
+    if not is_allowed:
+        return render(request, 'part5.html', {'error': message})
+        
     available_exams = Exam.objects.filter(part=part_number)
     if not available_exams.exists():
         return render(request, 'part5.html', {'error': f'目前沒有 Part {part_number} 的專屬考卷'})
@@ -597,15 +798,16 @@ def part5(request):
             'difficulty_level': q.difficulty_level,
         })
     questions_json = json.dumps(questions_data)
-    user = request.user
-    if not user.is_authenticated:
-        return redirect('login')
+    
+    # 手動處理時間戳記
+    utc_now = datetime.utcnow()
+    taiwan_now = utc_now + timedelta(hours=8)
     session = ExamSession.objects.create(
         exam=selected_exam,
         user=user,
         time_limit_enabled=True,
-        start_time=timezone.now(),
-        end_time=timezone.now(),
+        start_time=taiwan_now,
+        end_time=taiwan_now + timedelta(minutes=selected_exam.duration_minutes),
         status='in_progress',
     )
     context = {
@@ -615,8 +817,15 @@ def part5(request):
     }
     return render(request, 'part5.html', context)
 
+@login_required
 def part6(request):
+    user = request.user
     part_number = 6
+    is_allowed, message = check_and_update_test_count(user, part_number)
+    
+    if not is_allowed:
+        return render(request, 'part6.html', {'error': message})
+        
     available_exams = Exam.objects.filter(part=part_number)
     if not available_exams.exists():
         return render(request, 'part6.html', {'error': f'目前沒有 Part {part_number} 的專屬考卷'})
@@ -647,15 +856,16 @@ def part6(request):
         'reading_level': passage.reading_level,
     }
     questions_json = json.dumps(questions_data)
-    user = request.user
-    if not user.is_authenticated:
-        return redirect('login')
+    
+    # 手動處理時間戳記
+    utc_now = datetime.utcnow()
+    taiwan_now = utc_now + timedelta(hours=8)
     session = ExamSession.objects.create(
         exam=selected_exam,
         user=user,
         time_limit_enabled=True,
-        start_time=timezone.now(),
-        end_time=timezone.now(),
+        start_time=taiwan_now,
+        end_time=taiwan_now + timedelta(minutes=selected_exam.duration_minutes),
         status='in_progress',
     )
     context = {
@@ -666,8 +876,15 @@ def part6(request):
     }
     return render(request, 'part6.html', context)
 
+@login_required
 def part7(request):
+    user = request.user
     part_number = 7
+    is_allowed, message = check_and_update_test_count(user, part_number)
+    
+    if not is_allowed:
+        return render(request, 'part7.html', {'error': message})
+
     available_exams = Exam.objects.filter(part=part_number)
     if not available_exams.exists():
         return render(request, 'part7.html', {'error': f'目前沒有 Part {part_number} 的專屬考卷'})
@@ -698,15 +915,16 @@ def part7(request):
         'reading_level': passage.reading_level,
     }
     questions_json = json.dumps(questions_data)
-    user = request.user
-    if not user.is_authenticated:
-        return redirect('login')
+    
+    # 手動處理時間戳記
+    utc_now = datetime.utcnow()
+    taiwan_now = utc_now + timedelta(hours=8)
     session = ExamSession.objects.create(
         exam=selected_exam,
         user=user,
         time_limit_enabled=True,
-        start_time=timezone.now(),
-        end_time=timezone.now(),
+        start_time=taiwan_now,
+        end_time=taiwan_now + timedelta(minutes=selected_exam.duration_minutes),
         status='in_progress',
     )
     context = {
@@ -718,40 +936,57 @@ def part7(request):
     return render(request, 'part7.html', context)
 
 
+@login_required
+@transaction.atomic
+def exchange_test(request):
+    """
+    處理使用者兌換額外測驗次數的 View。
+    POST 請求需要包含 'exam_type' 參數 ('mixed' 或 'part')。
+    """
+    user = request.user
+    
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': '無效的請求方法'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        exam_type = data.get('exam_type')
+    except (json.JSONDecodeError, AttributeError):
+        return JsonResponse({'status': 'error', 'message': '無效的請求數據'}, status=400)
+    
+    if exam_type not in ['mixed', 'part']:
+        return JsonResponse({'status': 'error', 'message': '無效的測驗類型'}, status=400)
+    
+    if exam_type == 'mixed':
+        points_needed = EXCHANGE_POINTS_FOR_MIXED_TEST
+    else:
+        points_needed = EXCHANGE_POINTS_FOR_OTHER_PART_TEST
+    
+    if user.point < points_needed:
+        return JsonResponse({'status': 'error', 'message': f'您的點數不足，無法兌換。需要 {points_needed} 點。'})
+    
+    user.point -= points_needed
+    user.save()
+    
+    PointTransaction.objects.create(
+        user=user,
+        change_amount=-points_needed,
+        reason='exam_exchange'
+    )
+    
+    today = get_taiwan_today()
+    record, _ = DailyTestRecord.objects.get_or_create(user=user, date=today)
 
-def exam_part_view(request, part_number):
-    # 取得包含該 part 的所有考卷 ID（exam_id 是你的主鍵名稱）
-    exam_ids_with_part = ExamQuestion.objects.filter(
-        question__part=part_number
-    ).values_list('exam_id', flat=True).distinct()
-
-    if not exam_ids_with_part:
-        return render(request, 'no_exam_found.html', {'part': part_number})
-
-    selected_exam_id = random.choice(list(exam_ids_with_part))
-    selected_exam = Exam.objects.get(exam_id=selected_exam_id)
-
-    part_questions = ExamQuestion.objects.filter(
-        exam=selected_exam, question__part=part_number
-    ).select_related('question').order_by('question_order')
-
-    # 對應每個 part 要使用的模板
-    template_map = {
-        2: 'part2.html',
-        3: 'part3.html',
-        5: 'part5.html',
-        6: 'part6.html',
-        7: 'part7.html',
-    }
-    template_name = template_map.get(part_number, 'default_exam_part.html')
-
-    context = {
-        'exam': selected_exam,
-        'questions': [eq.question for eq in part_questions],
-        'part': part_number,
-    }
-    return render(request, template_name, context)
-
+    if exam_type == 'mixed':
+        # 新增一次綜合測驗機會
+        record.mixed_test_limit += 1 
+    else:
+        # 新增一次單一 Part 測驗機會
+        record.other_part_test_limit += 1 
+    
+    record.save()
+    
+    return JsonResponse({'status': 'success', 'message': f'成功兌換 {points_needed} 點，已為您新增一次測驗機會！', 'current_points': user.point})
 
 @csrf_exempt
 def update_exam_status(request):
@@ -778,9 +1013,37 @@ def update_exam_status(request):
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})    
 
+
+@login_required
+def get_points_history(request):
+    """
+    提供使用者點數變動記錄的 API 接口
+    """
+    user = request.user
+    transactions = PointTransaction.objects.filter(user=user).order_by('-created_at')
+
+    data = [
+        {
+            'date': transaction.created_at.strftime('%Y-%m-%d %H:%M'),
+            'reason': transaction.get_reason_display(),
+            'amount': transaction.change_amount
+        }
+        for transaction in transactions
+    ]
+    return JsonResponse({'success': True, 'transactions': data})
+
 @login_required
 def record(request):
     user = request.user
+
+    # 定義 Part 編號與名稱的映射關係
+    part_names = {
+        2: "應答問題",
+        3: "簡短對話",
+        5: "句子填空",
+        6: "段落填空",
+        7: "閱讀測驗",
+    }
 
     # 歷史測驗紀錄
     exam_results = (
@@ -791,7 +1054,7 @@ def record(request):
     )
 
     # 設定每頁顯示的筆數
-    items_per_page = 15
+    items_per_page = 10
     paginator = Paginator(exam_results, items_per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -829,13 +1092,9 @@ def record(request):
         correct_in_part = part_answers.filter(is_correct=True).count()
         percentage_in_part = int((correct_in_part / total_in_part) * 100) if total_in_part else 0
         
-        # 顯示名稱可以從模型取得，但這裡我們先用固定字串
-        part_display_name = f'Part {part}'
-        if part in [2, 3]:
-            part_display_name += ' (聽力)'
-        elif part in [5, 6, 7]:
-            part_display_name += ' (閱讀)'
-
+        # 透過 part_names 字典來取得正確的顯示名稱
+        part_display_name = part_names.get(part, f'Part {part}')
+        
         if total_in_part > 0: # 只顯示有作答紀錄的 Part
             part_performance[part] = {
                 'display_name': part_display_name,
@@ -844,7 +1103,6 @@ def record(request):
                 'percentage': percentage_in_part,
             }
     # --- Part 分析新增結束 ---
-
 
     # --- 新增：按題目類別分析作答情況 ---
     category_performance = {}
@@ -883,6 +1141,7 @@ def record(request):
         'part_performance': part_performance, # <-- 將 Part 分析數據傳遞到模板
         'learning_suggestions': get_learning_suggestions(category_performance),
     }
+
     return render(request, 'record.html', context)
 
 def get_learning_suggestions(category_performance):
@@ -909,8 +1168,6 @@ def get_daily_vocabulary(request):
     user = request.user
     today_date = timezone.now().date()
     
-    # ✅ 已修正：使用 sent_time 欄位來判斷使用者今天是否已領取過單字
-    # 這樣可以避免因為使用者回頭檢視舊單字而導致判斷錯誤。
     already_sent_today = UserVocabularyRecord.objects.filter(
         user=user,
         sent_time__date=today_date
@@ -1075,11 +1332,6 @@ def history_view(request):
     elif status == 'unfamiliar':
         user_vocabularies = user_vocabularies.filter(is_familiar=False)
     
-    # 4. 根據搜尋詞進行篩選
-    if search_term:
-        user_vocabularies = user_vocabularies.filter(word__word__icontains=search_term)
-
-    # 5. 將所有資料傳送給模板
     context = {
         'vocabularies': user_vocabularies,
         'current_status': status,

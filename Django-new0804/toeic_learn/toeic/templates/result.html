@@ -110,7 +110,7 @@
         }
         
         /* Part 6 & 7 文章的樣式 */
-        #reading-passage-section .analysis-section h3 {
+        .passage-section .analysis-section h3 {
             display: flex;
             align-items: center;
             color: #343a40;
@@ -118,23 +118,23 @@
             margin-bottom: 15px;
         }
 
-        #reading-passage-section .analysis-section h3 .fas {
+        .passage-section .analysis-section h3 .fas {
             margin-right: 10px;
             color: #007bff;
         }
 
-        #reading-passage-content {
+        .passage-section .passage-content {
             background-color: #f8f9fa;
             border: 1px solid #dee2e6;
             border-radius: 8px;
             padding: 20px;
         }
 
-        #reading-passage-content .passage-group {
+        .passage-section .passage-group {
             margin-bottom: 30px;
         }
         
-        #reading-passage-content h4 {
+        .passage-section h4 {
             display: flex;
             align-items: center;
             color: #4a90e2;
@@ -142,11 +142,11 @@
             margin: 0 0 10px 0;
         }
         
-        #reading-passage-content h4 .fas {
+        .passage-section h4 .fas {
             margin-right: 8px;
         }
 
-        #reading-passage-content pre {
+        .passage-section pre {
             white-space: pre-wrap;
             word-wrap: break-word;
             font-family: inherit;
@@ -154,18 +154,66 @@
             line-height: 1.6;
             color: #495057;
         }
-        #reading-passage-note {
+        .passage-section .passage-note {
             margin-top: 10px;
             color: #6c757d;
             font-size: 0.95em;
             font-style: italic;
+        }
+
+        /* 新增的 Part 導航按鈕樣式 */
+        .part-navigation {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .part-nav-btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #495057;
+            background-color: #e9ecef;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+        }
+
+        .part-nav-btn:hover {
+            background-color: #dee2e6;
+        }
+
+        .part-nav-btn.active {
+            background-color: #007bff;
+            color: #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        /* 將每個問題區塊獨立顯示，方便控制隱藏與顯示 */
+        .question-result {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .passage-group {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
     <div class="header">
         <button class="menu-btn" id="menu-btn">☰</button>
-        <h1>TOEIC學習平台</h1>        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <h1>TOEIC學習平台</h1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;             
         <span class="result-title">測驗結果</span>
     </div>
     
@@ -218,25 +266,30 @@
                 </div>
             </div>
 
-            <div class="analysis-section" id="personal-analysis-section" style="display:none;">
-                <div class="analysis-list" id="part-analysis-list"></div>
-                <div class="analysis-list" id="category-analysis-list"></div>
+            <div class="part-navigation" id="part-navigation-container" style="display: none;">
+                <button class="part-nav-btn" data-part="part2">應答問題</button>
+                <button class="part-nav-btn" data-part="part3">簡短對話</button>
+                <button class="part-nav-btn" data-part="part5">句子填空</button>
+                <button class="part-nav-btn" data-part="part6">段落填空</button>
+                <button class="part-nav-btn" data-part="part7">閱讀測驗</button>
             </div>
 
-            <div id="listening-script-section" style="display:none; margin-bottom:30px;">
-                <div class="analysis-section">
-                    <h3><i class="fas fa-headphones"></i> 聽力文字稿</h3>
-                    <div id="listening-script-content"></div>
-                    <div id="listening-script-note" style="margin-top:10px; color:#888; font-size:0.95em;"></div>
-                </div>
+            <div id="listening-script-section" class="analysis-section passage-section" data-part="part3" style="display:none;">
+                <h3><i class="fas fa-headphones"></i> 聽力文字稿</h3>
+                <div id="listening-script-content"></div>
+                <div id="listening-script-note">此為 簡短對話 的完整文字稿與翻譯</div>
             </div>
 
-            <div id="reading-passage-section" style="display:none; margin-bottom:30px;">
-                <div class="analysis-section">
-                    <h3><i class="fas fa-book-open"></i> 閱讀文章</h3>
-                    <div id="reading-passage-content"></div>
-                    <div id="reading-passage-note" style="margin-top:10px; color:#888; font-size:0.95em;"></div>
-                </div>
+            <div id="part6-passage-section" class="analysis-section passage-section" data-part="part6" style="display:none;">
+                <h3><i class="fas fa-book-open"></i>閱讀文章</h3>
+                <div id="part6-passage-content"></div>
+                <div id="part6-passage-note">此為 段落填空 的完整文章與翻譯</div>
+            </div>
+
+            <div id="part7-passage-section" class="analysis-section passage-section" data-part="part7" style="display:none;">
+                <h3><i class="fas fa-book-open"></i>閱讀文章</h3>
+                <div id="part7-passage-content"></div>
+                <div id="part7-passage-note">此為 閱讀測驗 的完整文章與翻譯</div>
             </div>
 
             <div class="answer-details">
@@ -244,11 +297,9 @@
                 <div id="question-results">
                 </div>
             </div>
-
-            <div class="feedback-section">
-                <h3><i class="fas fa-lightbulb"></i> 學習建議</h3>
-                <div id="ai-feedback" class="feedback-content">
-                </div>
+            <div class="analysis-section" id="personal-analysis-section" style="display:none;">
+                <div class="analysis-list" id="part-analysis-list"></div>
+                <div class="analysis-list" id="category-analysis-list"></div>
             </div>
 
             <div id="error-message" class="error-section" style="display: none;">
@@ -297,295 +348,274 @@
     </footer>
 
 <script>
+    // 全域變數，用來儲存從後端取得的完整資料，以供重複使用
+    let globalResultData = null;
+
     document.addEventListener('DOMContentLoaded', function() {
         loadTestResult();
+
+        // 監聽所有 part-nav-btn 的點擊事件
+        const partNavButtons = document.querySelectorAll('.part-nav-btn');
+        partNavButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // 移除所有按鈕的 active 類別
+                partNavButtons.forEach(btn => btn.classList.remove('active'));
+                // 為被點擊的按鈕添加 active 類別
+                this.classList.add('active');
+                
+                const selectedPart = this.getAttribute('data-part');
+                filterQuestionsByPart(selectedPart);
+            });
+        });
     });
 
     function loadTestResult() {
-        try {
-            const resultData = sessionStorage.getItem('test_result_data');
-            
-            if (!resultData) {
-                showError('找不到測驗結果資料');
-                return;
-            }
-
-            const data = JSON.parse(resultData);
-            console.log('Result data:', data);
-            
-            if (data.question_details) {
-                data.question_details.sort((a, b) => a.question_order - b.question_order);
-            }
-            
-            // 呼叫新的處理函式
-            handleReadingPassage(data);
-            handlePart3Transcript(data);
-            renderResult(data);
-            
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('result-content').style.display = 'block';
-            
-        } catch (error) {
-            console.error('Error loading result:', error);
-            showError('載入結果時發生錯誤：' + error.message);
-        }
-    }
-
-    function handlePart3Transcript(data) {
-        const section = document.getElementById('listening-script-section');
-        const scriptContainer = document.getElementById('listening-script-content');
+    try {
+        const resultData = sessionStorage.getItem('test_result_data');
         
-        let part3Transcript = null;
-        let part3Translation = null;
+        if (!resultData) {
+            showError('找不到測驗結果資料');
+            return;
+        }
 
-        if (data.question_details && data.transcripts && data.translations) {
-            const displayedPart3 = new Set();
+        const data = JSON.parse(resultData);
+        console.log('Result data:', data);
+
+        // 🌟 在這裡加入 console.log 來檢查實際值
+        console.log('從資料中讀取的測驗類型為:', data.test_type);
+        
+        if (data.question_details) {
+            data.question_details.sort((a, b) => a.question_order - b.question_order);
+        }
+        
+        renderResult(data);
+        
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('result-content').style.display = 'block';
+        
+    } catch (error) {
+        console.error('Error loading result:', error);
+        showError('載入結果時發生錯誤：' + error.message);
+    }
+}
+
+    // 新增函數：在初始載入時將文字稿和文章內容渲染進隱藏的區塊中
+    function preparePassageSections(data) {
+        const listeningSection = document.getElementById('listening-script-content');
+        const part6Section = document.getElementById('part6-passage-content');
+        const part7Section = document.getElementById('part7-passage-content');
+        
+        let part3TranscriptHtml = '';
+        const displayedPart3Materials = new Set();
+        if (data.transcripts && data.translations) {
             for (const question of data.question_details) {
                 const part = question.part;
                 const questionId = question.question_id;
-
-                if (part === 'part3' && data.transcripts[questionId] && !displayedPart3.has(data.transcripts[questionId])) {
-                    part3Transcript = data.transcripts[questionId];
-                    part3Translation = data.translations[questionId];
-                    displayedPart3.add(data.transcripts[questionId]);
-                    break;
+                if (part === 'part3' && data.transcripts[questionId]) {
+                    const materialContent = data.transcripts[questionId];
+                    if (!displayedPart3Materials.has(materialContent)) {
+                        const translationContent = data.translations[questionId];
+                        part3TranscriptHtml += `
+                            <div class="passage-group">
+                                <h4><i class="fas fa-file-audio"></i> 聽力文字稿</h4>
+                                <pre>${materialContent}</pre>
+                                ${translationContent ? `
+                                    <div class="translation" style="margin-top: 20px;">
+                                        <h4><i class="fas fa-language"></i> 翻譯</h4>
+                                        <pre>${translationContent}</pre>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                        displayedPart3Materials.add(materialContent);
+                    }
                 }
             }
         }
+        listeningSection.innerHTML = part3TranscriptHtml;
 
-        if (part3Transcript) {
-            let contentHtml = `
-                <div class="reading-passage-content">
-                    <h4><i class="fas fa-file-audio"></i> 完整文字稿</h4>
-                    <pre>${part3Transcript}</pre>
-                </div>
-            `;
-            
-            if (part3Translation) {
-                contentHtml += `
-                    <div class="translation" style="margin-top: 20px;">
-                        <h4><i class="fas fa-language"></i> 翻譯</h4>
-                        <pre>${part3Translation}</pre>
-                    </div>
-                `;
-            }
+        // **修改這部分：分別處理 Part 6 和 Part 7 的文章**
+        let part6PassageHtml = '';
+        let part7PassageHtml = '';
 
-            scriptContainer.innerHTML = contentHtml;
-            section.style.display = 'block';
-            document.getElementById('listening-script-note').textContent = '此為 Part 3 對話的完整文字稿與翻譯';
-        } else {
-            section.style.display = 'none';
-        }
-    }
-
-    // 修正後的 Part 6 & 7 處理函式，直接使用新的 reading_passages 列表
-    function handleReadingPassage(data) {
-        const section = document.getElementById('reading-passage-section');
-        const passageContainer = document.getElementById('reading-passage-content');
-        
-        let contentHtml = '';
-        
         if (data.reading_passages && Array.isArray(data.reading_passages)) {
             data.reading_passages.forEach(passage => {
-                if (passage.content) {
-                    contentHtml += `
-                        <div class="passage-group">
-                            <h4><i class="fas fa-book"></i> 閱讀文章</h4>
-                            <pre>${passage.content}</pre>
-                            ${passage.translation ? `
-                                <div class="translation" style="margin-top: 20px;">
-                                    <h4><i class="fas fa-language"></i> 文章翻譯</h4>
-                                    <pre>${passage.translation}</pre>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
+                const passageHtml = `
+                    <div class="passage-group">
+                        <h4><i class="fas fa-book"></i> 閱讀文章</h4>
+                        <pre>${passage.content}</pre>
+                        ${passage.translation ? `
+                            <div class="translation" style="margin-top: 20px;">
+                                <h4><i class="fas fa-language"></i> 文章翻譯</h4>
+                                <pre>${passage.translation}</pre>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                if (passage.material_part === 'part6') {
+                    part6PassageHtml += passageHtml;
+                } else if (passage.material_part === 'part7') {
+                    part7PassageHtml += passageHtml;
                 }
             });
         }
-        
-        if (contentHtml) {
-            passageContainer.innerHTML = contentHtml;
-            section.style.display = 'block';
-            document.getElementById('reading-passage-note').textContent = '';
-        } else {
-            section.style.display = 'none';
+
+        part6Section.innerHTML = part6PassageHtml;
+        part7Section.innerHTML = part7PassageHtml;
+    }
+
+    // 新增函數：根據所選 Part 篩選並顯示題目與相關內容
+    function filterQuestionsByPart(part) {
+        const allQuestions = document.querySelectorAll('.question-result');
+        const listeningSection = document.getElementById('listening-script-section');
+        const part6Section = document.getElementById('part6-passage-section');
+        const part7Section = document.getElementById('part7-passage-section');
+
+        // 隱藏所有區塊
+        allQuestions.forEach(q => q.style.display = 'none');
+        listeningSection.style.display = 'none';
+        part6Section.style.display = 'none';
+        part7Section.style.display = 'none';
+
+        // 根據所選 Part 顯示對應內容
+        if (part === 'all') {
+            allQuestions.forEach(q => q.style.display = 'block');
+            if (globalResultData && globalResultData.part_analysis) {
+                if (globalResultData.part_analysis['part3']) {
+                    listeningSection.style.display = 'block';
+                }
+                if (globalResultData.part_analysis['part6']) {
+                    part6Section.style.display = 'block';
+                }
+                if (globalResultData.part_analysis['part7']) {
+                    part7Section.style.display = 'block';
+                }
+            }
+        } else if (part === 'part2') {
+            document.querySelectorAll('.question-result[data-part="part2"]').forEach(q => q.style.display = 'block');
+        } else if (part === 'part3') {
+            document.querySelectorAll('.question-result[data-part="part3"]').forEach(q => q.style.display = 'block');
+            listeningSection.style.display = 'block';
+        } else if (part === 'part5') {
+            document.querySelectorAll('.question-result[data-part="part5"]').forEach(q => q.style.display = 'block');
+        } else if (part === 'part6') {
+            document.querySelectorAll('.question-result[data-part="part6"]').forEach(q => q.style.display = 'block');
+            part6Section.style.display = 'block';
+        } else if (part === 'part7') {
+            document.querySelectorAll('.question-result[data-part="part7"]').forEach(q => q.style.display = 'block');
+            part7Section.style.display = 'block';
         }
     }
 
-function renderQuestionResults(data) {
-    const container = document.getElementById('question-results');
-    if (!data.question_details || !Array.isArray(data.question_details)) {
-        container.innerHTML = '<p>無詳細答題資訊</p>';
-        return;
-    }
 
-    let html = '';
-    data.question_details.forEach((question, index) => {
-        const isCorrect = question.is_correct;
-        const statusClass = isCorrect ? 'correct' : 'incorrect';
-        const statusIcon = isCorrect ? 'fa-check-circle' : 'fa-times-circle';
-        const statusText = question.user_answer ? (isCorrect ? '正確' : '錯誤') : '未作答';
-        const part = question.part;
+    function renderQuestionResults(data) {
+        const container = document.getElementById('question-results');
+        if (!data.question_details || !Array.isArray(data.question_details)) {
+            container.innerHTML = '<p>無詳細答題資訊</p>';
+            return;
+        }
 
-        let optionsHtml = '';
-        if (question.options && Array.isArray(question.options)) {
-            optionsHtml = question.options
-                .filter(option => !(question.part === 'part2' && option.value.toUpperCase() === 'D'))
-                .map(option => {
-                    const optVal = option.value.toLowerCase();
-                    const userAns = (question.user_answer || '').toLowerCase();
-                    const correctAns = (question.correct_answer || '').toLowerCase();
+        let html = '';
+        data.question_details.forEach((question, index) => {
+            const isCorrect = question.is_correct;
+            const statusClass = isCorrect ? 'correct' : 'incorrect';
+            const statusIcon = isCorrect ? 'fa-check-circle' : 'fa-times-circle';
+            const statusText = question.user_answer ? (isCorrect ? '正確' : '錯誤') : '未作答';
+            const part = question.part;
+            const questionId = question.question_id;
 
-                    let optionClass = 'option-item';
-                    let iconHtml = '<i class="fas fa-circle option-icon neutral-icon"></i>';
+            let optionsHtml = '';
+            if (question.options && Array.isArray(question.options)) {
+                optionsHtml = question.options
+                    .filter(option => !(question.part === 'part2' && option.value.toUpperCase() === 'D'))
+                    .map(option => {
+                        const optVal = option.value.toLowerCase();
+                        const userAns = (question.user_answer || '').toLowerCase();
+                        const correctAns = (question.correct_answer || '').toLowerCase();
 
-                    if (optVal === userAns && optVal === correctAns) {
-                        optionClass += ' correct-option';
-                        iconHtml = '<i class="fas fa-check-circle option-icon correct-icon"></i>';
-                    } else if (optVal === userAns && optVal !== correctAns) {
-                        optionClass += ' incorrect-option';
-                        iconHtml = '<i class="fas fa-times-circle option-icon incorrect-icon"></i>';
-                    } else if (optVal === correctAns && optVal !== userAns) {
-                        optionClass += ' correct-option';
-                        iconHtml = '<i class="fas fa-check-circle option-icon correct-icon"></i>';
-                    }
-                    return `
-                        <div class="${optionClass}">
-                            ${iconHtml}
-                            <span class="option-label">${option.value.toUpperCase()}.</span>
-                            <span class="option-text">${option.text}</span>
+                        let optionClass = 'option-item';
+                        let iconHtml = '<i class="fas fa-circle option-icon neutral-icon"></i>';
+
+                        if (optVal === userAns && optVal === correctAns) {
+                            optionClass += ' correct-option';
+                            iconHtml = '<i class="fas fa-check-circle option-icon correct-icon"></i>';
+                        } else if (optVal === userAns && optVal !== correctAns) {
+                            optionClass += ' incorrect-option';
+                            iconHtml = '<i class="fas fa-times-circle option-icon incorrect-icon"></i>';
+                        } else if (optVal === correctAns && optVal !== userAns) {
+                            optionClass += ' correct-option';
+                            iconHtml = '<i class="fas fa-check-circle option-icon correct-icon"></i>';
+                        }
+                        return `
+                            <div class="${optionClass}">
+                                ${iconHtml}
+                                <span class="option-label">${option.value.toUpperCase()}.</span>
+                                <span class="option-text">${option.text}</span>
+                            </div>
+                        `;
+                    }).join('');
+            }
+            
+            const transcript = (part === 'part2' && data.transcripts && data.transcripts[question.question_id]) ? data.transcripts[question.question_id] : null;
+            const translation = (part === 'part2' && data.translations && data.translations[question.question_id]) ? data.translations[question.question_id] : null;
+
+            let transcriptHtml = '';
+            if (transcript) {
+                transcriptHtml = `
+                    <div class="transcript">
+                        <h4><i class="fas fa-file-audio"></i> 文字稿</h4>
+                        <pre>${transcript}</pre>
+                `;
+                if (translation) {
+                    transcriptHtml += `
+                        <div class="translation-divider"></div>
+                        <div class="translation-text">
+                            <pre>${translation}</pre>
                         </div>
                     `;
-                }).join('');
-        }
+                }
+                transcriptHtml += `</div>`;
+            }
 
-        const transcript = (part === 'part2' && data.transcripts && data.transcripts[question.question_id]) ? data.transcripts[question.question_id] : null;
-        const translation = (part === 'part2' && data.translations && data.translations[question.question_id]) ? data.translations[question.question_id] : null;
+            // 關鍵修改：在最外層的 div 加上 data-part 屬性
+            html += `
+                <div class="question-result ${statusClass}" data-part="${part}">
+                    <div class="question-header">
+                        <div class="question-info">
+                            <span class="question-number">題目 ${index + 1}</span>
+                            ${part ? `<span class="question-part">(${part.toUpperCase()})</span>` : ''}
+                        </div>
+                        <span class="question-status">
+                            <i class="fas ${statusIcon}"></i>
+                            ${statusText}
+                        </span>
+                    </div>
+                    
+                    ${transcriptHtml}
 
-        // **這裡是修正後的程式碼：**
-        // 將文字稿與翻譯的 HTML 字串獨立組建
-        let transcriptHtml = '';
-        if (transcript) {
-            transcriptHtml = `
-                <div class="transcript">
-                    <h4><i class="fas fa-file-audio"></i> 文字稿</h4>
-                    <pre>${transcript}</pre>
+                    <div class="question-content">
+                        ${question.question_text ? `<div class="question-text">${question.question_text}</div>` : ''}
+                        ${optionsHtml ? `<div class="options-container">${optionsHtml}</div>` : ''}
+                    </div>
+                    
+                    <div class="question-details">
+                        ${question.explanation ? `<div class="explanation"><p><strong>解釋：</strong>${question.explanation}</p></div>` : ''}
+                    </div>
+                </div>
             `;
-            if (translation) {
-                transcriptHtml += `
-                    <div class="translation-divider"></div>
-                    <div class="translation-text">
-                        <pre>${translation}</pre>
-                    </div>
-                `;
-            }
-            transcriptHtml += `</div>`; // 閉合 div
-        }
-
-        html += `
-            <div class="question-result ${statusClass}">
-                <div class="question-header">
-                    <div class="question-info">
-                        <span class="question-number">題目 ${index + 1}</span>
-                        ${part ? `<span class="question-part">(${part.toUpperCase()})</span>` : ''}
-                    </div>
-                    <span class="question-status">
-                        <i class="fas ${statusIcon}"></i>
-                        ${statusText}
-                    </span>
-                </div>
-                
-                ${transcriptHtml}
-
-                <div class="question-content">
-                    ${question.question_text ? `<div class="question-text">${question.question_text}</div>` : ''}
-                    ${optionsHtml ? `<div class="options-container">${optionsHtml}</div>` : ''}
-                </div>
-                
-                <div class="question-details">
-                    ${question.explanation ? `<div class="explanation"><p><strong>解釋：</strong>${question.explanation}</p></div>` : ''}
-                </div>
-            </div>
-        `;
-    });
-    container.innerHTML = html;
-}
-
-    function renderFeedback(data) {
-        const container = document.getElementById('ai-feedback');
-        const suggestions = [];
-        const feedbackList = document.createElement('ul');
-        feedbackList.className = 'feedback-list';
-
-        const accuracy = data.correct_answers && data.total_questions ?
-            Math.round((data.correct_answers / data.total_questions) * 100) : 0;
-        
-        if (accuracy >= 80) {
-            suggestions.push("表現優異！你的答題正確率很高，可以挑戰更進階的題目或加強弱點。");
-        } else if (accuracy >= 60) {
-            suggestions.push("表現良好，但仍有進步空間。建議針對錯誤較多的部分加強訓練。");
-        } else {
-            suggestions.push("正確率偏低，不用氣餒！建議從單字和文法基礎開始，逐步提升。");
-        }
-
-        if (data.part_analysis) {
-            const partNames = {
-                'part2': 'Part 2 (問答)',
-                'part3': 'Part 3 (簡短對話)',
-                'part5': 'Part 5 (單句填空)',
-                'part6': 'Part 6 (文章填空)',
-                'part7': 'Part 7 (單篇閱讀)'
-            };
-            for (const [part, analysis] of Object.entries(data.part_analysis)) {
-                const percentage = analysis.total > 0 ? (analysis.correct / analysis.total) : 0;
-                if (part.startsWith('part') && percentage < 0.6 && analysis.total > 0) {
-                    if (part === 'part2' || part === 'part3') {
-                        suggestions.push(`你在${partNames[part]}的聽力表現較弱，可能是因為無法在短時間內理解對話。建議多進行聽力精聽練習。`);
-                    } else {
-                        suggestions.push(`你在${partNames[part]}的閱讀表現不佳，可能是因為閱讀速度或對特定題型不熟悉。建議多練習文章精讀與解題技巧。`);
-                    }
-                }
-            }
-        }
-
-        if (data.category_analysis) {
-            const categoryNames = {
-                'tense': '時態',
-                'pos': '詞性',
-                'syntax': '句型結構',
-                'vocab': '單字',
-            };
-            for (const [category, analysis] of Object.entries(data.category_analysis)) {
-                const percentage = analysis.total > 0 ? (analysis.correct / analysis.total) : 0;
-                if (percentage < 0.6 && analysis.total > 0) {
-                    suggestions.push(`你在「${categoryNames[category] || category}」類別的正確率較低，建議多加強相關文法或單字練習。`);
-                }
-            }
-        }
-        
-        if (suggestions.length === 0) {
-            suggestions.push('本次測驗表現平穩，請持續保持！');
-        }
-
-        suggestions.forEach(s => {
-            const li = document.createElement('li');
-            li.innerHTML = s;
-            feedbackList.appendChild(li);
         });
-
-        container.innerHTML = '';
-        container.appendChild(feedbackList);
+        container.innerHTML = html;
     }
 
+    // 關鍵修改：調整 analysisNames 物件，移除 "Part" 前綴
     function generateAnalysisList(analysisData) {
         let html = '';
         const analysisNames = {
-            'part2': 'Part 2 (問答)',
-            'part3': 'Part 3 (簡短對話)',
-            'part5': 'Part 5 (單句填空)',
-            'part6': 'Part 6 (文章填空)',
-            'part7': 'Part 7 (單篇閱讀)',
+            'part2': '問答',
+            'part3': '簡短對話',
+            'part5': '單句填空',
+            'part6': '文章填空',
+            'part7': '單篇閱讀',
             'tense': '時態',
             'pos': '詞性',
             'syntax': '句型結構',
@@ -637,6 +667,7 @@ function renderQuestionResults(data) {
     }
 
     function renderResult(data) {
+        globalResultData = data;
         const totalQuestions = data.total_questions || 0;
         const correctAnswers = data.correct_answers || 0;
         const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
@@ -654,8 +685,26 @@ function renderQuestionResults(data) {
         document.getElementById('accuracy-rate').textContent = accuracy + '%';
 
         renderQuestionResults(data);
-        renderFeedback(data);
+        // renderFeedback(data);
         renderAnalysisSections(data);
+        preparePassageSections(data);
+
+        // 🌟 關鍵修改：根據測驗類型顯示或隱藏按鈕，並預設篩選
+        const partNavContainer = document.getElementById('part-navigation-container');
+        if (data.test_type === 'Mixed') {
+            partNavContainer.style.display = 'flex';
+            // 預設篩選並顯示 Part 2
+            const part2Btn = document.querySelector('.part-nav-btn[data-part="part2"]');
+            if (part2Btn) {
+                // 為 Part 2 按鈕添加 active 類別
+                part2Btn.classList.add('active');
+                filterQuestionsByPart('part2');
+            }
+        } else {
+            // 如果不是綜合測驗，隱藏按鈕並顯示所有題目
+            partNavContainer.style.display = 'none';
+            filterQuestionsByPart('all');
+        }
     }
 
     function showError(message) {

@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,7 +32,7 @@ AUTH_USER_MODEL = 'toeic.User'
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost',
-    'http://127.0.0.1',  # <-- 新增這行
+    'http://127.0.0.1', 
 ]
 
 
@@ -45,6 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "toeic",
+    # "sendgrid_backend", # 暫時註解掉這行
 ]
 
 MIDDLEWARE = [
@@ -85,11 +87,11 @@ if os.environ.get('DJANGO_ENV') == 'production':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.environ.get('DB_NAME', '114_system'),
-            'USER': os.environ.get('DB_USER', 'root'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', '12345678'),
-            'HOST': os.environ.get('DB_HOST', 'localhost'),
-            'PORT': os.environ.get('DB_PORT', '3306'),
+            'NAME': os.environ.get('DB_NAME'),
+            'USER': os.environ.get('DB_USER'),
+            'PASSWORD': os.environ.get('DB_PASSWORD'),
+            'HOST': os.environ.get('DB_HOST'),
+            'PORT': os.environ.get('DB_PORT'),
             'OPTIONS': {
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
                 'charset': 'utf8mb4',
@@ -103,6 +105,18 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
+# 郵件設定
+# 確保 EMAIL_BACKEND 設定為 Django 內建的 SMTP 後端
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# 從環境變數中讀取郵件設定
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASSWORD')
+DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_USER')
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -140,10 +154,10 @@ USE_TZ = False
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [
-    BASE_DIR / "toeic/static",  # 指定靜態檔案目錄
+    BASE_DIR / "toeic/static",
 ]
 
-
+LOGIN_URL = '/login/' 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
