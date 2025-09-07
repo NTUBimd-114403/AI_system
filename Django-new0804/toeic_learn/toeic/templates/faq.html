@@ -1,0 +1,161 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>常見問題 - TOEIC學習平台</title>
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/faq.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <!-- 導覽列 -->
+    <div class="header">
+        <button class="menu-btn" id="menu-btn">☰</button>
+        <h1>TOEIC學習平台</h1>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div class="nav-buttons">
+            <a href="{% url 'home' %}" target="_self">
+                <button class="nav-btn {% if request.path == '/' %}current{% endif %}">
+                    <i class="fas fa-home"></i> 首頁
+                </button>
+            </a>
+            <a href="{% url 'test' %}" target="_self">
+                <button class="nav-btn {% if request.path == '/test/' %}current{% endif %}">
+                    <i class="fas fa-file-alt"></i> 測驗平台
+                </button>
+            </a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'history' %}" target="_self">
+                    <button class="nav-btn {% if request.path == '/history/' %}current{% endif %}">
+                        <i class="fas fa-history"></i> 歷史單字
+                    </button>
+                </a>
+                <a href="{% url 'record' %}" target="_self">
+                    <button class="nav-btn">
+                        <i class="fas fa-user"></i> 學習歷程
+                    </button>
+                </a>
+                <a href="{% url 'faq' %}" target="_self">
+                <button class="nav-btn {% if request.path == '/faq/' %}current{% endif %}">
+                    <i class="fas fa-question-circle"></i> 常見問題
+                </button>
+            </a>
+                <a href="{% url 'profile-settings' %}" target="_self">
+                    <button class="nav-btn {% if request.path == '/profile-settings/' %}current{% endif %}">
+                        <i class="fas fa-cog"></i> 歡迎, {{ user.nickname }}
+                    </button>
+                </a>
+                <form id="logout-form" action="{% url 'logout' %}" method="POST" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-btn">
+                        <i class="fas fa-sign-out-alt"></i> 登出
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" target="_self">
+                    <button class="nav-btn {% if request.path == '/login/' %}current{% endif %}">
+                        <i class="fas fa-user"></i> 會員註冊/登入
+                    </button>
+                </a>
+            {% endif %}
+            
+        </div>
+    </div>
+
+    <!-- FAQ 內容 -->
+<div class="faq-container">
+    <div class="faq-column">
+        <section class="faq-category">
+            <h2><i class="fas fa-edit"></i> 測驗相關</h2>
+            <div class="faq-item">
+                <h3>如何開始測驗？</h3>
+                <p>
+                    <a href="{% url 'login' %}" class="faq-link">登入</a>頁面後，前往 
+                    <a href="{% url 'test' %}" class="faq-link">測驗平台</a>
+                    選擇測驗類型即可開始答題。
+                </p>
+            </div>
+            <div class="faq-item">
+                <h3>每天可以做幾次測驗？</h3>
+                <p>每天有 <strong>綜合測驗1次；其他測驗加總3次</strong>，超過次數可使用點數兌換。</p>
+            </div>
+            <div class="faq-item">
+                <h3>測驗結果在哪裡看？</h3>
+                <p>完成測驗後，系統會自動儲存你的結果。你可以在「學習歷程」頁面查看每次測驗的詳細分數與分析報告。</p>
+            </div>
+        </section>
+    </div>
+
+    <div class="faq-column">
+        <section class="faq-category">
+            <h2><i class="fas fa-user"></i> 帳號與學習</h2>
+            <div class="faq-item">
+                <h3>如何查看我的學習歷程？</h3>
+                <p>登入後點選「學習歷程」即可查看完整的紀錄。</p>
+            </div>
+            <div class="faq-item">
+                <h3>忘記密碼怎麼辦？</h3>
+                <p>
+                    請到 
+                    <a href="{% url 'login' %}" class="faq-link">登入</a>
+                    後選擇「忘記密碼」，依照步驟重設密碼。
+                </p>
+            </div>
+            <div class="faq-item">
+                <h3>如何修改個人資料？</h3>
+                <p>登入後，點擊導覽列上的「歡迎, {{ user.nickname }}」按鈕，即可進入個人設定頁面進行修改。</p>
+            </div>
+        </section>
+    </div>
+
+    <div class="faq-column">
+        <section class="faq-category">
+            <h2><i class="fas fa-coins"></i> 點數相關</h2>
+            <div class="faq-item">
+                <h3>如何獲得更多點數？</h3>
+                <p>測驗60分以上 <span class="bonus">+5分</span></p>
+                <p>測驗80分以上 <span class="bonus">+10分</span></p>
+            </div>
+            <div class="faq-item">
+                <h3>點數如何使用？</h3>
+                <p>綜合測驗一次 <span class="cost">-50分</span></p>
+                <p>其他測驗一次 <span class="cost">-20分</span></p>
+            </div>
+            <div class="faq-item">
+                <h3>每日測驗次數限制</h3>
+                <p>綜合測驗 <span class="limit">1次</span></p>
+                <p>其他測驗加總 <span class="limit">3次</span></p>
+            </div>
+        </section>
+    </div>
+</div>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="contact-us">
+                <h3>聯絡我們</h3>
+                <ul>
+                    <li><i class="fas fa-phone"></i><a href="tel:02 3322 2777"> 電話：02 3322 2777</a></li>
+                    <li><i class="fas fa-map"></i><a href="https://maps.app.goo.gl/3NMVwufcbbTrfQNz6" target="_blank"> 地址：100台北市中正區濟南路一段321號</a></li>
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d14459.01851827243!2d121.5254698!3d25.0423998!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442a970a11a84ad%3A0x58e05f2528812097!2z5ZyL56uL6Ie65YyX5ZWG5qWt5aSn5a24!5e0!3m2!1szh-TW!2stw" 
+                    width="300"
+                    height="250"
+                    style="border:0;"
+                    allowfullscreen=""
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 TOEIC學習平台 版權所有</p>
+        </div>
+    </footer>
+
+</body>
+</html>
