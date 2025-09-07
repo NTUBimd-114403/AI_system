@@ -1168,8 +1168,6 @@ def get_daily_vocabulary(request):
     user = request.user
     today_date = timezone.now().date()
     
-    # ✅ 已修正：使用 sent_time 欄位來判斷使用者今天是否已領取過單字
-    # 這樣可以避免因為使用者回頭檢視舊單字而導致判斷錯誤。
     already_sent_today = UserVocabularyRecord.objects.filter(
         user=user,
         sent_time__date=today_date
@@ -1334,11 +1332,6 @@ def history_view(request):
     elif status == 'unfamiliar':
         user_vocabularies = user_vocabularies.filter(is_familiar=False)
     
-    # 4. 根據搜尋詞進行篩選
-    if search_term:
-        user_vocabularies = user_vocabularies.filter(word__word__icontains=search_term)
-
-    # 5. 將所有資料傳送給模板
     context = {
         'vocabularies': user_vocabularies,
         'current_status': status,

@@ -264,242 +264,288 @@
             <p>© 2025 TOEIC學習平台 版權所有</p>
         </div>
     </footer>
-
+   <div id="custom-alert-overlay" class="custom-alert-overlay">
+    <div id="custom-alert-modal" class="custom-alert-modal">
+        <span id="custom-alert-close" class="custom-alert-close">×</span>
+        <p id="custom-alert-message"></p>
+    </div>
+</div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     {{ part_performance|json_script:"part-performance-data" }}
     {{ category_performance|json_script:"category-performance-data" }}
     <script>
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            return parts.length === 2 ? parts.pop().split(';').shift() : '';
-        }
+    // 顯示自訂提示框
+    function showAlert(message) {
+        const overlay = document.getElementById('custom-alert-overlay');
+        const messageElement = document.getElementById('custom-alert-message');
+        messageElement.textContent = message;
+        overlay.style.display = 'flex';
+    }
 
-        function bindPaginationEvents() {
-            const paginationLinks = document.querySelectorAll('.pagination a');
-            const examResultsContainer = document.getElementById('exam-results-container');
-            const currentUrl = window.location.href.split('?')[0];
+    // 取得 CSRF token 的函式
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        return parts.length === 2 ? parts.pop().split(';').shift() : '';
+    }
 
-            paginationLinks.forEach(link => {
-                link.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    const pageNumber = this.dataset.page;
+    // 綁定分頁按鈕事件
+    function bindPaginationEvents() {
+        const paginationLinks = document.querySelectorAll('.pagination a');
+        const examResultsContainer = document.getElementById('exam-results-container');
+        const currentUrl = window.location.href.split('?')[0];
 
-                    fetch(`${currentUrl}?page=${pageNumber}`)
-                        .then(response => response.text())
-                        .then(data => {
-                            const newContent = new DOMParser().parseFromString(data, 'text/html').querySelector('#exam-results-container');
-                            examResultsContainer.innerHTML = newContent.innerHTML;
-                            const newPagination = new DOMParser().parseFromString(data, 'text/html').querySelector('.pagination');
-                            document.querySelector('.pagination').innerHTML = newPagination.innerHTML;
-                            bindPaginationEvents();
-                        })
-                        .catch(error => console.error('Error fetching pagination data:', error));
-                });
+        paginationLinks.forEach(link => {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                const pageNumber = this.dataset.page;
+
+                fetch(`${currentUrl}?page=${pageNumber}`)
+                    .then(response => response.text())
+                    .then(data => {
+                        const newContent = new DOMParser().parseFromString(data, 'text/html').querySelector('#exam-results-container');
+                        examResultsContainer.innerHTML = newContent.innerHTML;
+                        const newPagination = new DOMParser().parseFromString(data, 'text/html').querySelector('.pagination');
+                        document.querySelector('.pagination').innerHTML = newPagination.innerHTML;
+                        bindPaginationEvents();
+                    })
+                    .catch(error => console.error('Error fetching pagination data:', error));
             });
-        }
+        });
+    }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            bindPaginationEvents();
+    // 當頁面內容載入完成時執行
+    document.addEventListener('DOMContentLoaded', function() {
+        bindPaginationEvents();
 
-            const scriptTagPart = document.getElementById('part-performance-data');
-            const scriptTagCategory = document.getElementById('category-performance-data');
-            const partPerformanceData = scriptTagPart ? JSON.parse(scriptTagPart.textContent) : null;
-            const categoryPerformanceData = scriptTagCategory ? JSON.parse(scriptTagCategory.textContent) : null;
-            
-            const analysisButtons = document.querySelectorAll('.analysis-btn');
-            const analysisLists = document.querySelectorAll('.analysis-list');
-            const chartCanvas = document.getElementById('analysis-radar-chart').getContext('2d');
-            let myChart = null; // 用來儲存 Chart.js 實例
+        const scriptTagPart = document.getElementById('part-performance-data');
+        const scriptTagCategory = document.getElementById('category-performance-data');
+        const partPerformanceData = scriptTagPart ? JSON.parse(scriptTagPart.textContent) : null;
+        const categoryPerformanceData = scriptTagCategory ? JSON.parse(scriptTagCategory.textContent) : null;
 
-            function updateChart(data) {
-                if (myChart) {
-                    myChart.destroy();
-                }
+        const analysisButtons = document.querySelectorAll('.analysis-btn');
+        const analysisLists = document.querySelectorAll('.analysis-list');
+        const chartCanvas = document.getElementById('analysis-radar-chart').getContext('2d');
+        let myChart = null; // 用來儲存 Chart.js 實例
 
-                if (!data || Object.keys(data).length === 0) {
-                    return; // 如果沒有數據就不繪製圖表
-                }
+        // 更新雷達圖的函式
+        function updateChart(data) {
+            if (myChart) {
+                myChart.destroy();
+            }
 
-                const labels = Object.values(data).map(item => item.display_name);
-                const dataPoints = Object.values(data).map(item => item.percentage);
-                
-                myChart = new Chart(chartCanvas, {
-                    type: 'radar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: '作答正確率 (%)',
-                            data: dataPoints,
-                            backgroundColor: 'rgba(0, 123, 255, 0.2)',
-                            borderColor: 'rgba(0, 123, 255, 1)',
-                            borderWidth: 2,
-                            pointBackgroundColor: 'rgba(0, 123, 255, 1)',
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: 'rgba(0, 123, 255, 1)'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                            },
-                            title: {
-                                display: true,
-                                text: '作答表現雷達圖',
-                                font: { size: 16 }
-                            }
+            if (!data || Object.keys(data).length === 0) {
+                // 如果沒有數據，隱藏圖表或顯示無數據訊息
+                chartCanvas.canvas.style.display = 'none';
+                return;
+            } else {
+                chartCanvas.canvas.style.display = 'block';
+            }
+
+            const labels = Object.values(data).map(item => item.display_name);
+            const dataPoints = Object.values(data).map(item => item.percentage);
+
+            myChart = new Chart(chartCanvas, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '作答正確率 (%)',
+                        data: dataPoints,
+                        backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                        borderColor: 'rgba(0, 123, 255, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(0, 123, 255, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(0, 123, 255, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
                         },
-                        scales: {
-                            r: {
-                                angleLines: { display: false },
-                                suggestedMin: 0,
-                                suggestedMax: 100,
-                                pointLabels: { font: { size: 12 } }
-                            }
+                        title: {
+                            display: true,
+                            text: '作答表現雷達圖',
+                            font: { size: 16 }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: { display: false },
+                            suggestedMin: 0,
+                            suggestedMax: 100,
+                            pointLabels: { font: { size: 12 } }
                         }
                     }
-                });
-            }
-
-            // 初始化時顯示 Part 作答分析
-            if (partPerformanceData) {
-                updateChart(partPerformanceData);
-            }
-
-            analysisButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    analysisButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-
-                    const analysisType = this.dataset.analysis;
-                    analysisLists.forEach(list => {
-                        list.style.display = 'none';
-                    });
-                    
-                    let dataToDisplay = null;
-                    if (analysisType === 'part') {
-                        document.getElementById('part-analysis-list').style.display = 'block';
-                        dataToDisplay = partPerformanceData;
-                    } else if (analysisType === 'category') {
-                        document.getElementById('category-analysis-list').style.display = 'block';
-                        dataToDisplay = categoryPerformanceData;
-                    }
-                    updateChart(dataToDisplay);
-                });
-            });
-
-            // 處理學習興趣選擇的邏輯
-            const userInterests = "{{ user.learning_interests }}".split(',').filter(item => item !== '');
-            const checkboxes = document.querySelectorAll('.interest-options input[type="checkbox"]');
-            
-            checkboxes.forEach(checkbox => {
-                if (userInterests.includes(checkbox.value)) {
-                    checkbox.checked = true;
                 }
             });
+        }
 
-            const interestForm = document.getElementById('interest-form');
-            interestForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const selectedInterests = Array.from(checkboxes)
-                    .filter(checkbox => checkbox.checked)
-                    .map(checkbox => checkbox.value)
-                    .join(',');
+        // 初始化時，預設顯示「Part 作答分析」
+        const partButton = document.querySelector('.analysis-btn[data-analysis="part"]');
+        const partList = document.getElementById('part-analysis-list');
+        const categoryList = document.getElementById('category-analysis-list');
+        
+        if (partButton) {
+            partButton.classList.add('active');
+        }
+        if (partList) {
+            partList.style.display = 'block';
+        }
+        if (categoryList) {
+            categoryList.style.display = 'none';
+        }
+        updateChart(partPerformanceData);
 
-                fetch('/update-interests/', {
+
+        analysisButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                analysisButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+
+                const analysisType = this.dataset.analysis;
+                analysisLists.forEach(list => {
+                    list.style.display = 'none';
+                });
+
+                let dataToDisplay = null;
+                if (analysisType === 'part') {
+                    document.getElementById('part-analysis-list').style.display = 'block';
+                    dataToDisplay = partPerformanceData;
+                } else if (analysisType === 'category') {
+                    document.getElementById('category-analysis-list').style.display = 'block';
+                    dataToDisplay = categoryPerformanceData;
+                }
+                updateChart(dataToDisplay);
+            });
+        });
+
+        // 處理學習興趣選擇的邏輯
+        const userInterests = "{{ user.learning_interests }}".split(',').filter(item => item !== '');
+        const checkboxes = document.querySelectorAll('.interest-options input[type="checkbox"]');
+
+        checkboxes.forEach(checkbox => {
+            if (userInterests.includes(checkbox.value)) {
+                checkbox.checked = true;
+            }
+        });
+
+        const interestForm = document.getElementById('interest-form');
+        interestForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const selectedInterests = Array.from(checkboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => checkbox.value)
+                .join(',');
+
+            try {
+                const response = await fetch('/update-interests/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCookie('csrftoken')
                     },
                     body: JSON.stringify({ interests: selectedInterests })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // 使用自訂訊息框替代 alert
-                        alert('學習興趣已成功更新！');
-                    } else {
-                        alert('更新失敗，請稍後再試。');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error updating interests:', error);
-                    alert('更新過程中發生錯誤。');
                 });
-            });
 
-            const showHistoryBtn = document.getElementById('show-points-history');
-            const pointsModal = document.getElementById('points-modal');
-            const closeBtn = pointsModal.querySelector('.close-btn');
-            const pointsTableBody = document.querySelector('#points-table tbody');
+                const data = await response.json();
 
-            if (showHistoryBtn) {
-                showHistoryBtn.addEventListener('click', function() {
-                    pointsModal.style.display = 'flex';
-                    fetchPointsHistory();
-                });
-            }
-
-            if (closeBtn) {
-                closeBtn.addEventListener('click', function() {
-                    pointsModal.style.display = 'none';
-                });
-            }
-
-            window.addEventListener('click', function(event) {
-                if (event.target == pointsModal) {
-                    pointsModal.style.display = 'none';
+                if (response.ok && data.success) {
+                    showAlert(data.message);
+                } else {
+                    showAlert(data.message || '更新失敗，請稍後再試。');
                 }
-            });
-
-            function fetchPointsHistory() {
-                if (pointsTableBody.innerHTML.trim() !== '' && pointsTableBody.innerHTML.trim() !== '<tr><td colspan="3">載入中...</td></tr>') {
-                    return;
-                }
-                
-                pointsTableBody.innerHTML = '<tr><td colspan="3">載入中...</td></tr>';
-                
-                fetch("/get-points-history/", {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        pointsTableBody.innerHTML = '';
-                        if (data.transactions.length > 0) {
-                            data.transactions.forEach(transaction => {
-                                const row = `
-                                    <tr>
-                                        <td>${transaction.date}</td>
-                                        <td>${transaction.reason}</td>
-                                        <td>${transaction.amount}</td>
-                                    </tr>
-                                `;
-                                pointsTableBody.innerHTML += row;
-                            });
-                        } else {
-                            pointsTableBody.innerHTML = '<tr><td colspan="3">尚無點數變動記錄。</td></tr>';
-                        }
-                    } else {
-                        console.error('Failed to fetch points history:', data.error);
-                        pointsTableBody.innerHTML = '<tr><td colspan="3">載入記錄失敗。</td></tr>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    pointsTableBody.innerHTML = '<tr><td colspan="3">發生錯誤，無法載入記錄。</td></tr>';
-                });
+            } catch (error) {
+                console.error('Error updating interests:', error);
+                showAlert('更新過程中發生錯誤。請檢查網路連線或稍後再試。');
             }
         });
-    </script>
+        
+        // 綁定自訂提示框的關閉事件
+        document.getElementById('custom-alert-close').addEventListener('click', function() {
+            document.getElementById('custom-alert-overlay').style.display = 'none';
+        });
+
+        document.getElementById('custom-alert-overlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        });
+
+        // 處理點數歷史記錄彈出視窗
+        const showHistoryBtn = document.getElementById('show-points-history');
+        const pointsModal = document.getElementById('points-modal');
+        const closeBtn = pointsModal.querySelector('.close-btn');
+        const pointsTableBody = document.querySelector('#points-table tbody');
+
+        if (showHistoryBtn) {
+            showHistoryBtn.addEventListener('click', function() {
+                pointsModal.style.display = 'flex';
+                fetchPointsHistory();
+            });
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                pointsModal.style.display = 'none';
+            });
+        }
+
+        window.addEventListener('click', function(event) {
+            if (event.target == pointsModal) {
+                pointsModal.style.display = 'none';
+            }
+        });
+
+        function fetchPointsHistory() {
+            if (pointsTableBody.innerHTML.trim() !== '' && pointsTableBody.innerHTML.trim() !== '<tr><td colspan="3">載入中...</td></tr>') {
+                return;
+            }
+
+            pointsTableBody.innerHTML = '<tr><td colspan="3">載入中...</td></tr>';
+
+            fetch("/get-points-history/", {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    pointsTableBody.innerHTML = '';
+                    if (data.transactions.length > 0) {
+                        data.transactions.forEach(transaction => {
+                            const row = `
+                                <tr>
+                                    <td>${transaction.date}</td>
+                                    <td>${transaction.reason}</td>
+                                    <td>${transaction.amount}</td>
+                                </tr>
+                            `;
+                            pointsTableBody.innerHTML += row;
+                        });
+                    } else {
+                        pointsTableBody.innerHTML = '<tr><td colspan="3">尚無點數變動記錄。</td></tr>';
+                    }
+                } else {
+                    console.error('Failed to fetch points history:', data.error);
+                    pointsTableBody.innerHTML = '<tr><td colspan="3">載入記錄失敗。</td></tr>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                pointsTableBody.innerHTML = '<tr><td colspan="3">發生錯誤，無法載入記錄。</td></tr>';
+            });
+        }
+    });
+</script> 
 </body>
 </html>

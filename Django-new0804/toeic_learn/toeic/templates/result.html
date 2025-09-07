@@ -213,7 +213,7 @@
 <body>
     <div class="header">
         <button class="menu-btn" id="menu-btn">☰</button>
-        <h1>TOEIC學習平台</h1>             
+        <h1>TOEIC學習平台</h1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;             
         <span class="result-title">測驗結果</span>
     </div>
     
@@ -607,16 +607,15 @@
         container.innerHTML = html;
     }
 
-  
-
+    // 關鍵修改：調整 analysisNames 物件，移除 "Part" 前綴
     function generateAnalysisList(analysisData) {
         let html = '';
         const analysisNames = {
-            'part2': 'Part 2 (問答)',
-            'part3': 'Part 3 (簡短對話)',
-            'part5': 'Part 5 (單句填空)',
-            'part6': 'Part 6 (文章填空)',
-            'part7': 'Part 7 (單篇閱讀)',
+            'part2': '問答',
+            'part3': '簡短對話',
+            'part5': '單句填空',
+            'part6': '文章填空',
+            'part7': '單篇閱讀',
             'tense': '時態',
             'pos': '詞性',
             'syntax': '句型結構',
