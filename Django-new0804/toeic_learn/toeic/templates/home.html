@@ -29,6 +29,11 @@
             </a>
         
             {% if user.is_authenticated %}
+              <a href="{% url 'relation_map' %}" target="_self">
+        <button class="nav-btn {% if request.path == '/relation-map/' %}current{% endif %}">
+            <i class="fas fa-project-diagram"></i> 單字關聯地圖
+        </button>
+    </a>
                 <a href="{% url 'history' %}" target="_self">
                     <button class="nav-btn {% if request.path == '/history/' %}current{% endif %}">
                         <i class="fas fa-history"></i> 歷史單字
@@ -44,11 +49,6 @@
                         <i class="fas fa-question-circle"></i> 常見問題
                     </button>
                 </a>
-                <!-- <a href="{% url 'faq' %}" target="_self">
-                    <button class="nav-btn {% if request.path == '/faq/' %}current{% endif %}">
-                        <i class="fas fa-question-circle"></i> 常見問題
-                    </button>
-                </a> -->
                 <a href="{% url 'profile-settings' %}" target="_self">
                             <button class="nav-btn {% if request.path == '/profile-settings/' %}current{% endif %}">
                                 <i class="fas fa-cog"></i> 歡迎, {{ user.nickname }}

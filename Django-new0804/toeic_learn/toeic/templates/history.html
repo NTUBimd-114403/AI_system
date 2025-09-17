@@ -26,6 +26,11 @@
                 </button>
             </a>
             {% if user.is_authenticated %}
+              <a href="{% url 'relation_map' %}" target="_self">
+        <button class="nav-btn {% if request.path == '/relation-map/' %}current{% endif %}">
+            <i class="fas fa-project-diagram"></i> 單字關聯地圖
+        </button>
+    </a>
                 <a href="{% url 'history' %}" target="_self">
                     <button class="nav-btn {% if request.path == '/history/' %}current{% endif %}">
                         <i class="fas fa-history"></i> 歷史單字
@@ -109,13 +114,19 @@
                                 </div>
                                 
                                 <div class="record-info">
-                                    <span class="familiar-status {% if record.is_familiar %}familiar{% else %}not-familiar{% endif %}">
-                                        {% if record.is_familiar %}
-                                            <i class="fas fa-check-circle"></i> 已熟悉
-                                        {% else %}
-                                            <i class="fas fa-times-circle"></i> 未熟悉
-                                        {% endif %}
-                                    </span>
+                                    <div class="status-and-map">
+                                <span class="familiar-status {% if record.is_familiar %}familiar{% else %}not-familiar{% endif %}">
+                                    {% if record.is_familiar %}
+                                        <i class="fas fa-check-circle"></i> 已熟悉
+                                    {% else %}
+                                        <i class="fas fa-times-circle"></i> 未熟悉
+                                    {% endif %}
+                                </span>
+                                <a href="{% url 'relation_map' %}?word={{ record.word.word }}" class="view-map-btn">
+                                    <i class="fas fa-sitemap"></i> 查看相似詞
+                                </a>
+                            </div>
+
                                     <span class="last-viewed">
                                         最後檢視：{{ record.last_viewed|date:"Y年m月d日 H:i" }}
                                     </span>
@@ -125,6 +136,7 @@
                                             標記為熟悉
                                         </button>
                                     {% endif %}
+                                    
                                 </div>
                             </div>
                         {% endfor %}

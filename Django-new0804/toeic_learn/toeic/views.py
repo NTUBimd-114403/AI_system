@@ -3,10 +3,10 @@ import json
 import random
 from datetime import timedelta
 from datetime import datetime
-
+import openai
 from django.conf import settings
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse,Http404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, get_user_model
 from django.contrib.auth.decorators import login_required
@@ -27,6 +27,21 @@ from .models import (
     ExamResult, Exam, ExamQuestion, ExamSession, DailyVocabulary,
     UserVocabularyRecord, ListeningMaterial,PointTransaction,DailyTestRecord,Phrase
 )
+
+
+# 在檔案頂部讀取環境變數，並將值賦予一個變數
+# 這是最推薦的方式，因為它只會載入一次，供整個模組使用。
+openai_api_key = os.getenv("OPENAI_API_KEY")
+
+# 檢查金鑰是否存在。如果沒有，程式會在啟動時報錯，這有助於提早發現錯誤。
+if not openai_api_key:
+    # 這裡可以加上你自己的錯誤處理或日誌記錄
+    print("Warning: OpenAI API key is not set in environment variables.")
+
+# 在這裡建立一個全域的 OpenAI 客戶端
+# 這樣可以避免在每次函式呼叫時都重新建立連線，提高效率。
+client = openai.OpenAI(api_key=openai_api_key)
+
 
 # 獲取當前使用的使用者模型
 User = get_user_model()
@@ -1344,3 +1359,85 @@ def faq(request):
     渲染常見問題頁面。
     """
     return render(request, 'faq.html')
+
+def relation_map_view(request, word=None):
+    context = {}
+    if word:
+        context['initial_word'] = word
+    return render(request, 'relation_map.html', context)
+
+
+def get_word_relations_by_ai(request, word):
+    """
+    使用 OpenAI API 為指定的單字找到翻譯、音標與多層同義詞（英文）。
+    支援最多三層。
+    """
+    try:
+        # 在這裡直接使用已經建立好的全域 client 變數即可
+        # 無須再用 os.getenv() 或任何變數傳遞
+        
+        prompt_text = f"""
+        Please provide information for the English word: {word}
+
+        Return JSON only, strictly following this format:
+        {{
+            "translation": "中文翻譯，請使用繁體中文",
+            "pronunciation": "KK or IPA phonetic transcription",
+            "synonyms": [
+                {{
+                    "word": "synonym1",
+                    "synonyms": [
+                        {{
+                            "word": "subsyn1",
+                            "synonyms": ["subsub1", "subsub2"]
+                        }},
+                        ...
+                    ]
+                }},
+                ...
+            ]
+        }}
+
+        Rules:
+        - "translation" must be Traditional Chinese only.
+        - "pronunciation" should be phonetic transcription (KK or IPA).
+        - "synonyms" must be English words only.
+        - Each level can have 0~3 sub-synonyms.
+        - Max depth = 3 levels (center -> top -> second -> third).
+        - Do not include Chinese in synonyms.
+        """
+        
+        # 由於 client 已經在檔案頂部建立，你可以直接呼叫其方法
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt_text}],
+            response_format={"type": "json_object"}
+        )
+
+        ai_text = response.choices[0].message.content.strip()
+        ai_data = json.loads(ai_text)
+
+        response_data = {
+            "source_word": word,
+            "translation": ai_data.get("translation", ""),
+            "pronunciation": ai_data.get("pronunciation", ""),
+            "synonyms": ai_data.get("synonyms", []) if isinstance(ai_data.get("synonyms"), list) else []
+        }
+        return JsonResponse(response_data)
+
+    except openai.APIError as e:
+        return JsonResponse({
+            "source_word": word,
+            "translation": "",
+            "pronunciation": "",
+            "synonyms": [],
+            "error": f"OpenAI API 錯誤: {e}"
+        }, status=500)
+    except (json.JSONDecodeError, IndexError, KeyError) as e:
+        return JsonResponse({
+            "source_word": word,
+            "translation": "",
+            "pronunciation": "",
+            "synonyms": [],
+            "error": f"無法解析 AI 回應: {e}"
+        }, status=500)

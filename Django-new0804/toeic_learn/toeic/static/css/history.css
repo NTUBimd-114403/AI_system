@@ -207,20 +207,17 @@
     color: #dc3545; /* 紅色 */
 }
 
+/* 已/未熟悉樣式 */
 .familiar-status.familiar {
-    color: #28a745; /* 綠色 */
     background-color: #e2f5e7;
-    padding: 4px 8px; /* 增加內邊距 */
-    border-radius: 4px;
-    font-size: 0.9em;
+    color: #28a745;
+    border: 1px solid #28a745;
 }
 
 .familiar-status.not-familiar {
-    color: #dc3545; /* 紅色 */
     background-color: #f8e4e7;
-    padding: 4px 8px; /* 增加內邊距 */
-    border-radius: 4px;
-    font-size: 0.9em;
+    color: #dc3545;
+    border: 1px solid #dc3545;
 }
 
 .last-viewed {
@@ -371,4 +368,58 @@
 .status-message.show {
     opacity: 1;
     visibility: visible;
+}
+/* 查看關聯圖按鈕 - 和諧版 */
+/* 查看關聯圖樣式 */
+.view-map-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    background-color: #f3f4f6;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.view-map-btn:hover {
+    background-color: #e5e7eb;
+    color: #1f2937;
+}
+
+.status-and-map {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* 間距 */
+    margin-top: 6px;
+}
+
+/* 讓兩個按鈕等寬，各佔一半，文字置中 */
+.status-and-map .familiar-status,
+.status-and-map .view-map-btn {
+    flex: 1;                  /* 平分寬度 */
+    display: flex;            /* 用 flex 讓內容置中 */
+    justify-content: center;  /* 水平置中 */
+    align-items: center;      /* 垂直置中 */
+    gap: 4px;                 /* 圖示和文字間隔 */
+    padding: 6px 0;           /* 上下 padding */
+    font-size: 14px;
+    border-radius: 6px;
+    font-weight: 500;
+    text-align: center;       /* 保險，確保文字置中 */
+}
+
+.btn-relation-map {
+    margin-left: 15px;
+    padding: 6px 12px;
+    background-color: #2563eb;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 14px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+.btn-relation-map:hover {
+    background-color: #1e40af;
 }
