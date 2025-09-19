@@ -1,0 +1,142 @@
+/* word-map.css */
+
+/* 調整主體容器樣式 */
+.word-map-container {
+    background-color: #f3f4f6; /* bg-gray-100 */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem; /* p-4 */
+}
+
+/* 主卡片容器樣式 */
+.word-map-card {
+    width: 100%; /* w-full */
+    max-width: 48rem; /* max-w-2xl */
+    background-color: #fff; /* bg-white */
+    padding: 1.5rem; /* p-6 */
+    border-radius: 0.75rem; /* rounded-xl */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-lg */
+    border: 1px solid #e5e7eb; /* border border-gray-200 */
+}
+
+/* 標題樣式 */
+.word-map-title {
+    font-size: 2.25rem; /* text-3xl */
+    font-weight: 700; /* font-bold */
+    color: #1f2937; /* text-gray-800 */
+    text-align: center;
+    margin-bottom: 1.5rem; /* mb-6 */
+}
+
+/* 搜尋區塊樣式 */
+.word-map-search {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* space-x-2 */
+    margin-bottom: 1.5rem; /* mb-6 */
+}
+
+/* 輸入框樣式 */
+.word-map-input {
+    flex-grow: 1; /* flex-grow */
+    padding: 0.75rem; /* p-3 */
+    border: 1px solid #d1d5db; /* border border-gray-300 */
+    border-radius: 0.5rem; /* rounded-lg */
+    outline: none; /* focus:outline-none */
+}
+.word-map-input:focus {
+    outline: 2px solid #3b82f6; /* focus:ring-2 focus:ring-blue-500 */
+    outline-offset: 2px;
+}
+
+/* 搜尋按鈕樣式 */
+.word-map-button {
+    background-color: #2563eb; /* bg-blue-600 */
+    color: #fff; /* text-white */
+    padding: 0.75rem; /* p-3 */
+    border-radius: 0.5rem; /* rounded-lg */
+    transition: background-color 0.3s; /* transition duration-300 */
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-md */
+}
+.word-map-button:hover {
+    background-color: #1d4ed8; /* hover:bg-blue-700 */
+}
+
+/* 結果容器樣式 */
+.word-map-result {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 訊息樣式 */
+.word-map-message {
+    color: #6b7280; /* text-gray-500 */
+    text-align: center;
+}
+
+/* 載入中訊息樣式 */
+.word-map-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.word-map-loading-text {
+    margin-top: 1rem; /* mt-4 */
+    color: #6b7280; /* text-gray-500 */
+    text-align: center;
+}
+
+/* 錯誤訊息樣式 */
+.word-map-error {
+    color: #ef4444; /* text-red-500 */
+    text-align: center;
+}
+
+/* 結果卡片樣式 */
+.word-map-result-card {
+    background-color: #fff; /* bg-white */
+    padding: 1.5rem; /* p-6 */
+    border-radius: 0.75rem; /* rounded-xl */
+    border: 1px solid #d1d5db; /* border border-gray-300 */
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+    width: 100%; /* w-full */
+}
+
+/* 結果卡片標題樣式 */
+.word-map-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem; /* mb-4 */
+}
+.word-map-word {
+    font-size: 1.875rem; /* text-3xl */
+    font-weight: 700; /* font-bold */
+    color: #4338ca; /* text-indigo-700 */
+}
+.word-map-pronunciation {
+    font-size: 0.875rem; /* text-sm */
+    color: #6b7280; /* text-gray-500 */
+}
+.word-map-translation {
+    font-size: 1.125rem; /* text-lg */
+    color: #4b5563; /* text-gray-600 */
+    margin-bottom: 1.5rem; /* mb-6 */
+}
+.word-map-subtitle {
+    font-size: 1.25rem; /* text-xl */
+    font-weight: 600; /* font-semibold */
+    color: #374151; /* text-gray-700 */
+    border-bottom: 1px solid;
+    padding-bottom: 0.5rem; /* pb-2 */
+    margin-bottom: 1rem; /* mb-4 */
+}
+.word-map-graph {
+    width: 100%; /* w-full */
+    height: 500px;
+}

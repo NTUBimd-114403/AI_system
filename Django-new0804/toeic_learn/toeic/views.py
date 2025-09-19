@@ -28,18 +28,11 @@ from .models import (
     UserVocabularyRecord, ListeningMaterial,PointTransaction,DailyTestRecord,Phrase
 )
 
-
-# 在檔案頂部讀取環境變數，並將值賦予一個變數
-# 這是最推薦的方式，因為它只會載入一次，供整個模組使用。
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
-# 檢查金鑰是否存在。如果沒有，程式會在啟動時報錯，這有助於提早發現錯誤。
 if not openai_api_key:
-    # 這裡可以加上你自己的錯誤處理或日誌記錄
     print("Warning: OpenAI API key is not set in environment variables.")
 
-# 在這裡建立一個全域的 OpenAI 客戶端
-# 這樣可以避免在每次函式呼叫時都重新建立連線，提高效率。
 client = openai.OpenAI(api_key=openai_api_key)
 
 
@@ -54,9 +47,8 @@ DAILY_OTHER_PART_TEST_LIMIT = 3
 EXCHANGE_POINTS_FOR_MIXED_TEST = 50
 EXCHANGE_POINTS_FOR_OTHER_PART_TEST = 20
 
-
 logging.basicConfig(level=logging.INFO)
-# 將您的主頁視圖函式更新為此
+
 def home(request):
     """
     渲染主頁面，並在頁面上隨機顯示每日片語，同時傳遞用戶資訊。
@@ -201,48 +193,6 @@ def register_view(request):
 
 def test_page(request):
     return render(request, 'test.html')
-
-def reading_test(request):
-    # 隨機抽取一篇已審核的文章
-    passages = ReadingPassage.objects.filter(is_approved=True)  # 假設有 is_approved 欄位標示審核狀態
-    if not passages.exists():
-        return render(request, 'reading_test.html', {'error': '目前沒有已審核的文章'})
-
-    passage = random.choice(passages)
-
-    # 取得該文章的所有題目
-    questions = Question.objects.filter(passage=passage)
-
-    # 將資料包成 dict 傳給模板
-    passage_data = {
-        'title': passage.title,
-        'content': passage.content,
-        'topic': passage.topic,
-        'word_count': passage.word_count,
-        'reading_level': passage.reading_level,
-    }
-
-    # 將題目轉成 list of dict，方便 JS 使用
-    questions_data = []
-    for q in questions:
-        questions_data.append({
-            'question_id': q.question_id,
-            'question_text': q.question_text,
-            'option_a_text': q.option_a_text,
-            'option_b_text': q.option_b_text,
-            'option_c_text': q.option_c_text,
-            'option_d_text': q.option_d_text,
-            'difficulty_level': q.difficulty_level,
-        })
-
-    # 把題目序列化成JSON字串，安全傳到模板
-    questions_json = json.dumps(questions_data)
-
-    return render(request, 'reading_test.html', {
-        'passage': passage_data,
-        'questions_json': questions_json,
-    })
-
 
 @csrf_exempt
 @require_POST
@@ -495,13 +445,13 @@ def test_result(request):
     
     return render(request, 'result.html', context)
 
-def get_daily_record_and_counts(user):
-    """
-    取得使用者當天的每日測驗紀錄。
-    """
-    today = timezone.localdate(timezone.now())
-    record, created = DailyTestRecord.objects.get_or_create(user=user, date=today)
-    return record, record.mixed_test_count, record.other_part_test_count
+# def get_daily_record_and_counts(user):
+#     """
+#     取得使用者當天的每日測驗紀錄。
+#     """
+#     today = timezone.localdate(timezone.now())
+#     record, created = DailyTestRecord.objects.get_or_create(user=user, date=today)
+#     return record, record.mixed_test_count, record.other_part_test_count
 
 # 獲取當前台灣日期
 def get_taiwan_today():
@@ -1368,13 +1318,8 @@ def relation_map_view(request, word=None):
 
 
 def get_word_relations_by_ai(request, word):
-    """
-    使用 OpenAI API 為指定的單字找到翻譯、音標與多層同義詞（英文）。
-    支援最多三層。
-    """
+
     try:
-        # 在這裡直接使用已經建立好的全域 client 變數即可
-        # 無須再用 os.getenv() 或任何變數傳遞
         
         prompt_text = f"""
         Please provide information for the English word: {word}

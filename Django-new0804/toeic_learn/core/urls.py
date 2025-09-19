@@ -52,8 +52,6 @@ urlpatterns = [
     ), name='password_reset_complete'),
 
     path('test/', views.test_page, name='test'),
-    path('reading_test/', views.reading_test, name='reading_test'),
-    path('reading_test/<int:passage_id>/', views.reading_test, name='reading_test_detail'),
     path("logout/", views.logout_view, name="logout"),
     path('record/', views.record, name='record'),
     path('get-points-history/', views.get_points_history, name='get_points_history'),
@@ -71,7 +69,6 @@ urlpatterns = [
     path('relation-map/', views.relation_map_view, name='relation_map'),
     path('relation-map/<str:word>/', views.relation_map_view, name='relation_map_with_word'),
     path('api/get_word_relations/<str:word>/', views.get_word_relations_by_ai, name='get_word_relations'),
-    # path('exam/part/<int:part_number>/', views.exam_part_view, name='exam_part_view'),
     path('api/update_exam_status/', views.update_exam_status, name='update_exam_status'),
     path('api/chatbot/vocabulary/', views.get_daily_vocabulary, name='get_daily_vocabulary'),
     path('api/chatbot/mark-familiar/', views.mark_word_as_familiar, name='mark_word_as_familiar'),

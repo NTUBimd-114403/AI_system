@@ -5,8 +5,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>單字關聯地圖</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="{% static 'css/reading_test.css' %}">
+<link rel="stylesheet" href="{% static 'css/common.css' %}">
+<link rel="stylesheet" href="{% static 'css/word-map.css' %}">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
 body { font-family: 'Noto Sans TC', sans-serif; }
@@ -14,21 +15,77 @@ body { font-family: 'Noto Sans TC', sans-serif; }
 @keyframes spin { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
 </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+<div class="header">
+        <button class="menu-btn" id="menu-btn">☰</button>
+        <h1>TOEIC學習平台</h1>        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div class="nav-buttons">
+            <a href="{% url 'home' %}" target="_self">
+                <button class="nav-btn {% if request.path == '/' %}current{% endif %}">
+                    <i class="fas fa-home"></i> 首頁
+                </button>
+            </a>
 
-<div class="w-full max-w-2xl bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-    <h1 class="text-3xl font-bold text-gray-800 text-center mb-6">單字關聯地圖</h1>
-    
-    <div class="flex items-center space-x-2 mb-6">
-        <input type="text" id="wordInput" placeholder="輸入單字，例如 'happy'" class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <button id="searchButton" class="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md">搜尋</button>
-    </div>
+            <a href="{% url 'test' %}" target="_self">
+                <button class="nav-btn {% if request.path == '/test/' %}current{% endif %}">
+                    <i class="fas fa-file-alt"></i> 測驗平台
+                </button>
+            </a>
 
-    <div id="resultContainer" class="min-h-[200px] flex flex-col justify-center items-center">
-        <p id="message" class="text-gray-500 text-center">輸入單字並點擊搜尋以查看其相似詞。</p>
+            {% if user.is_authenticated %}
+              <a href="{% url 'relation_map' %}" target="_self">
+        <button class="nav-btn {% if request.path == '/relation-map/' %}current{% endif %}">
+            <i class="fas fa-project-diagram"></i> 單字關聯地圖
+        </button>
+    </a>
+                <a href="{% url 'history' %}" target="_self">
+                    <button class="nav-btn {% if request.path == '/history/' %}current{% endif %}">
+                        <i class="fas fa-history"></i> 歷史單字
+                    </button>
+                </a>
+                <a href="{% url 'record' %}" target="_self">
+                    <button class="nav-btn {% if request.path == '/record/' %}current{% endif %}">
+                        <i class="fas fa-user"></i> 學習歷程
+                    </button>
+                </a>
+                <a href="{% url 'faq' %}" target="_self">
+                <button class="nav-btn {% if request.path == '/faq/' %}current{% endif %}">
+                    <i class="fas fa-question-circle"></i> 常見問題
+                </button>
+            </a>
+                <a href="{% url 'profile-settings' %}" target="_self">
+                    <button class="nav-btn {% if request.path == '/profile-settings/' %}current{% endif %}">
+                        <i class="fas fa-cog"></i> 歡迎, {{ user.nickname }}
+                    </button>
+                </a>
+                <form id="logout-form" action="{% url 'logout' %}" method="POST" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-btn">
+                        <i class="fas fa-sign-out-alt"></i> 登出
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" target="_self">
+                    <button class="nav-btn {% if request.path == '/login/' %}current{% endif %}">
+                        <i class="fas fa-user"></i> 會員註冊/登入
+                    </button>
+                </a>
+            {% endif %}
+        </div>
     </div>
-</div>
-    <a href="{% url 'home' %}" id="backButton">回到首頁</a>
+<body>
+
+<main class="word-map-container">
+    <div class="word-map-card">
+        <h1 class="word-map-title">單字關聯地圖</h1>
+        <div class="word-map-search">
+            <input type="text" id="wordInput" placeholder="輸入單字，例如 'happy'" class="word-map-input">
+            <button id="searchButton" class="word-map-button">搜尋</button>
+        </div>
+        <div id="resultContainer" class="word-map-result">
+            <p id="message" class="word-map-message">輸入單字並點擊搜尋以查看其相似詞。</p>
+        </div>
+    </div>
+</main>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -50,29 +107,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchWordRelations(word){
-        resultContainer.innerHTML = `<div class="flex flex-col items-center"><div class="spinner"></div><p class="mt-4 text-gray-500 text-center">載入中...</p></div>`;
+        resultContainer.innerHTML = `<div class="word-map-loading"><div class="spinner"></div><p class="word-map-loading-text">載入中...</p></div>`;
         try{
             const response = await fetch(`/api/get_word_relations/${word}/`);
             if(!response.ok) throw new Error(`後端錯誤（${response.status}）`);
             const data = await response.json();
-            if(data.error){ resultContainer.innerHTML=`<p class="text-red-500 text-center">${data.error}</p>`; return; }
+            if(data.error){ resultContainer.innerHTML=`<p class="word-map-error">${data.error}</p>`; return; }
             renderResults(data);
-        }catch(e){ resultContainer.innerHTML=`<p class="text-red-500 text-center">錯誤: ${e.message}</p>`; console.error(e); }
+        }catch(e){ resultContainer.innerHTML=`<p class="word-map-error">錯誤: ${e.message}</p>`; console.error(e); }
     }
 
     function renderResults(data){
         resultContainer.innerHTML='';
 
         const wordCard = document.createElement('div');
-        wordCard.className='bg-white p-6 rounded-xl border border-gray-300 shadow-sm w-full';
+        wordCard.className='word-map-result-card';
         wordCard.innerHTML=`
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-3xl font-bold text-indigo-700">${data.source_word}</h2>
-                <span class="text-sm text-gray-500">${data.pronunciation||''}</span>
+            <div class="word-map-header">
+                <h2 class="word-map-word">${data.source_word}</h2>
+                <span class="word-map-pronunciation">${data.pronunciation||''}</span>
             </div>
-            <p class="text-lg text-gray-600 mb-6">${data.translation||''}</p>
-            <h3 class="text-xl font-semibold text-gray-700 border-b pb-2 mb-4">相似詞地圖</h3>
-            <div id="graph" class="w-full" style="height:500px;"></div>
+            <p class="word-map-translation">${data.translation||''}</p>
+            <h3 class="word-map-subtitle">相似詞地圖</h3>
+            <div id="graph" class="word-map-graph" style="height:500px;"></div>
         `;
         resultContainer.appendChild(wordCard);
 
@@ -157,5 +214,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 </script>
+<footer class="footer">
+        <div class="footer-container">
+            <div class="contact-us">
+                <h3>聯絡我們</h3>
+                <ul>
+                    <li><i class="fas fa-phone"></i><a href="tel:02 3322 2777"> 電話：02 3322 2777</a></li>
+                    <li><i class="fas fa-map"></i><a href="https://maps.app.goo.gl/3NMVwufcbbTrfQNz6" target="_blank"> 地址：100台北市中正區濟南路一段321號</a></li>
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d14459.01851827243!2d121.5254698!3d25.0423998!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442a970a11a84ad%3A0x58e05f2528812097!2z5ZyL56uL6Ie65YyX5ZWG5qWt5aSn5a24!5e0!3m2!1szh-TW!2stw!4v1728891709611!5m2!1szh-TW!2stw"
+                        height="250"
+                        style="border:0;"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 TOEIC學習平台 版權所有</p>
+        </div>
+    </footer>
 </body>
 </html>
