@@ -1,27 +1,25 @@
 import os
 import json
 import random
-from datetime import timedelta
-from datetime import datetime
+import logging
+from datetime import datetime, date, timedelta
 import openai
 from django.conf import settings
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse,Http404
+from django.http import HttpResponse, JsonResponse, Http404
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, get_user_model
+from django.contrib.auth import authenticate, login, logout, get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Count, Q, F, FloatField, ExpressionWrapper
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
 from django.utils import timezone
-from django.contrib.auth import logout
-import logging
-from django.db import transaction
-from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth import update_session_auth_hash
-from datetime import date
+
 from .forms import RegisterForm
+
 from .models import (
     ReadingPassage, Question, QUESTION_CATEGORY_CHOICES, UserAnswer,
     ExamResult, Exam, ExamQuestion, ExamSession, DailyVocabulary,
@@ -1352,7 +1350,6 @@ def get_word_relations_by_ai(request, word):
         - Do not include Chinese in synonyms.
         """
         
-        # 由於 client 已經在檔案頂部建立，你可以直接呼叫其方法
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": prompt_text}],

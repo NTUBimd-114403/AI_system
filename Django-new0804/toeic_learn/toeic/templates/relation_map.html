@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>單字關聯地圖</title>
+<title>欸！愛多益 - 單字關聯地圖</title>
 <link rel="stylesheet" href="{% static 'css/common.css' %}">
 <link rel="stylesheet" href="{% static 'css/word-map.css' %}">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
@@ -17,7 +17,7 @@ body { font-family: 'Noto Sans TC', sans-serif; }
 </head>
 <div class="header">
         <button class="menu-btn" id="menu-btn">☰</button>
-        <h1>TOEIC學習平台</h1>        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <h1>欸！愛多益</h1>        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <div class="nav-buttons">
             <a href="{% url 'home' %}" target="_self">
                 <button class="nav-btn {% if request.path == '/' %}current{% endif %}">
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         </div>
         <div class="footer-bottom">
-            <p>© 2025 TOEIC學習平台 版權所有</p>
+            <p>© 2025 欸！愛多益 版權所有</p>
         </div>
     </footer>
 </body>
