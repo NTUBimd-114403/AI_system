@@ -1,0 +1,463 @@
+{
+  "name": "part4",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.elevenlabs.io/v1/text-to-speech/{{$json.voiceId}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Accept\": \"audio/mpeg\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"text\": \"{{ $json.originalData.listening_material.transcript }}\",\n  \"model_id\": \"eleven_multilingual_v2\",\n  \"voice_settings\": {\n    \"stability\": 0.5,\n    \"similarity_boost\": 0.75,\n    \"speed\" : 0.95\n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "=data"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -304,
+        -480
+      ],
+      "id": "08edf297-4c35-4ef4-b7ed-19f766575a11",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Rd4CT48GCzm2U7ax",
+          "name": "11lab"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "object",
+        "operation": "create",
+        "bucketName": "114system",
+        "objectName": "=part4/{{ $json.originalData.listening_material.material_id }}.mp3",
+        "createData": {
+          "acl": "[]"
+        },
+        "createQuery": {},
+        "encryptionHeaders": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.googleCloudStorage",
+      "typeVersion": 1,
+      "position": [
+        -896,
+        -272
+      ],
+      "id": "4676ae45-1bb6-4d06-ba0c-8c9e18ad0150",
+      "name": "Create an object",
+      "retryOnFail": true,
+      "credentials": {
+        "googleCloudStorageOAuth2Api": {
+          "id": "q8pKB7gkNWCcYjJG",
+          "name": "Google Cloud Storage account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function pickRandom(arr) {\n  return arr[Math.floor(Math.random() * arr.length)];\n}\n\nconst voicePools = {\n  american: [\"ZIlrSGI4jZqobxRKprJz\", \"f5HLTX707KIM4SzJYzSz\", \"lxYfHSkYm1EzQzGhdbfc\"],\n  british:  [\"u8GDilEiJPUbRk87Lcqs\", \"ZF6FPAbjXT4488VcRRnw\", \"mZ8K1MPRiT5wDQaasg3i\"],\n  australian: [\"Ho8lEgLAUvibG7H3G3TK\", \"WLKp2jV6nrS8aMkPPDRO\", \"aEO01A4wXwd1O8GPgGlF\"]\n};\n\n// 取得輸入資料\nconst data = $json.data;\n\nif (!data) {\n  throw new Error(\"❌ 缺少 data，請檢查上個節點輸出\");\n}\nif (!data.questions || data.questions.length === 0) {\n  throw new Error(\"❌ data.questions 不存在或為空\");\n}\n\n// 隨機選口音 & 對應 voiceId\nconst accents = Object.keys(voicePools);\nconst randomAccent = pickRandom(accents);\nconst randomVoiceId = pickRandom(voicePools[randomAccent]);\n\n// 覆寫 accent\ndata.listening_material.accent = randomAccent;\n\n// 取第一題（或你可以隨機挑一題）\nconst question = data.questions[0];\n\nreturn [{\n  json: {\n    voiceId: randomVoiceId,\n    accent: randomAccent,\n    originalData: data\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -512,
+        -480
+      ],
+      "id": "20251206-b833-4d85-91b6-10896cd1638c",
+      "name": "隨機選擇voiced_id"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {
+          "includeUnpaired": false
+        }
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -704,
+        -272
+      ],
+      "id": "8f72c625-5aa9-483b-b1f3-3c72023a7dcd",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const DEFAULT_BUCKET = '114system';\n\nfunction formatDate(date) {\n  return date.toISOString().slice(0, 19).replace('T', ' ');\n}\nconst now = formatDate(new Date());\n\nconst out = [];\n\nfor (const it of items) {\n  const j = it.json || {};\n\n  // 只處理「有 originalData」的那筆\n  if (!j.originalData) continue;\n\n  const data = j.originalData || {};\n  const mat = { ...(data.listening_material || {}) };\n  let qs = Array.isArray(data.questions) ? data.questions : [];\n\n  const bucket = j.bucket || DEFAULT_BUCKET;\n  const name = j.name || (mat.material_id ? `part4/${mat.material_id}.mp3` : null);\n\n  if (name) {\n    mat.audio_url = `https://storage.googleapis.com/${bucket}/${encodeURI(name)}`;\n  }\n\n  mat.question_type = \"listen\";\n  mat.is_approved = 0;\n  mat.created_at = now;\n  mat.updated_at = now;\n\n  qs = qs.map(q => ({\n    ...q,\n    passage_id: null,\n    question_image_url: null,\n    created_at: now,\n    updated_at: now\n  }));\n\n  out.push({\n    json: {\n      toeic_listeningmaterial: mat,\n      toeic_questions: qs\n    }\n  });\n}\n\n// ⚠️ 保證只輸出處理後的 JSON\nreturn out.length > 0 ? [out[out.length - 1]] : [];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -512,
+        -272
+      ],
+      "id": "e1af06f5-859f-4fbb-97e2-141db1fe8447",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/app/json/toeic_part4_db_ready.jsonl",
+        "options": {
+          "append": true
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        -96
+      ],
+      "id": "05c5eadb-f24c-4ba2-a6cd-7be9c64a26ee",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "jsCode": "const jsonlData = items.map(i => JSON.stringify(i.json)).join('\\n');\n\n// 回傳一個 binary 項目（不管有幾筆輸入，都只輸出一個）\nreturn [{\n  binary: {\n    data: {\n      data: Buffer.from(jsonlData, 'utf-8'),\n      mimeType: 'application/jsonl',\n      fileName: 'toeic_part4.jsonl'\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -896,
+        -96
+      ],
+      "id": "4ba6b58d-ccf3-4202-93c0-e87498ee4ab9",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -896,
+        -480
+      ],
+      "id": "8b3a52ab-4cb4-492a-b822-96e8ba2f7683",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11430/generate_part4",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Content-Type\": \"application/json\"\n}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -704,
+        -480
+      ],
+      "id": "07cdddfb-22f4-43e2-a76a-25a314a3a774",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": {
+          "__rl": true,
+          "value": "toeic_listeningmaterial",
+          "mode": "list",
+          "cachedResultName": "toeic_listeningmaterial"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "material_id",
+        "valueToMatchOn": "={{ $json.toeic_listeningmaterial.material_id }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "audio_url",
+              "value": "={{ $json.toeic_listeningmaterial.audio_url }}"
+            },
+            {
+              "column": "transcript",
+              "value": "={{ $json.toeic_listeningmaterial.transcript }}"
+            },
+            {
+              "column": "accent",
+              "value": "={{ $json.toeic_listeningmaterial.accent }}"
+            },
+            {
+              "column": "topic",
+              "value": "={{ $json.toeic_listeningmaterial.topic }}"
+            },
+            {
+              "column": "listening_level",
+              "value": "={{ $json.toeic_listeningmaterial.listening_level }}"
+            },
+            {
+              "column": "is_approved",
+              "value": "={{ $json.toeic_listeningmaterial.is_approved }}"
+            },
+            {
+              "column": "created_at",
+              "value": "={{ $json.toeic_listeningmaterial.created_at }}"
+            },
+            {
+              "column": "updated_at",
+              "value": "={{ $json.toeic_listeningmaterial.updated_at }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -304,
+        -272
+      ],
+      "id": "c7c23dac-91c1-467f-8725-c650bba7ba00",
+      "name": "存入聽力表",
+      "credentials": {
+        "mySql": {
+          "id": "1IRe8k68oOuihi6L",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": {
+          "__rl": true,
+          "value": "toeic_question",
+          "mode": "list",
+          "cachedResultName": "toeic_question"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "question_id",
+        "valueToMatchOn": "={{ $json.toeic_questions[0].question_id }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "question_type",
+              "value": "=listen"
+            },
+            {
+              "column": "part",
+              "value": "=2"
+            },
+            {
+              "column": "question_text",
+              "value": "={{ $json.toeic_questions[0].question_text }}"
+            },
+            {
+              "column": "option_a_text",
+              "value": "={{ $json.toeic_questions[0].option_a_text }}"
+            },
+            {
+              "column": "option_b_text",
+              "value": "={{ $json.toeic_questions[0].option_b_text }}"
+            },
+            {
+              "column": "option_c_text",
+              "value": "={{ $json.toeic_questions[0].option_c_text }}"
+            },
+            {
+              "column": "is_correct",
+              "value": "={{ $json.toeic_questions[0].is_correct }}"
+            },
+            {
+              "column": "difficulty_level",
+              "value": "=3"
+            },
+            {
+              "column": "explanation",
+              "value": "={{ $json.toeic_questions[0].explanation }}"
+            },
+            {
+              "column": "created_at",
+              "value": "={{ $json.toeic_questions[0].created_at }}"
+            },
+            {
+              "column": "updated_at",
+              "value": "={{ $json.toeic_questions[0].updated_at }}"
+            },
+            {
+              "column": "question_category",
+              "value": "={{ $json.toeic_questions[0].question_category }}"
+            },
+            {
+              "column": "material_id",
+              "value": "={{ $json.toeic_questions[0].material_id }}"
+            },
+            {
+              "column": "passage_id",
+              "value": "={{ $json.toeic_questions[0].passage_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -288,
+        -96
+      ],
+      "id": "d17ce210-25a8-4c14-8c84-6235697c0089",
+      "name": "存入問題表",
+      "credentials": {
+        "mySql": {
+          "id": "1IRe8k68oOuihi6L",
+          "name": "MySQL account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Create an object",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "隨機選擇voiced_id": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an object": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "存入聽力表",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "存入問題表",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "隨機選擇voiced_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "31bd73f2-7ab9-49ec-990d-73d446bbb726",
+  "meta": {
+    "instanceId": "56d5fc753739ca819a95a90ca86e7ee4890379e37fd5e90d1398ca6f4ac9b444"
+  },
+  "id": "w0VtJXRBwj4rajk0",
+  "tags": []
+}
