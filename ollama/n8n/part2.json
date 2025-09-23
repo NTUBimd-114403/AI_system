@@ -7,7 +7,7 @@
           "interval": [
             {
               "field": "minutes",
-              "minutesInterval": 10
+              "minutesInterval": 30
             }
           ]
         }
@@ -103,8 +103,8 @@
       "type": "n8n-nodes-base.googleCloudStorage",
       "typeVersion": 1,
       "position": [
-        -416,
-        128
+        -464,
+        112
       ],
       "id": "a54398a5-8158-4ad3-ad93-c3f2cdb122fd",
       "name": "Create an object",
@@ -118,7 +118,7 @@
     },
     {
       "parameters": {
-        "jsCode": "function pickRandom(arr) {\n  return arr[Math.floor(Math.random() * arr.length)];\n}\n\n// 1. 隨機選口音\nconst accents = [\"american\", \"british\", \"australian\"];\nconst randomAccent = pickRandom(accents);\n\n// 2. 隨機選 voice_id\nconst voicePools = {\n  american: [\"ZIlrSGI4jZqobxRKprJz\", \"f5HLTX707KIM4SzJYzSz\", \"lxYfHSkYm1EzQzGhdbfc\"],\n  british: [\"u8GDilEiJPUbRk87Lcqs\", \"ZF6FPAbjXT4488VcRRnw\", \"mZ8K1MPRiT5wDQaasg3i\"],\n  australian: [\"Ho8lEgLAUvibG7H3G3TK\", \"WLKp2jV6nrS8aMkPPDRO\", \"aEO01A4wXwd1O8GPgGlF\"]\n};\n\nconst randomVoiceId = pickRandom(voicePools[randomAccent]);\n\n// 3. 組合發音文本\nconst data = $json.data;\nconst material = data.toeic_listeningmaterial;\nconst question = data.toeic_questions[0];\n\nconst ttsText = `Question ${question.question_text}  A: ${question.option_a_text}  B: ${question.option_b_text}  C: ${question.option_c_text}`;\n\n// 輸出到下一節點\nreturn [{\n  json: {\n    ttsText,\n    voiceId: randomVoiceId,\n    accent: randomAccent,\n    originalData: data\n  }\n}];\n"
+        "jsCode": "function pickRandom(arr) {\n  return arr[Math.floor(Math.random() * arr.length)];\n}\n\n// 1. 定義資料\nconst voicePools = {\n  american: [\"ZIlrSGI4jZqobxRKprJz\", \"f5HLTX707KIM4SzJYzSz\", \"lxYfHSkYm1EzQzGhdbfc\"],\n  british:  [\"u8GDilEiJPUbRk87Lcqs\", \"ZF6FPAbjXT4488VcRRnw\", \"mZ8K1MPRiT5wDQaasg3i\"],\n  australian: [\"Ho8lEgLAUvibG7H3G3TK\", \"WLKp2jV6nrS8aMkPPDRO\", \"aEO01A4wXwd1O8GPgGlF\"]\n};\n\n// 2. 抽選隨機口音與 voiceId\nconst accents = Object.keys(voicePools);\nconst randomAccent = pickRandom(accents);\nconst randomVoiceId = pickRandom(voicePools[randomAccent]);\n\n// 3. 取得原始資料\nconst data = $json.data;\ndata.toeic_listeningmaterial.accent = randomAccent;  // 更新 accent\n\nconst material = data.toeic_listeningmaterial;\nconst question = data.toeic_questions[0];  // 可改為多題支援\n\n// 4. 組合 TTS 文本\nconst ttsText = `Question: ${question.question_text} A: ${question.option_a_text} B: ${question.option_b_text} C: ${question.option_c_text} D: ${question.option_d_text}`;\n\n// 5. 輸出至下一節點\nreturn [{\n  json: {\n    ttsText,\n    voiceId: randomVoiceId,\n    accent: randomAccent,\n    originalData: data\n  }\n}];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -140,21 +140,21 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -144,
-        128
+        -256,
+        112
       ],
       "id": "3f1d9065-6a08-4b55-a438-1fd85841d778",
       "name": "Merge"
     },
     {
       "parameters": {
-        "jsCode": "const DEFAULT_BUCKET = '114system';\nconst PREFIX = 'part2';\n\n// 把時間轉成 MySQL DATETIME 格式 (YYYY-MM-DD HH:MM:SS)\nfunction formatDate(date) {\n  return date.toISOString().slice(0, 19).replace('T', ' ');\n}\n\nconst now = formatDate(new Date());\n\nconst out = [];\n\nfor (const it of items) {\n  const j = it.json || {};\n\n  // 原始資料（經過 Merge 的 Input 1）\n  const data = j.data || {};\n  const mat  = { ...(data.toeic_listeningmaterial || {}) };\n  let qs     = Array.isArray(data.toeic_questions) ? data.toeic_questions : [];\n\n  // GCS metadata（經過 Merge 的 Input 2）\n  const bucket = j.bucket || DEFAULT_BUCKET;\n  const name   = j.name || (mat.material_id ? `${PREFIX}/${mat.material_id}.mp3` : null);\n\n  // 回填可播放 URL（保留 /，不要把它編成 %2F）\n  if (name) {\n    mat.audio_url = `https://storage.googleapis.com/${bucket}/${encodeURI(name)}`;\n    mat.transcript = $('隨機選擇voiced_id').first().json.ttsText;\n    mat.accent = $('隨機選擇voiced_id').first().json.originalData.toeic_listeningmaterial.accent\n    mat.question_type = \"listen\";\n  }\n\n  // 在 listening material 加上新欄位\n  mat.is_approved = 0;\n  mat.created_at = now;\n  mat.updated_at = now;\n\n  // 在每個 question 加上新欄位\n  qs = qs.map(q => ({\n    ...q,\n    created_at: now,\n    updated_at: now,\n  }));\n\n  out.push({\n    json: {\n      toeic_listeningmaterial: mat,\n      toeic_questions: qs,\n    }\n  });\n}\n\nreturn out;\n"
+        "jsCode": "// const DEFAULT_BUCKET = '114system';\n\n// function formatDate(date) {\n//   return date.toISOString().slice(0, 19).replace('T', ' ');\n// }\n// const now = formatDate(new Date());\n\n// const out = [];\n\n// for (const it of items) {\n//   const j = it.json || {};\n\n//   // 只處理「有 originalData」的那筆\n//   if (!j.originalData) continue;\n\n//   const data = j.originalData || {};\n//   const mat = { ...(data.toeic_listening_material || {}) };\n//   let qs = Array.isArray(data.toeic_questions) ? data.toeic_questions : [];\n\n//   const bucket = j.bucket || DEFAULT_BUCKET;\n//   const name = j.name || (mat.material_id ? `part4/${mat.material_id}.mp3` : null);\n\n//   if (name) {\n//     mat.audio_url = `https://storage.googleapis.com/${bucket}/${encodeURI(name)}`;\n//   }\n//   mat.transcript = $input.first().json.originalData.toeic_listeningmaterial.transcript;\n//   mat.accent = $input.first().json.originalData.toeic_listeningmaterial.accent;\n//   mat.topic = $input.first().json.originalData.toeic_listeningmaterial.topic;\n//   mat.speaker_count = $input.first().json.originalData.toeic_listeningmaterial.speaker_count;\n//   mat.material_id = $input.first().json.originalData.toeic_listeningmaterial.material_id;\n//   mat.question_type = \"listen\";\n//   mat.is_approved = 0;\n//   mat.created_at = now;\n//   mat.updated_at = now;\n\n//   qs = qs.map(q => ({\n//     ...q,\n//     passage_id: null,\n//     question_image_url: null,\n//     created_at: now,\n//     updated_at: now\n//   }));\n\n//   out.push({\n//     json: {\n//       toeic_listeningmaterial: mat,\n//       toeic_questions: qs\n//     }\n//   });\n// }\n\n// // ⚠️ 保證只輸出處理後的 JSON\n// return out.length > 0 ? [out[out.length - 1]] : [];\nconst DEFAULT_BUCKET = '114system';\n\nfunction formatDate(date) {\n  return date.toISOString().slice(0, 19).replace('T', ' ');\n}\nconst now = formatDate(new Date());\n\nconst out = [];\n\nfor (const it of items) {\n  const j = it.json || {};\n\n  // 只處理「有 originalData」的那筆\n  if (!j.originalData) continue;\n\n  const data = j.originalData || {};\n  const mat = { ...(data.toeic_listeningmaterial || {}) };\n  let qs = Array.isArray(data.toeic_questions) ? data.toeic_questions : [];\n\n  const bucket = j.bucket || DEFAULT_BUCKET;\n  const name = j.name || (mat.material_id ? `part4/${mat.material_id}.mp3` : null);\n\n  if (name) {\n    mat.audio_url = `https://storage.googleapis.com/${bucket}/${encodeURI(name)}`;\n  }\n\n  mat.question_type = \"listen\";\n  mat.is_approved = 0;\n  mat.created_at = now;\n  mat.updated_at = now;\n\n  qs = qs.map(q => ({\n    ...q,\n    passage_id: null,\n    question_image_url: null,\n    created_at: now,\n    updated_at: now\n  }));\n\n  out.push({\n    json: {\n      toeic_listeningmaterial: mat,\n      toeic_questions: qs\n    }\n  });\n}\n\n// ⚠️ 保證只輸出處理後的 JSON\nreturn out.length > 0 ? [out[out.length - 1]] : [];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        48,
-        128
+        -112,
+        112
       ],
       "id": "68d106a6-306b-4c11-af27-60558f37beda",
       "name": "Code"
@@ -171,8 +171,8 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1,
       "position": [
-        448,
-        464
+        -224,
+        336
       ],
       "id": "26996c1f-e75e-4f68-a975-583adf85a5fa",
       "name": "Read/Write Files from Disk"
@@ -230,8 +230,8 @@
       "type": "n8n-nodes-base.mySql",
       "typeVersion": 2.5,
       "position": [
-        448,
-        80
+        80,
+        112
       ],
       "id": "5e2a5b2d-1db6-4a19-bf52-03f7bbe18f84",
       "name": "Insert or update rows in a table",
@@ -319,8 +319,8 @@
       "type": "n8n-nodes-base.mySql",
       "typeVersion": 2.5,
       "position": [
-        448,
-        256
+        80,
+        320
       ],
       "id": "4c63a5df-fe89-4a80-889a-c6549fca3527",
       "name": "Insert or update rows in a table1",
@@ -338,8 +338,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        208,
-        368
+        -464,
+        272
       ],
       "id": "520bbfb4-acfa-4a0d-9008-9953d87baa62",
       "name": "Code1"
@@ -365,11 +365,6 @@
             "node": "隨機選擇voiced_id",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
@@ -390,6 +385,11 @@
         [
           {
             "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
             "type": "main",
             "index": 0
           }
@@ -460,7 +460,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "279f907b-2ecc-43ed-8ae4-feb0a0802690",
+  "versionId": "2dd8c6a4-85a1-4d7a-bc10-aad2c8ee928c",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "56d5fc753739ca819a95a90ca86e7ee4890379e37fd5e90d1398ca6f4ac9b444"
