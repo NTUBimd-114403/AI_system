@@ -1,0 +1,93 @@
+services:
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    
+
+  n8n:
+    image: n8nio/n8n
+    ports:
+      - "5678:5678"
+    volumes:
+      - ~/.n8n:/home/node/.n8n
+      - ./data:/data
+      - ./json:/app/json
+      - ./chroma_db:/app/chroma_db
+    depends_on:
+      - ollama
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      
+  part6:
+    build: ./part6
+    ports:
+      - "11436:11436"
+    volumes:
+      - ./data:/data
+      - ./chroma_db:/app/chroma_db
+      - ./json:/app/json
+    env_file:
+      - .env
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=gpt-4o-mini
+      - OPENAI_BASE_URL=https://api.openai.com/v1
+
+  part5:
+    build: ./part5
+    ports:
+      - "11435:11435"
+    volumes:
+      - ./data:/data
+      - ./chroma_db:/app/chroma_db
+      - ./json:/app/json
+
+  part2:
+    build: ./part2
+    ports:
+      - "11432:11432"
+    volumes:
+      - ./data:/data
+      - ./chroma_db:/app/chroma_db
+      - ./json:/app/json
+    env_file:
+      - .env
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=gpt-4o-mini
+      - OPENAI_BASE_URL=https://api.openai.com/v1
+    
+  part3:
+    build: ./part3
+    ports:
+      - "11433:11433"
+    volumes:
+      - ./data:/data
+      - ./chroma_db:/app/chroma_db
+      - ./json:/app/json
+    env_file:
+      - .env
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=gpt-4o-mini
+      - OPENAI_BASE_URL=https://api.openai.com/v1
+
+  part4:
+    build: ./part4
+    ports:
+      - "11430:11430"
+    volumes:
+      - ./data:/data
+      - ./chroma_db:/app/chroma_db
+      - ./json:/app/json
+    env_file:
+      - .env
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=gpt-4o-mini
+      - OPENAI_BASE_URL=https://api.openai.com/v1
+volumes:
+  ollama_data:

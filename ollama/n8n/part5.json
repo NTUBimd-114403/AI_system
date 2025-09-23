@@ -1,0 +1,229 @@
+{
+  "name": "part5",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -848,
+        -320
+      ],
+      "id": "e9ba79ab-970c-4a93-8ffe-4fd8b178f595",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11435/generate_part5",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Content-Type\": \"application/json\"\n}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -640,
+        -320
+      ],
+      "id": "a6b35d4f-ed4c-4bf0-896c-66d9debfa966",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 將 JSON 轉字串\nconst jsonContent = JSON.stringify(items[0].json, null, 0) + \"\\n\";\n\n// 存入 binary\nitems[0].binary = {\n    data: {\n        data: Buffer.from(jsonContent, 'utf8'),\n        mimeType: 'application/json'\n    }\n};\n\nreturn items;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        -320
+      ],
+      "id": "f0550ea6-3504-4981-bbfb-93f3c0aecb41",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a0f491c2-0d79-4909-859f-5c77a606d010",
+              "name": "questions",
+              "value": "={{ $json.data.questions }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        -320
+      ],
+      "id": "8df257dc-21d6-430d-9b6d-89f329ccd86f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/app/json/toeic_part5_db_ready.jsonl",
+        "options": {
+          "append": true
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        176,
+        -320
+      ],
+      "id": "ffbcda48-62f4-41ab-93f6-c991dc2171f8",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": {
+          "__rl": true,
+          "value": "toeic_question",
+          "mode": "list",
+          "cachedResultName": "toeic_question"
+        },
+        "columnToMatchOn": "question_id",
+        "options": {
+          "replaceEmptyStrings": false
+        }
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -208,
+        -128
+      ],
+      "id": "e40c577e-176c-4efe-becc-337ae5ccbe7d",
+      "name": "Insert or update rows in a table",
+      "alwaysOutputData": false,
+      "credentials": {
+        "mySql": {
+          "id": "1IRe8k68oOuihi6L",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const q = item.json.data.questions;\n  return {\n    json: {\n      question_id: q.question_id,\n      question_type: q.question_type,\n      question_category: q.question_category,\n      question_text: q.question_text,\n      part: q.part,\n      option_a_text: q.option_a_text,\n      option_b_text: q.option_b_text,\n      option_c_text: q.option_c_text,\n      option_d_text: q.option_d_text,\n      is_correct: q.is_correct,\n      difficulty_level: q.difficulty_level,\n      explanation: q.explanation,\n      created_at: q.created_at,\n      updated_at: q.updated_at\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -432,
+        -320
+      ],
+      "id": "df428d75-a8b9-4227-bd9b-1349a597242c",
+      "name": "Code1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        []
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Insert or update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0fc2b848-d1ca-46d7-9ff7-da5458d7d351",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "56d5fc753739ca819a95a90ca86e7ee4890379e37fd5e90d1398ca6f4ac9b444"
+  },
+  "id": "fyB6qEgQQe4lU7Gx",
+  "tags": []
+}

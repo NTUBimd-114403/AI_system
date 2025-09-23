@@ -1,0 +1,147 @@
+[
+  {
+    "id": "part4_001",
+    "transcript": "Questions 1 through 3. Refer to the following telephone message.  Hello, Mr.Lee! This is Thomas from bks auto shop, calling you with some information about your car repair. I know we told you that it would take until next week to get the part we ordered, but we got the part early and I was able to finish the repair. We're going to be closing for the day in a few minutes, but you're welcome toget your caranytime tomorrow. If you need a ride to the shop tomorrow, let me know, and I can arrange one for you.",
+    "questions": [
+    {
+        "question": "What does the speaker say about the repair?",
+        "option": {
+          "A": "It is not required.",
+          "B": "It has been finished early.",
+          "C": "It will be inexpensive.",
+          "D": "It is covered by a warranty."
+        },
+        "answer": "B"
+      },
+      {
+        "question": "When can the listener pick up his car?",
+        "option": {
+          "A": "Today",
+          "B": "Tomorrow",
+          "C": "Next week",
+          "D": "In two weeks"
+        },
+        "answer": "B"
+      },
+      {
+        "question": "What does the speaker offer to do?",
+        "option": {
+          "A": "Look for a used part",
+          "B": "Refund the cost of a charge",
+          "C": "Send an invoice",
+          "D": "Arrange a ride"
+        },
+        "answer": "D"
+      }
+    ]
+  },
+  {
+    "id": "part4_002",
+    "transcript": "Questions 4 through 6. Refer to the following announcement. Good afternoon everyone, I hope you're all doing well. We've seen a significant increase in online engagement, with our social media followers growing by 15% over the past month. This is fantastic news and shows that our efforts are paying off. Our next step is to launch a series of webinars aimed at educating our customers about the benefits of our products. The first webinar will be held next Tuesday at 10 AM. Lastly, I want to remind everyone about the annual charity event we are sponsoring. It will take place on September 15th, and we need volunteers to help with the event. If you're interested, please sign up with HR.",
+    "questions": [
+      {
+        "question": "What has increased by 15% over the past month?",
+        "option": {
+          "A": "Sales revenue",
+          "B": "Social media followers",
+          "C": "Customer satisfaction",
+          "D": "Product iventory"
+        },
+        "answer": "B"
+      },
+      {
+        "question": "What is the purpose of the upcoming webinars?",
+        "option": {
+          "A": "To launch a new product",
+          "B": "To educate customers about the benefits of products",
+          "C": "To train employees on new software",
+          "D": "To discuss company policies"
+        },
+        "answer": "B"
+      },
+      {
+        "question": "When is the annual charity event?",
+        "option": {
+          "A": "August 15th",
+          "B": "August 20th",
+          "C": "September 15th",
+          "D": "September 20th"
+        },
+        "answer": "C"
+      }
+    ]
+  },
+  {
+    "id": "part4_003",
+    "transcript": "Questions 7 through 9. Refer to the following talk. Okay. Before you start serving food, I want to let you know that the restaurant is a bit understaffed tonight. Tamara called me this afternoon to let me know that she has a cold, so I'm asking each of you to be in charge of one extra table tonight. Please also remember to tell each table of guests about our new menu special. It's a rice dish with assorted grilled vegetables. I think it'll be very popular because many of our customers have been asking from for more vegetarian options. That's all for tonight.",
+    "questions": [
+      {
+        "question": " What kind of business does the speaker work for?",
+        "option": {
+          "A": "A restaurant",
+          "B": "A supermarket",
+          "C": "A furniture store",
+          "D": "A fitness center"
+        },
+        "answer": "A"
+      },
+      {
+        "question": "Why does the speaker assign extra work to the listeners?",
+        "option": {
+          "A": "A deadline is approaching.",
+          "B": "A staff member is unwell.",
+          "C": "Many customers are expected.",
+          "D": "Equipment needs to be unpacked."
+        },
+        "answer": "B"
+      },
+      {
+        "question": "What does the speaker ask listeners to tell customers about?",
+        "option": {
+          "A": "New business hours",
+          "B": "Discount cards",
+          "C": "A special dish",
+          "D": "A holiday sale"
+        },
+        "answer": "C"
+      }
+    ]
+  },
+  {
+    "id": "part4_004",
+    "transcript": "Questions 10 through 12. Refer to the following excerpt from a meeting. So, I call this meeting to discuss our contract with Torland Advertising and to decide whether we should. Should continue to use them to develop our radio advertising materials. I had a discussion with their people yesterday, and i have to say, I'm a little concerned. They seem much more focused on cutting their costs than they are on, providing good quality advertising for us. Here's the thing if we decide to end this business relationship, we'll need to pay them for anything they've already developed. Please thake a minute to look at this contract with me. You;ll see that's part of the agreement we made.",
+    "questions": [
+      {
+        "question": "What bothers the man about Torland Advertising?",
+        "option": {
+          "A": "Their failure to meet deadlines",
+          "B": "Their problems with staffing",
+          "C": "Their request to revise a contract",
+          "D": "Their focus on cost cutting"
+        },
+        "answer": "D"
+      },
+      {
+        "question": "What does the man mean when he says, “Here’s the thing”?",
+        "option": {
+          "A": "He will demonstrate a product.",
+          "B": "He has forgotten a word.",
+          "C": "He has found what he was looking for.",
+          "D": "He will introduce a point to consider."
+        },
+        "answer": "D"
+      },
+      {
+        "question": "What are the listeners asked to look at?",
+        "option": {
+          "A": "A design idea",
+          "B": "A business contract",
+          "C": "An advertisement",
+          "D": "A budget"
+        },
+        "answer": "B"
+      }
+    ]
+  }
+]
+
