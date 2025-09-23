@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TOEIC學習平台 - 歷史單字</title>
+    <title>欸！愛多益 - 歷史單字</title>
     <link rel="stylesheet" href="{% static 'css/common.css' %}">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/history.css' %}">
@@ -13,7 +13,7 @@
 <body {% if not user.is_authenticated %}class="no-auth"{% endif %}>
     <div class="header">
         <button class="menu-btn" id="menu-btn">☰</button>
-        <h1>TOEIC學習平台</h1>      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <h1>欸！愛多益</h1>      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <div class="nav-buttons">
             <a href="{% url 'home' %}" target="_self">
                 <button class="nav-btn {% if request.path == '/' %}current{% endif %}">
@@ -169,7 +169,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>© 2025 TOEIC學習平台 版權所有</p>
+            <p>© 2025 欸！愛多益 版權所有</p>
         </div>
     </footer>
 

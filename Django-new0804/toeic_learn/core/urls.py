@@ -30,9 +30,6 @@ urlpatterns = [
     path('profile-settings/', views.profile_settings, name='profile-settings'),
     path('update-profile/', views.update_profile, name='update-profile'), # 確保此行存在
     path('change-password/', views.change_password, name='change-password'),
-    # path('accounts/', include('django.contrib.auth.urls')), # 註解此行以避免衝突
-    
-    # 增加密碼重設流程的 URL
     path('password_reset/', auth_views.PasswordResetView.as_view(
         template_name='password_reset_form.html',
         email_template_name='password_reset_email.html',
