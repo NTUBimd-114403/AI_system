@@ -1,0 +1,470 @@
+{
+  "name": "part2",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -496,
+        -112
+      ],
+      "id": "70c80b3f-73d5-41f1-bcf2-87a1b41a3342",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11432/generate_part2",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Content-Type\": \"application/json\"\n}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -304,
+        -112
+      ],
+      "id": "6d402f35-bc4d-4474-a919-9ee52c9d44f4",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.elevenlabs.io/v1/text-to-speech/{{$json.voiceId}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Accept\": \"audio/mpeg\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"text\": \"{{$json.ttsText}}\",\n  \"model_id\": \"eleven_multilingual_v2\",\n  \"voice_settings\": {\n    \"stability\": 0.5,\n    \"similarity_boost\": 0.75\n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "=data"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        48,
+        -112
+      ],
+      "id": "10c71c3d-95cb-4f71-acab-4a0c8fcacec4",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Rd4CT48GCzm2U7ax",
+          "name": "11lab"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "object",
+        "operation": "create",
+        "bucketName": "114system",
+        "objectName": "=part2/{{ $json.originalData.toeic_listeningmaterial.material_id }}.mp3",
+        "createData": {
+          "acl": "[]"
+        },
+        "createQuery": {},
+        "encryptionHeaders": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.googleCloudStorage",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        112
+      ],
+      "id": "a54398a5-8158-4ad3-ad93-c3f2cdb122fd",
+      "name": "Create an object",
+      "retryOnFail": true,
+      "credentials": {
+        "googleCloudStorageOAuth2Api": {
+          "id": "q8pKB7gkNWCcYjJG",
+          "name": "Google Cloud Storage account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function pickRandom(arr) {\n  return arr[Math.floor(Math.random() * arr.length)];\n}\n\n// 1. 定義資料\nconst voicePools = {\n  american: [\"ZIlrSGI4jZqobxRKprJz\", \"f5HLTX707KIM4SzJYzSz\", \"lxYfHSkYm1EzQzGhdbfc\"],\n  british:  [\"u8GDilEiJPUbRk87Lcqs\", \"ZF6FPAbjXT4488VcRRnw\", \"mZ8K1MPRiT5wDQaasg3i\"],\n  australian: [\"Ho8lEgLAUvibG7H3G3TK\", \"WLKp2jV6nrS8aMkPPDRO\", \"aEO01A4wXwd1O8GPgGlF\"]\n};\n\n// 2. 抽選隨機口音與 voiceId\nconst accents = Object.keys(voicePools);\nconst randomAccent = pickRandom(accents);\nconst randomVoiceId = pickRandom(voicePools[randomAccent]);\n\n// 3. 取得原始資料\nconst data = $json.data;\ndata.toeic_listeningmaterial.accent = randomAccent;  // 更新 accent\n\nconst material = data.toeic_listeningmaterial;\nconst question = data.toeic_questions[0];  // 可改為多題支援\n\n// 4. 組合 TTS 文本\nconst ttsText = `Question: ${question.question_text} A: ${question.option_a_text} B: ${question.option_b_text} C: ${question.option_c_text} D: ${question.option_d_text}`;\n\n// 5. 輸出至下一節點\nreturn [{\n  json: {\n    ttsText,\n    voiceId: randomVoiceId,\n    accent: randomAccent,\n    originalData: data\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -128,
+        -112
+      ],
+      "id": "549ad404-b080-487f-a996-6616f1cf6d4a",
+      "name": "隨機選擇voiced_id"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {
+          "includeUnpaired": false
+        }
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -256,
+        112
+      ],
+      "id": "3f1d9065-6a08-4b55-a438-1fd85841d778",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "// const DEFAULT_BUCKET = '114system';\n\n// function formatDate(date) {\n//   return date.toISOString().slice(0, 19).replace('T', ' ');\n// }\n// const now = formatDate(new Date());\n\n// const out = [];\n\n// for (const it of items) {\n//   const j = it.json || {};\n\n//   // 只處理「有 originalData」的那筆\n//   if (!j.originalData) continue;\n\n//   const data = j.originalData || {};\n//   const mat = { ...(data.toeic_listening_material || {}) };\n//   let qs = Array.isArray(data.toeic_questions) ? data.toeic_questions : [];\n\n//   const bucket = j.bucket || DEFAULT_BUCKET;\n//   const name = j.name || (mat.material_id ? `part4/${mat.material_id}.mp3` : null);\n\n//   if (name) {\n//     mat.audio_url = `https://storage.googleapis.com/${bucket}/${encodeURI(name)}`;\n//   }\n//   mat.transcript = $input.first().json.originalData.toeic_listeningmaterial.transcript;\n//   mat.accent = $input.first().json.originalData.toeic_listeningmaterial.accent;\n//   mat.topic = $input.first().json.originalData.toeic_listeningmaterial.topic;\n//   mat.speaker_count = $input.first().json.originalData.toeic_listeningmaterial.speaker_count;\n//   mat.material_id = $input.first().json.originalData.toeic_listeningmaterial.material_id;\n//   mat.question_type = \"listen\";\n//   mat.is_approved = 0;\n//   mat.created_at = now;\n//   mat.updated_at = now;\n\n//   qs = qs.map(q => ({\n//     ...q,\n//     passage_id: null,\n//     question_image_url: null,\n//     created_at: now,\n//     updated_at: now\n//   }));\n\n//   out.push({\n//     json: {\n//       toeic_listeningmaterial: mat,\n//       toeic_questions: qs\n//     }\n//   });\n// }\n\n// // ⚠️ 保證只輸出處理後的 JSON\n// return out.length > 0 ? [out[out.length - 1]] : [];\nconst DEFAULT_BUCKET = '114system';\n\nfunction formatDate(date) {\n  return date.toISOString().slice(0, 19).replace('T', ' ');\n}\nconst now = formatDate(new Date());\n\nconst out = [];\n\nfor (const it of items) {\n  const j = it.json || {};\n\n  // 只處理「有 originalData」的那筆\n  if (!j.originalData) continue;\n\n  const data = j.originalData || {};\n  const mat = { ...(data.toeic_listeningmaterial || {}) };\n  let qs = Array.isArray(data.toeic_questions) ? data.toeic_questions : [];\n\n  const bucket = j.bucket || DEFAULT_BUCKET;\n  const name = j.name || (mat.material_id ? `part4/${mat.material_id}.mp3` : null);\n\n  if (name) {\n    mat.audio_url = `https://storage.googleapis.com/${bucket}/${encodeURI(name)}`;\n  }\n\n  mat.question_type = \"listen\";\n  mat.is_approved = 0;\n  mat.created_at = now;\n  mat.updated_at = now;\n\n  qs = qs.map(q => ({\n    ...q,\n    passage_id: null,\n    question_image_url: null,\n    created_at: now,\n    updated_at: now\n  }));\n\n  out.push({\n    json: {\n      toeic_listeningmaterial: mat,\n      toeic_questions: qs\n    }\n  });\n}\n\n// ⚠️ 保證只輸出處理後的 JSON\nreturn out.length > 0 ? [out[out.length - 1]] : [];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        112
+      ],
+      "id": "68d106a6-306b-4c11-af27-60558f37beda",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/app/json/toeic_part2_db_ready.jsonl",
+        "dataPropertyName": "=data",
+        "options": {
+          "append": true
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        336
+      ],
+      "id": "26996c1f-e75e-4f68-a975-583adf85a5fa",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": {
+          "__rl": true,
+          "value": "toeic_listeningmaterial",
+          "mode": "list",
+          "cachedResultName": "toeic_listeningmaterial"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "material_id",
+        "valueToMatchOn": "={{ $json.toeic_listeningmaterial.material_id }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "audio_url",
+              "value": "={{ $json.toeic_listeningmaterial.audio_url }}"
+            },
+            {
+              "column": "transcript",
+              "value": "={{ $json.toeic_listeningmaterial.transcript }}"
+            },
+            {
+              "column": "accent",
+              "value": "={{ $json.toeic_listeningmaterial.accent }}"
+            },
+            {
+              "column": "topic",
+              "value": "={{ $json.toeic_listeningmaterial.topic }}"
+            },
+            {
+              "column": "listening_level",
+              "value": "={{ $json.toeic_listeningmaterial.listening_level }}"
+            },
+            {
+              "column": "is_approved",
+              "value": "={{ $json.toeic_listeningmaterial.is_approved }}"
+            },
+            {
+              "column": "created_at",
+              "value": "={{ $json.toeic_listeningmaterial.created_at }}"
+            },
+            {
+              "column": "updated_at",
+              "value": "={{ $json.toeic_listeningmaterial.updated_at }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        80,
+        112
+      ],
+      "id": "5e2a5b2d-1db6-4a19-bf52-03f7bbe18f84",
+      "name": "Insert or update rows in a table",
+      "credentials": {
+        "mySql": {
+          "id": "1IRe8k68oOuihi6L",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": {
+          "__rl": true,
+          "value": "toeic_question",
+          "mode": "list",
+          "cachedResultName": "toeic_question"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "question_id",
+        "valueToMatchOn": "={{ $json.toeic_questions[0].question_id }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "question_type",
+              "value": "=listen"
+            },
+            {
+              "column": "part",
+              "value": "=2"
+            },
+            {
+              "column": "question_text",
+              "value": "={{ $json.toeic_questions[0].question_text }}"
+            },
+            {
+              "column": "option_a_text",
+              "value": "={{ $json.toeic_questions[0].option_a_text }}"
+            },
+            {
+              "column": "option_b_text",
+              "value": "={{ $json.toeic_questions[0].option_b_text }}"
+            },
+            {
+              "column": "option_c_text",
+              "value": "={{ $json.toeic_questions[0].option_c_text }}"
+            },
+            {
+              "column": "is_correct",
+              "value": "={{ $json.toeic_questions[0].is_correct }}"
+            },
+            {
+              "column": "difficulty_level",
+              "value": "=3"
+            },
+            {
+              "column": "explanation",
+              "value": "={{ $json.toeic_questions[0].explanation }}"
+            },
+            {
+              "column": "created_at",
+              "value": "={{ $json.toeic_questions[0].created_at }}"
+            },
+            {
+              "column": "updated_at",
+              "value": "={{ $json.toeic_questions[0].updated_at }}"
+            },
+            {
+              "column": "question_category",
+              "value": "={{ $json.toeic_questions[0].question_category }}"
+            },
+            {
+              "column": "material_id",
+              "value": "={{ $json.toeic_questions[0].material_id }}"
+            },
+            {
+              "column": "passage_id",
+              "value": "={{ $json.toeic_questions[0].passage_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        80,
+        320
+      ],
+      "id": "4c63a5df-fe89-4a80-889a-c6549fca3527",
+      "name": "Insert or update rows in a table1",
+      "credentials": {
+        "mySql": {
+          "id": "1IRe8k68oOuihi6L",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const line = JSON.stringify($json) + '\\n';\nconst buf  = Buffer.from(line, 'utf8');\nreturn [{\n  binary: {\n    data: {\n      data: buf.toString('base64'),\n      mimeType: 'application/json',\n      fileName: 'toeic.jsonl',\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -464,
+        272
+      ],
+      "id": "520bbfb4-acfa-4a0d-9008-9953d87baa62",
+      "name": "Code1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "隨機選擇voiced_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Create an object",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "隨機選擇voiced_id": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an object": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Insert or update rows in a table",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Insert or update rows in a table1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert or update rows in a table": {
+      "main": [
+        []
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2dd8c6a4-85a1-4d7a-bc10-aad2c8ee928c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "56d5fc753739ca819a95a90ca86e7ee4890379e37fd5e90d1398ca6f4ac9b444"
+  },
+  "id": "bpU0rp0TVDxoe3RT",
+  "tags": []
+}

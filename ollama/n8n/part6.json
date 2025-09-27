@@ -1,0 +1,624 @@
+{
+  "name": "part6",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/app/json/toeic_part6_db_ready.jsonl",
+        "options": {
+          "append": true
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        640,
+        -128
+      ],
+      "id": "34333caf-32f0-4295-84f9-c1b5efa1b63d",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": {
+          "__rl": true,
+          "value": "toeic_readingpassage",
+          "mode": "list",
+          "cachedResultName": "toeic_readingpassage"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "passage_id",
+        "valueToMatchOn": "={{ $json.passage.passage_id }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "title",
+              "value": "={{ $json.passage.title }}"
+            },
+            {
+              "column": "content",
+              "value": "={{ $json.passage.content }}"
+            },
+            {
+              "column": "word_count",
+              "value": "={{ $json.passage.word_count }}"
+            },
+            {
+              "column": "reading_level",
+              "value": "={{ $json.passage.reading_level }}"
+            },
+            {
+              "column": "topic",
+              "value": "={{ $json.passage.topic }}"
+            },
+            {
+              "column": "is_approved",
+              "value": "={{ $json.passage.is_approved }}"
+            },
+            {
+              "column": "rejection_reason",
+              "value": "={{ $json.passage.rejection_reason }}"
+            },
+            {
+              "column": "created_at",
+              "value": "={{ $json.passage.created_at }}"
+            },
+            {
+              "column": "updated_at",
+              "value": "={{ $json.passage.updated_at }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -240,
+        80
+      ],
+      "id": "eacd092c-144c-4a05-9069-08dbf29bdd98",
+      "name": "插入passage",
+      "credentials": {
+        "mySql": {
+          "id": "1IRe8k68oOuihi6L",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": {
+          "__rl": true,
+          "value": "toeic_question",
+          "mode": "list",
+          "cachedResultName": "toeic_question"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "question_id",
+        "valueToMatchOn": "={{ $json.questions[2].question_id }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "question_type",
+              "value": "={{ $json.questions[2].question_type }}"
+            },
+            {
+              "column": "part",
+              "value": "={{ $json.questions[2].part }}"
+            },
+            {
+              "column": "question_text",
+              "value": "={{ $json.questions[2].question_text }}"
+            },
+            {
+              "column": "option_a_text",
+              "value": "={{ $json.questions[2].option_a_text }}"
+            },
+            {
+              "column": "option_b_text",
+              "value": "={{ $json.questions[2].option_b_text }}"
+            },
+            {
+              "column": "option_c_text",
+              "value": "={{ $json.questions[2].option_c_text }}"
+            },
+            {
+              "column": "option_d_text",
+              "value": "={{ $json.questions[2].option_d_text }}"
+            },
+            {
+              "column": "is_correct",
+              "value": "={{ $json.questions[2].is_correct }}"
+            },
+            {
+              "column": "difficulty_level",
+              "value": "={{ $json.questions[2].difficulty_level }}"
+            },
+            {
+              "column": "explanation",
+              "value": "={{ $json.questions[2].explanation }}"
+            },
+            {
+              "column": "created_at",
+              "value": "={{ $json.questions[2].created_at }}"
+            },
+            {
+              "column": "updated_at",
+              "value": "={{ $json.questions[2].updated_at }}"
+            },
+            {
+              "column": "question_category",
+              "value": "={{ $json.questions[2].question_category }}"
+            },
+            {
+              "column": "passage_id",
+              "value": "={{ $json.questions[2].passage_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -240,
+        272
+      ],
+      "id": "9763cc19-cf63-4b3e-88b1-c507fa1c9b41",
+      "name": "q2",
+      "credentials": {
+        "mySql": {
+          "id": "1IRe8k68oOuihi6L",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": {
+          "__rl": true,
+          "value": "toeic_question",
+          "mode": "list",
+          "cachedResultName": "toeic_question"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "question_id",
+        "valueToMatchOn": "={{ $json.questions[3].question_id }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "question_type",
+              "value": "={{ $json.questions[3].question_type }}"
+            },
+            {
+              "column": "part",
+              "value": "={{ $json.questions[3].part }}"
+            },
+            {
+              "column": "question_text",
+              "value": "={{ $json.questions[3].question_text }}"
+            },
+            {
+              "column": "option_a_text",
+              "value": "={{ $json.questions[3].option_a_text }}"
+            },
+            {
+              "column": "option_b_text",
+              "value": "={{ $json.questions[3].option_b_text }}"
+            },
+            {
+              "column": "option_c_text",
+              "value": "={{ $json.questions[3].option_c_text }}"
+            },
+            {
+              "column": "option_d_text",
+              "value": "={{ $json.questions[3].option_d_text }}"
+            },
+            {
+              "column": "is_correct",
+              "value": "={{ $json.questions[3].is_correct }}"
+            },
+            {
+              "column": "difficulty_level",
+              "value": "={{ $json.questions[3].difficulty_level }}"
+            },
+            {
+              "column": "explanation",
+              "value": "={{ $json.questions[3].explanation }}"
+            },
+            {
+              "column": "created_at",
+              "value": "={{ $json.questions[3].created_at }}"
+            },
+            {
+              "column": "updated_at",
+              "value": "={{ $json.questions[3].updated_at }}"
+            },
+            {
+              "column": "question_category",
+              "value": "={{ $json.questions[3].question_category }}"
+            },
+            {
+              "column": "passage_id",
+              "value": "={{ $json.questions[3].passage_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        80
+      ],
+      "id": "5ea011c4-df85-479d-b39e-28519e2380a9",
+      "name": "q3",
+      "credentials": {
+        "mySql": {
+          "id": "1IRe8k68oOuihi6L",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": {
+          "__rl": true,
+          "value": "toeic_question",
+          "mode": "list",
+          "cachedResultName": "toeic_question"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "question_id",
+        "valueToMatchOn": "={{ $json.questions[1].question_id }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "question_type",
+              "value": "={{ $json.questions[1].question_type }}"
+            },
+            {
+              "column": "part",
+              "value": "={{ $json.questions[1].part }}"
+            },
+            {
+              "column": "question_text",
+              "value": "={{ $json.questions[1].question_text }}"
+            },
+            {
+              "column": "option_a_text",
+              "value": "={{ $json.questions[1].option_a_text }}"
+            },
+            {
+              "column": "option_b_text",
+              "value": "={{ $json.questions[1].option_b_text }}"
+            },
+            {
+              "column": "option_c_text",
+              "value": "={{ $json.questions[1].option_c_text }}"
+            },
+            {
+              "column": "option_d_text",
+              "value": "={{ $json.questions[1].option_d_text }}"
+            },
+            {
+              "column": "is_correct",
+              "value": "={{ $json.questions[1].is_correct }}"
+            },
+            {
+              "column": "difficulty_level",
+              "value": "={{ $json.questions[1].difficulty_level }}"
+            },
+            {
+              "column": "explanation",
+              "value": "={{ $json.questions[1].explanation }}"
+            },
+            {
+              "column": "created_at",
+              "value": "={{ $json.questions[1].created_at }}"
+            },
+            {
+              "column": "updated_at",
+              "value": "={{ $json.questions[1].updated_at }}"
+            },
+            {
+              "column": "question_category",
+              "value": "={{ $json.questions[1].question_category }}"
+            },
+            {
+              "column": "passage_id",
+              "value": "={{ $json.questions[1].passage_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        288
+      ],
+      "id": "5aa34185-4dad-4bb0-8cfb-c00812deaef9",
+      "name": "q1",
+      "credentials": {
+        "mySql": {
+          "id": "1IRe8k68oOuihi6L",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": {
+          "__rl": true,
+          "value": "toeic_question",
+          "mode": "list",
+          "cachedResultName": "toeic_question"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "question_id",
+        "valueToMatchOn": "={{ $json.questions[0].question_id }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "question_type",
+              "value": "={{ $json.questions[0].question_type }}"
+            },
+            {
+              "column": "part",
+              "value": "={{ $json.questions[0].part }}"
+            },
+            {
+              "column": "question_text",
+              "value": "={{ $json.questions[0].question_text }}"
+            },
+            {
+              "column": "option_a_text",
+              "value": "={{ $json.questions[0].option_a_text }}"
+            },
+            {
+              "column": "option_b_text",
+              "value": "={{ $json.questions[0].option_b_text }}"
+            },
+            {
+              "column": "option_c_text",
+              "value": "={{ $json.questions[0].option_c_text }}"
+            },
+            {
+              "column": "option_d_text",
+              "value": "={{ $json.questions[0].option_d_text }}"
+            },
+            {
+              "column": "is_correct",
+              "value": "={{ $json.questions[0].is_correct }}"
+            },
+            {
+              "column": "difficulty_level",
+              "value": "={{ $json.questions[0].difficulty_level }}"
+            },
+            {
+              "column": "explanation",
+              "value": "={{ $json.questions[0].explanation }}"
+            },
+            {
+              "column": "created_at",
+              "value": "={{ $json.questions[0].created_at }}"
+            },
+            {
+              "column": "updated_at",
+              "value": "={{ $json.questions[0].updated_at }}"
+            },
+            {
+              "column": "question_category",
+              "value": "={{ $json.questions[0].question_category }}"
+            },
+            {
+              "column": "passage_id",
+              "value": "={{ $json.questions[0].passage_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        160
+      ],
+      "id": "1b254004-e517-457e-b5e6-6d06d94d8b2c",
+      "name": "q0",
+      "credentials": {
+        "mySql": {
+          "id": "1IRe8k68oOuihi6L",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11436/generate_part6",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"Content-Type\": \"application/json\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -64,
+        -128
+      ],
+      "id": "e0ae9620-1637-48e1-bd34-28496c9f3e0f",
+      "name": "呼叫part6 api"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawPassage = items[0].json.data.reading_passage;\nconst rawQuestions = items[0].json.data.questions;\n\nfunction toMysqlDatetime(isoString) {\n  return new Date(isoString).toISOString().slice(0, 19).replace(\"T\", \" \");\n}\n\nconst passage = {\n  passage_id: rawPassage.passage_id,\n  topic: rawPassage.topic,\n  title: rawPassage.title,\n  reading_level: rawPassage.reading_level,\n  content: rawPassage.content,\n  word_count: rawPassage.word_count,\n  created_at: toMysqlDatetime(rawPassage.created_at),\n  updated_at: toMysqlDatetime(rawPassage.updated_at),\n  is_approved: rawPassage.is_approved,\n  rejection_reason: rawPassage.rejection_reason || \"\"\n};\n\nconst questions = rawQuestions.map(q => ({\n  question_id: q.question_id,\n  passage_id: q.passage_id,\n  question_text: q.question_text,\n  question_type: q.question_type,\n  question_category: q.question_category,\n  question_image_url: (q.question_image_url === \"null\" || q.question_image_url === null) ? null : q.question_image_url,\n  part: q.part,\n  option_a_text: q.option_a_text,\n  option_b_text: q.option_b_text,\n  option_c_text: q.option_c_text,\n  option_d_text: q.option_d_text,\n  is_correct: q.is_correct,\n  difficulty_level: q.difficulty_level,\n  explanation: q.explanation,\n  created_at: toMysqlDatetime(q.created_at),\n  updated_at: toMysqlDatetime(q.updated_at)\n}));\n\nreturn [{\n  json: {\n    passage,\n    questions\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        -128
+      ],
+      "id": "418ed952-e558-40f1-a9c4-aed6e28e5bc3",
+      "name": "整理"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 將每一行轉成 JSON string，並合併成一個字串\nconst lines = $input.all().map(item => JSON.stringify(item.json)).join(\"\\n\");\n\nreturn [\n  {\n    json: {\n      content: lines,\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        336,
+        -128
+      ],
+      "id": "884730b8-cd3c-44e4-8c09-1bbe9073abb9",
+      "name": "jsonl"
+    },
+    {
+      "parameters": {
+        "jsCode": "const lines = $input.all().map(item => {\n  const raw = JSON.parse(item.json.content);  // 解開 content 裡面的字串\n  return JSON.stringify({\n    reading_passage: raw.passage,\n    questions: raw.questions\n  });\n});\n\nreturn [{\n  binary: {\n    data: {\n      data: Buffer.from(lines.join('\\n'), 'utf-8'),  // 這才是純 jsonl 格式\n      mimeType: 'application/jsonl',\n      fileName: 'toeic_part6_output.jsonl'\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        -128
+      ],
+      "id": "59e30b8d-6298-421e-a9b1-837b2b4b67c2",
+      "name": "轉data"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -256,
+        -128
+      ],
+      "id": "bcba3245-fb75-468e-9cee-a49bf463c5f1",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "呼叫part6 api": {
+      "main": [
+        [
+          {
+            "node": "整理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "整理": {
+      "main": [
+        [
+          {
+            "node": "插入passage",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "q1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "q2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "q3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "jsonl",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "q0",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jsonl": {
+      "main": [
+        [
+          {
+            "node": "轉data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "轉data": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "呼叫part6 api",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b1a4080a-7ae6-47f9-9f43-b546a032d74c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "56d5fc753739ca819a95a90ca86e7ee4890379e37fd5e90d1398ca6f4ac9b444"
+  },
+  "id": "DjANxxKNJkRugXm9",
+  "tags": []
+}
