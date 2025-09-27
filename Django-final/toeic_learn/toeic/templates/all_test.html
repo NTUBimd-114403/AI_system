@@ -1,0 +1,402 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>欸！愛多益 - 綜合測驗</title>
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/reading_test.css' %}">
+    <link rel="stylesheet" href="{% static 'css/part2.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* 確保樣式能正確覆蓋，以支援不同 Part 的顯示 */
+        .quiz-options {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quiz-options li {
+            margin-bottom: 0;
+        }
+        
+        .quiz-options label {
+            display: block;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #f9f9f9;
+            transition: background-color 0.2s;
+        }
+        
+        .quiz-options label:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .quiz-options input[type="radio"] {
+            display: none;
+        }
+        
+        .quiz-options label.selected {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        /* 專為 Part 2 設置的特殊樣式 */
+        .quiz-options.part2-style {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .quiz-options.part2-style label {
+            width: 60px;
+            height: 60px;
+            text-align: center;
+            line-height: 60px;
+            padding: 0;
+            border-radius: 50%;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="menu-btn" id="menu-btn">☰</button>
+        <h1>欸！愛多益</h1>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <span class="reading-title">綜合測驗</span>
+    </div>
+
+    <div class="container" id="main-container">
+        {% if error %}
+            <div class="error-message">
+                <h4><i class="fas fa-exclamation-triangle"></i> 錯誤</h4>
+                <p>{{ error }}</p>
+                <button onclick="location.reload()" class="nav-btn">重新載入</button>
+            </div>
+        {% elif questions_json %}
+            <h2 class="center-title" id="test-title"></h2>
+            <p>發佈日期: <span id="currentDate"></span></p>
+
+            <div class="passage-info" id="passage-info"></div>
+            
+            <div class="passage-box" id="passage-box" style="display: none;">
+                </div>
+
+            <div id="question-counter">
+                <div class="difficulty-badge" id="difficulty-badge">Loading...</div>
+                <div>題目 <span id="current-question">1</span> / <span id="total-questions"></span></div>
+            </div>
+
+            <div id="question-container">
+                <div class="quiz-box">
+                    <p id="question"></p>
+                    <ul id="options"></ul>
+                </div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button id="prev-btn" class="nav-btn" type="button">
+                    <i class="fas fa-chevron-left"></i> 上一題
+                </button>
+                <button id="next-btn" class="nav-btn" type="button">
+                    下一題 <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        {% else %}
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>載入題目中...</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <a href="{% url 'test' %}" id="backButton">回到上一頁</a>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const sessionId = "{{ session_id }}";
+    const questionsData = JSON.parse('{{ questions_json|escapejs }}');
+    const currentDateEl = document.getElementById("currentDate");
+    const totalQuestionsEl = document.getElementById('total-questions');
+    
+    if (currentDateEl) {
+        currentDateEl.textContent = new Date().toISOString().split('T')[0];
+    }
+    
+    let currentQuestionIndex = 0;
+    let userAnswers = {};
+    
+    if (questionsData.length > 0) {
+        totalQuestionsEl.textContent = questionsData.length;
+    }
+
+    // 移除 pageTitleEl，因為標題現在是靜態的
+    // const pageTitleEl = document.getElementById('page-title');
+    const testTitleEl = document.getElementById('test-title');
+    const passageInfoEl = document.getElementById('passage-info');
+    const passageBoxEl = document.getElementById('passage-box');
+    const optionsContainer = document.getElementById('options');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    let audioPlayer = document.getElementById('audio-player');
+    if (!audioPlayer) {
+        audioPlayer = document.createElement('audio');
+        audioPlayer.setAttribute('controls', '');
+        audioPlayer.id = 'audio-player';
+    }
+
+    let previousMaterialId = null;
+
+    function renderPage() {
+        if (questionsData.length === 0) return;
+
+        const currentQuestion = questionsData[currentQuestionIndex];
+        const part = currentQuestion.part;
+        const currentMaterialId = currentQuestion.passage_id || currentQuestion.material_id;
+
+        if (currentMaterialId && currentMaterialId === previousMaterialId) {
+            renderQuestion(currentQuestion);
+            return;
+        }
+
+        let partName = '';
+        if (part === 2) {
+            partName = '應答問題';
+        } else if (part === 3) {
+            partName = '簡短對話';
+        } else if (part === 5) {
+            partName = '句子填空';
+        } else if (part === 6) {
+            partName = '段落填空';
+        } else if (part === 7) {
+            partName = '單/雙篇文章';
+        }
+        // 只更新 test-title，不更新 header 標題
+        testTitleEl.textContent = `${partName}`;
+
+        passageInfoEl.innerHTML = '';
+        passageBoxEl.innerHTML = '';
+        passageBoxEl.style.display = 'none';
+
+        if (part === 2 || part === 3) {
+            passageBoxEl.style.display = 'block';
+            passageBoxEl.innerHTML = '<h3>對話音檔</h3>';
+            audioPlayer.src = currentQuestion.audio_url || '';
+            audioPlayer.load();
+            passageBoxEl.appendChild(audioPlayer);
+            audioPlayer.play();
+            
+            if (part === 3 && currentQuestion.material) {
+                passageInfoEl.innerHTML = `
+                    <div>主題: ${currentQuestion.material.topic || ''}</div>
+                    <div>口音: ${currentQuestion.material.accent || ''}｜聽力級別: ${currentQuestion.material.listening_level || ''}</div>
+                `;
+            }
+        } else if (part === 6 || part === 7) {
+            passageBoxEl.style.display = 'block';
+            if (currentQuestion.passage) {
+                passageInfoEl.innerHTML = `
+                    <div>類別: ${currentQuestion.passage.topic || ''}</div>
+                    <div>字數: ${currentQuestion.passage.word_count || ''}｜閱讀級別: ${currentQuestion.passage.reading_level || ''}</div>
+                `;
+                passageBoxEl.innerHTML = `
+                    <h3 id="passage-title">${currentQuestion.passage_title || ''}</h3>
+                    <p id="passage-content">${currentQuestion.passage_content || ''}</p>
+                `;
+            }
+        } else {
+            passageBoxEl.style.display = 'none';
+        }
+        
+        previousMaterialId = currentMaterialId;
+        renderQuestion(currentQuestion);
+    }
+    
+    function renderQuestion(question) {
+    const difficultyBadge = document.getElementById('difficulty-badge');
+    const questionEl = document.getElementById('question');
+    const part = question.part;
+    
+    difficultyBadge.textContent = question.difficulty_level ? `Level ${question.difficulty_level}` : 'UNKNOWN';
+
+    if (part === 2) {
+        questionEl.textContent = `Q${currentQuestionIndex + 1}`;
+    } else {
+        questionEl.textContent = `Q${currentQuestionIndex + 1}. ${question.question_text || ''}`;
+    }
+    
+    optionsContainer.innerHTML = '';
+    optionsContainer.className = `quiz-options ${part === 2 ? 'part2-style' : ''}`;
+    const optionsToDisplay = (part === 2) ? ['A', 'B', 'C'] : ['A', 'B', 'C', 'D'];
+    
+    optionsToDisplay.forEach(optionKey => {
+        const optionTextKey = `option_${optionKey.toLowerCase()}_text`;
+        const optionText = question[optionTextKey] || '';
+        
+        const li = document.createElement('li');
+        const label = document.createElement('label');
+        const input = document.createElement('input');
+        
+        input.type = 'radio';
+        input.name = `q-${question.question_id}`; // 使用問題ID來確保每個問題的選項是獨立的
+        input.value = optionKey;
+        
+        const span = document.createElement('span');
+        span.textContent = (part === 2) ? optionKey : `${optionKey}. ${optionText}`;
+
+        label.appendChild(input);
+        label.appendChild(span);
+        li.appendChild(label);
+        
+        const questionId = question.question_id;
+        if (userAnswers[questionId] === optionKey) {
+            // 如果之前有選，標記 input 為 checked
+            input.checked = true;
+            // 並為 label 添加 selected 樣式
+            label.classList.add('selected');
+        }
+        
+        // 監聽 input 的 'change' 事件
+        input.addEventListener('change', () => {
+            // 先移除同一個問題下所有 label 的 selected 樣式
+            document.querySelectorAll(`input[name="q-${question.question_id}"]`).forEach(el => {
+                el.parentElement.classList.remove('selected');
+            });
+            // 為當前被選中的 input 的 parent label 添加 selected 樣式
+            input.parentElement.classList.add('selected');
+            // 保存答案
+            saveCurrentAnswer();
+        });
+
+        optionsContainer.appendChild(li);
+    });
+    
+    updateCounter();
+    updateNavigationButtons();
+}
+
+    function saveCurrentAnswer() {
+    const questionId = questionsData[currentQuestionIndex].question_id;
+    const selectedRadio = document.querySelector(`input[name="q-${questionId}"]:checked`);
+    if (selectedRadio) {
+        userAnswers[questionId] = selectedRadio.value;
+    } else {
+        delete userAnswers[questionId]; // 如果使用者取消選擇，則清除答案
+    }
+}
+
+    function nextQuestion() {
+        saveCurrentAnswer();
+        if (currentQuestionIndex < questionsData.length - 1) {
+            currentQuestionIndex++;
+            renderPage();
+        } else {
+            submitQuiz();
+        }
+    }
+
+    function previousQuestion() {
+        saveCurrentAnswer();
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            renderPage();
+        }
+    }
+    
+    prevBtn.removeEventListener('click', previousQuestion);
+    nextBtn.removeEventListener('click', nextQuestion);
+    nextBtn.removeEventListener('click', submitQuiz);
+
+    prevBtn.addEventListener('click', previousQuestion);
+    nextBtn.addEventListener('click', nextQuestion);
+
+
+    function updateNavigationButtons() {
+        prevBtn.style.visibility = currentQuestionIndex === 0 ? 'hidden' : 'visible';
+        
+        nextBtn.removeEventListener('click', nextQuestion);
+        nextBtn.removeEventListener('click', submitQuiz);
+
+        if (currentQuestionIndex === questionsData.length - 1) {
+            nextBtn.innerHTML = '<i class="fas fa-check"></i> 完成測驗';
+            nextBtn.className = 'nav-btn submit-btn';
+            nextBtn.addEventListener('click', submitQuiz);
+        } else {
+            nextBtn.innerHTML = '下一題 <i class="fas fa-chevron-right"></i>';
+            nextBtn.className = 'nav-btn';
+            nextBtn.addEventListener('click', nextQuestion);
+        }
+    }
+
+    function updateCounter() {
+        document.getElementById('current-question').textContent = currentQuestionIndex + 1;
+    }
+
+    function submitQuiz() {
+        saveCurrentAnswer();
+        
+        const unansweredCount = questionsData.length - Object.keys(userAnswers).length;
+        if (unansweredCount > 0) {
+            if (!confirm(`你還有 ${unansweredCount} 題未作答，確定要提交測驗嗎？`)) {
+                return;
+            }
+        }
+
+        nextBtn.disabled = true;
+        nextBtn.textContent = '正在提交...';
+
+        fetch('/api/submit_test_answer/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({
+                session_id: sessionId,
+                answers: userAnswers,
+                test_type: 'mixed',
+                total_questions: questionsData.length
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                sessionStorage.setItem('test_result_data', JSON.stringify(data.data));
+                window.location.href ='/test_result/?type=mixed';
+            } else {
+                alert('提交失敗：' + (data.error || '未知錯誤'));
+                nextBtn.disabled = false;
+                nextBtn.textContent = '完成測驗';
+            }
+        })
+        .catch(() => {
+            alert('提交過程中發生錯誤，請稍後重試');
+            nextBtn.disabled = false;
+            nextBtn.textContent = '完成測驗';
+        });
+    }
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        return parts.length === 2 ? parts.pop().split(';').shift() : '';
+    }
+
+    if (questionsData.length > 0) {
+        renderPage();
+    }
+});
+</script>
+</body>
+</html>

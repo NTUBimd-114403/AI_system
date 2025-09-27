@@ -1,0 +1,790 @@
+/* 全域性基本樣式 */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    overflow-x: hidden;
+    position: relative;
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f7f9fc;
+    color: #333;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+iframe {
+    max-width: 100%;
+    width: 100%;
+}
+
+.main-content {
+    /* 讓它成為內部元素的定位參考點 */
+    position: relative;
+}
+
+
+/* 輪播圖樣式 */
+.carousel {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+    overflow: hidden;
+}
+
+.carousel-images {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel-image {
+    min-width: 100%;
+    height: auto;
+}
+
+.carousel-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 24px;
+    padding: 10px;
+    cursor: pointer;
+    border: none;
+    z-index: 10;
+}
+
+.carousel-button-left {
+    left: 0;
+}
+
+.carousel-button-right {
+    right: 0;
+}
+
+
+/* 滾動提示與動畫樣式 */
+.scroll-down,
+.scroll-down-indicator {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    color: #555;
+    font-size: 1.2em;
+    font-weight: bold;
+    animation: bounce 2s infinite;
+}
+
+/* 針對英雄區塊的滾動提示額外樣式 */
+.scroll-down-indicator i {
+    font-size: 2em;
+    color: #fff;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+
+/* 導覽列與按鈕樣式 */
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* 當前頁面按鈕樣式改變 */
+a.current .nav-btn {
+    background-color: #6c4409;
+    color: #fff;
+    pointer-events: none; /* 禁用點擊 */
+    cursor: default;
+    position: relative;
+}
+
+/* 訊息提示樣式 */
+/* 基礎訊息樣式 */
+.messages {
+    list-style: none;
+    padding: 0;
+    margin: 10px auto 5px;
+    max-width: 600px;
+    text-align: center;
+}
+
+/* 個別訊息項目樣式 */
+.messages li {
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 16px;
+    display: inline-block;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* 登入成功的樣式 */
+.messages li.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 登入失敗的樣式 */
+.messages li.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 漸入動畫效果 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 標記單字按鈕樣式 */
+.mark-familiar-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 滑鼠滑過時的互動效果 */
+.mark-familiar-btn:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+}
+
+/* 按鈕被點擊後或禁用時的樣式 */
+.mark-familiar-btn:disabled,
+.mark-familiar-btn[disabled] {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    color: #666666;
+    transform: none;
+    box-shadow: none;
+}
+
+
+/* AI 機器人樣式 */
+/* 當 body 標籤有 no-auth 類別時，隱藏機器人按鈕和對話框 */
+.no-auth #chatbot-toggle-btn,
+.no-auth #ai-chatbot-container {
+    display: none;
+}
+
+#chatbot-toggle-btn {
+    /* 固定位置，讓按鈕永遠在畫面的右下角 */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    /* 圓角膠囊形狀，讓六個字可以完整顯示 */
+    border-radius: 50px;
+    padding: 12px 24px;
+    /* 使用漸層背景，增添設計感 */
+    background: linear-gradient(135deg, #3498db, #5d9cec);
+    color: white;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+    /* 平滑的過渡效果 */
+    transition: all 0.3s ease-in-out;
+}
+
+#chatbot-toggle-btn:hover {
+    /* 滑鼠移上去時，按鈕會稍微放大並改變陰影 */
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+}
+
+#ai-chatbot-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 350px;
+    height: 450px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+#chatbot-header {
+    background-color: #3498db;
+    color: white;
+    padding: 15px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    font-size: 1.1em;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#chatbot-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+#chatbot-messages {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#chatbot-input-area {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+}
+
+#user-input {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+#send-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    margin-left: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.chatbot-message {
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 80%;
+}
+
+.robot-message {
+    background-color: #e9e9eb;
+    align-self: flex-start;
+}
+
+.user-message {
+    background-color: #3498db;
+    color: white;
+    align-self: flex-end;
+}
+
+.vocab-card {
+    background-color: #f7f7f7;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.vocab-card h4 {
+    display: flex;
+    align-items: baseline;
+    gap: 8px; /* 單字、音標、詞性間距 */
+    margin: 0 0 10px 0;
+    font-size: 1.2em;
+    color: #2c3e50;
+    flex-wrap: wrap; /* 讓內容在空間不足時換行 */
+}
+
+.vocab-card .word-text {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+/* 新增：音標樣式 */
+.vocab-card .pronunciation-text {
+    /* 主要修改：讓音標換行 */
+    display: block;
+    font-size: 1em;
+    color: #3498db;
+    font-family: Arial, sans-serif;
+    font-style: normal;
+    margin-top: 5px; /* 新增：與上方單字增加間距 */
+}
+
+
+.vocab-card .part-of-speech {
+    font-size: 0.9em;
+    color: #7f8c8d;
+}
+
+.vocab-card .translation {
+    margin: 5px 0;
+    font-size: 1em;
+    color: #34495e;
+}
+
+.vocab-card .example-sentence {
+    font-size: 0.9em;
+    color: #333;
+    font-style: italic;
+    margin-top: 10px;
+    line-height: 1.4;
+}
+
+/* 調整：例句翻譯顏色也變深 */
+.vocab-card .example-translation {
+    font-size: 0.9em;
+    color: #555;
+    margin-top: 5px;
+    line-height: 1.4;
+}
+
+/* 這裡就是針對單字中文翻譯的樣式 */
+.vocab-card .word-translation {
+    font-size: 0.9em;
+    color: #888;
+    font-weight: normal;
+}
+
+/* 英雄區塊 */
+.hero-section {
+    margin-top: 20px;
+    padding: 120px 20px 80px 20px;
+    text-align: center;
+    color: #fff;
+    background: linear-gradient(rgba(0, 86, 179, 0.8), rgba(0, 86, 179, 0.8)), url('https://images.unsplash.com/photo-1542435503-9d2d0c2420f8') no-repeat center center/cover;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+.hero-section h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    animation: fadeIn 1s ease-in-out;
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    transition: opacity 0.5s ease-in-out; /* 標語輪播的過渡效果 */
+}
+.hero-section p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    animation: fadeIn 1.5s ease-in-out;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.cta-button {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff;
+    padding: 15px 40px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: background-color 0.3s, transform 0.3s;
+    box-shadow: 0 5px 15px rgba(255, 153, 0, 0.4);
+}
+.cta-button:hover {
+    background-color: #e68a00;
+    transform: translateY(-3px);
+}
+.cta-button:active {
+    transform: scale(0.98);
+    background-color: #d87d00;
+}
+
+/* 交錯佈局的功能展示區塊 */
+.feature-showcase-section {
+    padding: 60px 20px 80px 20px;
+}
+.showcase-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 50px;
+    margin-bottom: 80px;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.showcase-item.reverse {
+    flex-direction: row-reverse;
+}
+.showcase-image {
+    width: 100%;
+    max-width: 500px;
+    height: 350px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+.showcase-content {
+    max-width: 500px;
+    padding: 20px;
+}
+.showcase-content h2 {
+    font-size: 2rem;
+    color: #0056b3;
+    margin-bottom: 20px;
+}
+.showcase-content p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #555;
+    margin-bottom: 30px;
+}
+.cta-button-small {
+    display: inline-block;
+    background-color: #0056b3;
+    color: #fff;
+    padding: 12px 30px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: background-color 0.3s, transform 0.3s;
+}
+.cta-button-small:hover {
+    background-color: #004494;
+    transform: translateY(-2px);
+}
+@media (max-width: 900px) {
+    .showcase-item, .showcase-item.reverse {
+        flex-direction: column;
+        text-align: center;
+    }
+    .showcase-image {
+        margin-bottom: 30px;
+    }
+}
+
+/* 如何開始區塊 */
+.how-to-start-section {
+    padding: 80px 20px;
+    text-align: center;
+}
+.how-to-start-section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 60px;
+    color: #0056b3;
+}
+.steps-container {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    flex-wrap: wrap;
+}
+.step-item {
+    max-width: 250px;
+    text-align: center;
+}
+.step-item .icon-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #0056b3;
+    color: #fff;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.step-item h3 {
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+}
+.step-item p {
+    color: #777;
+}
+
+/* 部落格區塊 */
+.blog-section {
+    padding: 80px 20px;
+    background-color: #f0f4f8;
+    text-align: center;
+}
+.blog-section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 60px;
+}
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.blog-card {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: left;
+}
+.blog-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+.blog-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: #0056b3;
+}
+.blog-card p {
+    color: #777;
+    line-height: 1.6;
+}
+.blog-card a.read-more {
+    display: inline-block;
+    margin-top: 15px;
+    color: #ff9900;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+/* 專案核心特色 (從features-section複製並修改) */
+.features-section-moved {
+    padding: 80px 20px;
+    margin-top: 60px;
+    text-align: center;
+    background-color: #fff;
+    border-radius: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.features-section-moved h2 {
+    font-size: 2.5rem;
+    margin-bottom: 60px;
+}
+.feature-grid-moved {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+}
+.feature-card-moved {
+    background-color: #f7f9fc;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.feature-card-moved:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+.feature-card-moved i {
+    font-size: 3rem;
+    color: #0056b3;
+    margin-bottom: 20px;
+}
+.feature-card-moved h3 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+.feature-card-moved p {
+    color: #777;
+}
+.feature-image-placeholder-moved {
+    margin-top: 20px;
+    height: 200px;
+    background-color: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+}
+
+/* 專題結語與展示區塊 */
+.project-summary-section {
+    background-color: #f7f9fc;
+    padding: 80px 20px;
+    text-align: center;
+}
+.project-summary-section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+.project-summary-section p {
+    max-width: 800px;
+    margin: 0 auto 40px;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #555;
+}
+
+/* 淡入滑入動畫效果 */
+.fade-in-up {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.fade-in-up.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* 新增的每日片語區塊樣式 */
+.daily-phrase-section {
+    padding: 80px 50px;
+    background-color: #f0f4f8; /* 柔和的淺灰色背景 */
+    text-align: center;
+    margin-top: -80px;
+}
+
+.daily-phrase-section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+    color: #333; /* 標題顏色 */
+}
+
+.phrase-card-container {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+    overflow: hidden;
+    min-height: 250px;
+}
+
+.phrase-card {
+    width: 100%;
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1); /* 更深、更柔和的陰影 */
+    text-align: center;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    min-height: 200px;
+}
+
+.phrase-card:hover {
+    transform: translateY(-8px); /* 滑鼠懸停時向上移動更多 */
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+}
+
+.phrase-card.active {
+    display: flex;
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.phrase-topic {
+    font-size: 2.8rem; /* 片語字體放大 */
+    color: #34495e;
+    font-weight: 700;
+    margin-bottom: 5px;
+    line-height: 1.2;
+}
+
+/* 新增的 CSS 樣式來控制片語和翻譯的佈局 */
+.phrase-header {
+    display: flex;
+    align-items: baseline; /* 讓文字底部對齊 */
+    gap: 10px; /* 在片語和翻譯之間增加間距 */
+}
+
+/* 調整翻譯文字的字體大小 */
+.phrase-topic-translation {
+    font-size: 20px; /* 這裡可以調整為你想要的任何大小，例如 80% */
+    color: #555; /* 讓翻譯的顏色稍微淡一點 */
+}
+
+
+.english-phrase {
+    font-size: 1.4rem; /* 例句字體大小適中 */
+    color: #2c3e50;
+    font-weight: 500;
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+
+.chinese-translation {
+    font-size: 1.2rem;
+    color: #777;
+    font-style: italic;
+    line-height: 1.6;
+}
+
+/* 行動裝置樣式調整 */
+@media (max-width: 768px) {
+    .daily-phrase-section {
+        padding: 60px 20px;
+    }
+    
+    .phrase-card {
+        padding: 30px;
+    }
+
+    .phrase-topic {
+        font-size: 2rem;
+    }
+
+    .phrase-topic-translation {
+        font-size: 1.2rem;
+    }
+
+    .english-phrase {
+        font-size: 1.2rem;
+    }
+
+    .chinese-translation {
+        font-size: 1rem;
+    }
+}
+
