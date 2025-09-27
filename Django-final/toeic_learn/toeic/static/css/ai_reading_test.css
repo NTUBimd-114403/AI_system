@@ -1,0 +1,385 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 80%;
+    max-width: 800px;
+    padding: 130px;
+}
+.box {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    min-height: 200px; /* 設定最小高度，方便填充 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #7f8c8d;
+}
+.ai_reading-title {
+    font-size: 25px;
+    font-weight: bold;
+    color: #555;
+}
+h2 {
+    color: #2c3e50;
+}
+h1{
+    text-align: center;
+    color: #58585b;
+}
+
+p{
+    font-weight: bold;
+}
+
+form {
+    max-width: 600px; /* 限制題目區塊寬度 */
+    margin: 20px auto; /* 讓表單置中 */
+    padding: 20px; /* 內距 */
+    background-color: white; /* 背景色 */
+    border-radius: 10px; /* 圓角 */
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* 陰影 */
+}
+
+label {
+    display: block; /* 讓選項換行 */
+    background-color: white; /* 每個選項都是白色底 */
+    border: 1px solid #ddd; /* 淡灰色邊框 */
+    border-radius: 5px; /* 圓角 */
+    padding: 10px; /* 內距 */
+    margin: 5px 0; /* 選項間距 */
+    cursor: pointer; /* 滑鼠移動到上面時變手指 */
+}
+
+label:hover {
+    background-color: #f5f5f5; /* 滑鼠移上時變淺灰 */
+}
+
+input[type="radio"] {
+    margin-right: 10px; /* 讓選擇按鈕與文字有距離 */
+}        /* 正確答案與錯誤答案標記 */
+.correct {
+    color: green;
+}
+
+.incorrect {
+    color: red;
+}
+#backButton {
+    position: fixed;
+    top: 80px;
+    left: 20px;
+    background-color: #86c0e6;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    text-decoration: none; /* 移除底線 */
+    display: inline-block; /* 確保樣式正常應用 */
+}
+#backButton:hover {
+    background-color: #0056b3;
+}
+
+.container {
+    display: flex;
+    justify-content: center; /* 讓區塊在水平方向置中 */
+    gap: 20px; /* 區塊之間的間距 */
+    width: 80%;
+    margin: 100px auto; /* 垂直置中 */
+}
+
+
+.test-box {
+    width: 30%;
+    padding: 40px;
+    text-align: center;
+    background: #86c0e6;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.3s, background 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.test-box:hover {
+    background: #73a5d3;
+    transform: scale(1.05);
+}
+
+h2 {
+    margin: 0 0 10px;
+}
+
+.hidden {
+    display: none;
+}
+
+.test-box {
+    width: 100%;              /* 使容器佔滿父元素的寬度 */
+    padding: 20px;           /* 內邊距 */
+    text-align: center;      /* 文字置中 */
+    background: #86c0e6;     /* 背景顏色 */
+    color: white;            /* 文字顏色 */
+    border-radius: 10px;     /* 圓角邊框 */
+    cursor: pointer;         /* 指標變成手形 */
+    transition: transform 0.3s, background 0.3s; /* 過渡效果 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 陰影效果 */
+    font-size: 16px;         /* 字體大小 */
+    line-height: 1.5;        /* 行高，增加可讀性 */
+    overflow: visible;       /* 確保文字不會被隱藏 */
+    min-height: 50px;        /* 設定最小高度以容納文字 */
+}
+
+
+.test-box:hover {
+    background: #73a5d3;
+    transform: scale(1.05);
+}
+
+.passage-box {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow:0 4px 4px rgba(0, 0, 0, 0.2);
+}
+.category-box span {
+    background: #007BFF;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-right: 5px;
+}
+.quiz-box {
+    margin-top: 20px;
+}
+.quiz-options li {
+    list-style: none;
+    background: #ddd;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.quiz-options li.correct {
+    background: #28a745;
+    color: white;
+}
+.quiz-options li.incorrect {
+    background: #dc3545;
+    color: white;
+}
+
+.select-container {
+    display: flex;
+    justify-content: center; /* 水平置中 */
+    align-items: center; /* 垂直置中 */
+    gap: 50px; /* 控制兩個選單的間距 */
+}
+
+.points-container {
+    display: flex;
+    justify-content: center; /* 水平置中 */
+    align-items: center; /* 垂直置中 */
+}
+
+#startTest {
+    background-color: #3498db; /* 藍色背景 */
+    color: white; /* 文字顏色 */
+    font-size: 18px; /* 字體大小 */
+    padding: 12px 24px; /* 內邊距 */
+    border: none; /* 去掉邊框 */
+    border-radius: 8px; /* 圓角 */
+    cursor: pointer; /* 滑鼠變小手 */
+    transition: background-color 0.3s ease-in-out;
+    align-items: center;
+}
+
+#startTest:hover {
+    background-color: #2980b9; /* 滑鼠移過去變深色 */
+}
+
+#hidden-box {
+    display: none;
+}
+/* Category and Difficulty box styling */
+.category-box, .difficulty-box {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+
+/* Styling for select elements */
+select {
+    padding: 10px;
+    font-size: 16px;
+    width: 100%;
+    max-width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover effect */
+select:hover {
+    border-color: #007bff;
+}
+
+/* Focus effect when the user clicks on the dropdown */
+select:focus {
+    border-color: #0056b3;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Option styling */
+option {
+    padding: 10px;
+    font-size: 16px;
+}
+
+/* Placeholder for the select box text */
+select option {
+    color: #666;
+}
+
+/* Styling for labels inside the category box */
+.category-box, .difficulty-box {
+    display: flex;
+    flex-direction: column; /* 讓 label 和輸入框垂直排列 */
+    align-items: center; /* 水平置中 */
+    justify-content: center; /* 垂直置中 */
+    height: 100vh; /* 讓整個區塊佔滿畫面高度 */
+}
+
+
+/* Cost box container */
+.cost-box {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #f1f1f1;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    color: #333;
+    text-align: center;  /* 置中文本 */
+    display: flex;        /* 使用flexbox */
+    flex-direction: column;
+    align-items: center;  /* 置中按鈕 */
+    justify-content: center;  /* 置中容器內的內容 */
+}
+
+/* Styling for the cost text */
+.cost-box p {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Styling for the cost value */
+#cost {
+    font-size: 18px;
+    color: #007bff;
+    font-weight: bold;
+}
+
+/* Styling for the buy button */
+#buyButton {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+/* Hover effect for the buy button */
+#buyButton:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* Focus effect when the button is clicked */
+#buyButton:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .cost-box {
+        padding: 15px;
+    }
+
+    #buyButton {
+        width: 100%;
+        padding: 12px;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    select {
+        width: 100%;
+    }
+}
+
+
+#passage {
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-left: 5px solid #007bff;
+    border-radius: 5px;
+}
+
+.question-box {
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+#question {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+#options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#options button {
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    background-color: #f8f8f8;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 5px;
+}
+
+#options button:hover {
+    background-color: #007bff;
+    color: #fff;
+}

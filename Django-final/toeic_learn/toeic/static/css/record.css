@@ -1,0 +1,645 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+.record-title {
+    font-size: 25px;
+    font-weight: bold;
+    color: #555;
+}
+.container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 50px;
+    background: white;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.profile {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile img {
+    width: 100px;
+    border-radius: 50%;
+}
+
+.profile h2 {
+    margin: 10px 0;
+}
+
+.progress-section, .test-history, .learning-goals {
+    margin-bottom: 50px;
+    margin-top: 50px;
+}
+
+.progress-bar {
+    background: #ddd;
+    height: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.progress {
+    height: 100%;
+    background: #28a745;
+    width: 0%;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+th {
+    background: #007bff;
+    color: white;
+}
+#backButton {
+    position: fixed;
+    top: 80px;
+    left: 20px;
+    background-color: #86c0e6;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    text-decoration: none; /* 移除底線 */
+    display: inline-block; /* 確保樣式正常應用 */
+}
+#backButton:hover {
+    background-color: #0056b3;
+}
+ /* 保持你的原始 CSS 樣式 */
+        * { box-sizing: border-box; }
+        body { overflow-x: hidden; }
+        img { max-width: 100%; height: auto; }
+        iframe { max-width: 100%; width: 100%; }
+        
+        .table-standard {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .table-standard th,
+        .table-standard td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        .table-standard th {
+            background-color: #007BFF;
+            color: white;
+            font-weight: bold;
+        }
+        .table-standard tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .table-standard tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .category-analysis-section, .part-analysis-section, .test-history, .personalized-advice-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .category-analysis-section h3, .part-analysis-section h3, .test-history h3, .personalized-advice-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .category-analysis-section h3 i, .part-analysis-section h3 i, .test-history h3 i, .personalized-advice-section h3 i {
+            margin-right: 10px;
+        }
+        .personalized-advice-section h3 {
+            color: #e65100;
+            border-bottom: 2px solid #ffe0b2;
+        }
+        .personalized-advice-section h3 i {
+            color: #fbc02d;
+        }
+        .personalized-advice-section ul {
+            padding-left: 20px;
+            margin: 0;
+            list-style: none; /* 移除預設的項目符號 */
+        }
+        .personalized-advice-section li {
+            margin-bottom: 10px;
+            font-size: 16px;
+            display: flex;
+            align-items: flex-start;
+        }
+        .personalized-advice-section li i {
+            color: #fbc02d;
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .advice-text {
+            line-height: 1.6;
+        }
+
+        .analysis-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .analysis-item {
+            flex: 1 1 calc(50% - 15px);
+            min-width: 280px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .analysis-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .analysis-item-content {
+            display: flex;
+            flex-direction: column;
+        }
+        .analysis-item-content .title {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #007bff;
+        }
+        .analysis-item-content .details {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        .analysis-item .percentage {
+            font-weight: bold;
+            color: #007bff;
+            font-size: 1.2em;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination a {
+            color: #007BFF;
+            padding: 8px 16px;
+            text-decoration: none;
+            transition: background-color .3s, color .3s, border-color .3s;
+            border: 1px solid #007BFF;
+            margin: 0 4px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .pagination a.active {
+            background-color: #007BFF;
+            color: white;
+            border: 1px solid #007BFF;
+        }
+        .pagination a:hover:not(.active) {
+            background-color: #f0f8ff;
+            color: #0056b3;
+            border-color: #0056b3;
+        }
+        .pagination .current {
+            padding: 8px 16px;
+            margin: 0 4px;
+            font-weight: bold;
+        }
+
+        /* 調整圖表容器的樣式 */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* 這裡已調整為 600px */
+            margin: 0 auto;
+        }
+        #part-radar-chart {
+            height: 400px; /* 這裡已調整為 400px */
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                max-width: 100%;
+            }
+            #part-radar-chart {
+                height: 350px; /* 在手機上可以再調小一點 */
+            }
+        }
+
+     /* 學習興趣選擇區塊樣式 */
+.interest-selection-section {
+    background-color: #f8f9fa;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+    border: 1px solid #e9ecef;
+}
+
+.interest-selection-section h3 {
+    font-size: 1.5rem;
+    color: #495057;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.interest-selection-section h3 i {
+    margin-right: 10px;
+    color: #007bff;
+}
+
+.interest-selection-section p {
+    font-size: 1rem;
+    color: #6c757d;
+    margin-bottom: 20px;
+}
+
+/* 興趣選項容器 */
+.interest-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* 興趣選項標籤的父元素樣式 */
+.interest-options label {
+    background-color: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 25px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+    color: #495057;
+    display: inline-flex;
+    align-items: center;
+    user-select: none;
+}
+
+/* 隱藏原生 checkbox */
+.interest-options input[type="checkbox"] {
+    display: none;
+}
+
+/* 當 input 被勾選時，改變其緊鄰的兄弟元素 <span> 的樣式 */
+.interest-options input[type="checkbox"]:checked + span {
+    background-color: #007bff;
+    color: #ffffff;
+    padding: 10px 20px; /* 為了維持膠囊形狀，重新設定 padding */
+    border-radius: 25px; /* 讓 <span> 也有圓角 */
+    margin: -10px -20px; /* 負邊距來填滿父元素 label 的空間 */
+}
+
+/* 為了讓父元素 label 在勾選時有邊框和陰影，這裡需要做個調整 */
+/* 更直接的方式是把樣式加在 label 上，而不是 span 上 */
+
+/* 最終且最簡單的 CSS 方案，同時修改 HTML 和 CSS */
+.interest-options label {
+    /* 這裡的樣式保持不變 */
+    background-color: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 25px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+    color: #495057;
+    display: flex;
+    align-items: center;
+    user-select: none;
+}
+
+/* 滑鼠懸停時的視覺回饋 */
+.interest-options label:hover {
+    background-color: #e9ecef;
+    border-color: #007bff;
+}
+
+/* 當內部的 input 被勾選時，改變 label 的樣式 */
+/* 由於沒有父選擇器，這段 CSS 樣式會失效。 */
+/* 所以最簡單的解決方案，就是用 JavaScript 動態加 class */
+/* 或是將 input 和 span 包在另一個 div 裡面 */
+
+/* 考慮到你的需求，我推薦你回到**不用修改 HTML 的 JavaScript 方案**。
+因為修改 HTML 會讓你的程式碼變得更複雜，且可能影響其他樣式。
+
+但是如果你堅持要修改 HTML，請使用下面的 CSS 程式碼：
+*/
+
+.interest-options input[type="checkbox"]:checked + span {
+    background-color: #007bff; /* 主題藍色 */
+    color: #ffffff; /* 白色文字 */
+    border-color: #007bff; /* 邊框顏色 */
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2); /* 陰影 */
+}
+
+/* 儲存按鈕樣式 */
+.save-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #28a745;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.save-btn:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+.save-btn i {
+    margin-right: 8px;
+}
+
+/* 可愛膠囊狀顯示容器 */
+.pill-display {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 15px; /* 增加左右 padding 來形成膠囊狀 */
+    border-radius: 20px;
+    font-weight: bold;
+    margin: 0 8px; /* 增加間隔 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    white-space: nowrap; /* 防止內容換行 */
+}
+
+/* 學習時數的樣式 */
+#study-hours.pill-display {
+    background-color: #e6f7ff; /* 淺藍色背景 */
+    color: #007bff; /* 藍色文字 */
+    border: 1px solid #007bff; /* 藍色邊框 */
+}
+
+/* 點數的樣式 */
+#user-points.pill-display {
+    background-color: #fff7e6; /* 淺黃色背景 */
+    color: #ff9800; /* 橘色文字 */
+    border: 1px solid #ff9800; /* 橘色邊框 */
+}
+
+/* 改善個人資訊區塊的排版 */
+.profile {
+    border-radius: 15px;
+    text-align: center;
+    max-width: 600px;
+    margin: 30px auto;
+}
+
+.profile h2 {
+    margin-top: 20px;
+    font-size: 24px;
+    color: #333;
+}
+
+.profile img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.info-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    margin-top: 25px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    color: #555;
+}
+
+.info-item p {
+    margin: 0;
+}
+
+/* 圖示顏色 */
+.icon-blue {
+    color: #007bff;
+}
+
+.icon-orange {
+    color: #ff9800;
+}
+
+/* 顯示點數紀錄的按鈕 */
+.history-btn {
+    background-color: transparent;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 5px;
+    transition: color 0.3s;
+}
+
+.history-btn:hover {
+    color: #007bff;
+}
+
+/* 彈出視窗 (Modal) 的基本樣式 */
+.modal {
+    display: none; /* 預設隱藏 */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4); /* 半透明黑色背景 */
+    justify-content: center;
+    align-items: center;
+}
+
+/* 彈出視窗內容的樣式 */
+.modal-content {
+    background-color: #fff;
+    margin: 15% auto; /* 垂直置中 */
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    width: 90%;
+    max-width: 500px;
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+}
+
+/* 彈出動畫 */
+@keyframes animatetop {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+
+/* 關閉按鈕樣式 */
+.close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: #000;
+    text-decoration: none;
+}
+
+/* 表格樣式 */
+#points-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+#points-table th, #points-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+#points-table th {
+    background-color: #292f7c;
+}
+
+/* 隱藏和顯示表格的 CSS */
+.points-table-container.hidden {
+    display: none;
+}
+
+.points-table-container.visible {
+    display: block;
+}
+
+/* 按鈕容器 */
+        .button-container {
+            display: flex;
+            gap: 1rem;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 基礎按鈕樣式 */
+        .analysis-btn {
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 9999px; /* 圓角 */
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* 預設按鈕樣式 */
+        .analysis-btn.default-style {
+            background-color: var(--default-color);
+            color: var(--default-text-color);
+        }
+        .analysis-btn.default-style:hover {
+            background-color: var(--default-hover-color);
+            transform: translateY(-2px); /* 新增：向上輕微移動 */
+            box-shadow: 0 6px 12px -2px rgba(0,0,0,0.1), 0 3px 6px -2px rgba(0,0,0,0.06); /* 新增：陰影變化 */
+        }
+
+        /* 啟用按鈕樣式 (active) */
+        .analysis-btn.active-style {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 10px 15px -3px var(--primary-shadow-color), 0 4px 6px -2px var(--primary-shadow-color);
+        }
+        .analysis-btn.active-style:hover {
+            background-color: var(--primary-hover-color);
+            transform: translateY(-2px); /* 新增：向上輕微移動 */
+            box-shadow: 0 12px 20px -5px var(--primary-shadow-color), 0 6px 8px -3px var(--primary-shadow-color); /* 新增：陰影變化 */
+        }
+
+        /* 確保 focus 樣式與 hover 效果一致 */
+        .analysis-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px var(--primary-shadow-color);
+            background-color: #007bff;
+            color: white;
+        }
+
+/* 自訂訊息框樣式 */
+.custom-alert-overlay {
+  display: none; /* 預設隱藏 */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  justify-content: center;
+  align-items: center;
+}
+
+.custom-alert-modal {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 300px;
+  position: relative;
+}
+
+.custom-alert-modal p {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.custom-alert-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.custom-alert-close:hover {
+  color: #333;
+}

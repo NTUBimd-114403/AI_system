@@ -1,0 +1,335 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>欸！愛多益 - 歷史單字</title>
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/history.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body {% if not user.is_authenticated %}class="no-auth"{% endif %}>
+    <div class="header">
+        <button class="menu-btn" id="menu-btn">☰</button>
+        <h1>欸！愛多益</h1>      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div class="nav-buttons">
+            <a href="{% url 'home' %}" target="_self">
+                <button class="nav-btn {% if request.path == '/' %}current{% endif %}">
+                    <i class="fas fa-home"></i> 首頁
+                </button>
+            </a>
+            <a href="{% url 'test' %}" target="_self">
+                <button class="nav-btn {% if request.path == '/test/' %}current{% endif %}">
+                    <i class="fas fa-file-alt"></i> 測驗平台
+                </button>
+            </a>
+            {% if user.is_authenticated %}
+              <a href="{% url 'relation_map' %}" target="_self">
+        <button class="nav-btn {% if request.path == '/relation-map/' %}current{% endif %}">
+            <i class="fas fa-project-diagram"></i> 單字關聯地圖
+        </button>
+    </a>
+                <a href="{% url 'history' %}" target="_self">
+                    <button class="nav-btn {% if request.path == '/history/' %}current{% endif %}">
+                        <i class="fas fa-history"></i> 歷史單字
+                    </button>
+                </a>
+                <a href="{% url 'record' %}" target="_self">
+                    <button class="nav-btn">
+                        <i class="fas fa-user"></i> 學習歷程
+                    </button>
+                </a>
+                <a href="{% url 'faq' %}" target="_self">
+                <button class="nav-btn {% if request.path == '/faq/' %}current{% endif %}">
+                    <i class="fas fa-question-circle"></i> 常見問題
+                </button>
+            </a>
+                <a href="{% url 'profile-settings' %}" target="_self">
+            <button class="nav-btn {% if request.path == '/profile-settings/' %}current{% endif %}">
+                <i class="fas fa-cog"></i> 歡迎, {{ user.nickname }}
+            </button>
+        </a>
+                <form id="logout-form" action="{% url 'logout' %}" method="POST" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-btn">
+                        <i class="fas fa-sign-out-alt"></i> 登出
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" target="_self">
+                    <button class="nav-btn {% if request.path == '/login/' %}current{% endif %}">
+                        <i class="fas fa-user"></i> 會員註冊/登入
+                    </button>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="main-content">
+            <div id="status-message" class="status-message"></div>
+            <h2 class="content-title"><i class="fas fa-book"></i> 我的單字紀錄</h2>
+            
+            <div class="filter-section">
+                <form id="vocab-filter-form" class="filter-form">
+                    <div class="filter-options">
+                        <label>
+                            <input type="radio" name="status" value="all" {% if current_status == 'all' %}checked{% endif %}>
+                            <span>所有單字</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="status" value="familiar" {% if current_status == 'familiar' %}checked{% endif %}>
+                            <span>已熟悉</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="status" value="unfamiliar" {% if current_status == 'unfamiliar' %}checked{% endif %}>
+                            <span>未熟悉</span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+
+            <div id="vocab-list-container">
+                {% if vocabularies %}
+                    <p class="record-count">您已記錄了 {{ vocabularies|length }} 個單字。</p>
+                    <div class="vocab-cards-grid">
+                        {% for record in vocabularies %}
+                            <div class="vocab-card-item {% if record.is_familiar %}familiar-card{% else %}not-familiar-card{% endif %}">
+                                <div class="word-details">
+                                    <div class="word-and-translation">
+                                        <h4 class="word-text">{{ record.word.word }}</h4>
+                                        <span class="translation-on-side">{{ record.word.part_of_speech }} - {{ record.word.translation }}</span>
+                                    </div>
+                                    
+                                    <span class="pronunciation-text">{{ record.word.pronunciation }}</span>
+                                    
+                                    <p class="example-sentence">
+                                        例句： {{ record.word.example_sentence }}
+                                    </p>
+                                    <p class="example-translation">
+                                        翻譯： {{ record.word.example_translation }}
+                                    </p>
+                                </div>
+                                
+                                <div class="record-info">
+                                    <div class="status-and-map">
+                                <span class="familiar-status {% if record.is_familiar %}familiar{% else %}not-familiar{% endif %}">
+                                    {% if record.is_familiar %}
+                                        <i class="fas fa-check-circle"></i> 已熟悉
+                                    {% else %}
+                                        <i class="fas fa-times-circle"></i> 未熟悉
+                                    {% endif %}
+                                </span>
+                                <a href="{% url 'relation_map' %}?word={{ record.word.word }}" class="view-map-btn">
+                                    <i class="fas fa-sitemap"></i> 查看相似詞
+                                </a>
+                            </div>
+
+                                    <span class="last-viewed">
+                                        最後檢視：{{ record.last_viewed|date:"Y年m月d日 H:i" }}
+                                    </span>
+                                    
+                                    {% if not record.is_familiar %}
+                                        <button class="mark-familiar-btn" data-word-id="{{ record.word.id }}">
+                                            標記為熟悉
+                                        </button>
+                                    {% endif %}
+                                    
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="no-record-message">
+                        <p>您目前沒有任何單字紀錄。開始與多益單字小幫手互動，記錄您的單字吧！</p>
+                        <a href="{% url 'home' %}" class="btn-primary">返回首頁</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="contact-us">
+                <h3>聯絡我們</h3>
+                <ul>
+                    <li><i class="fas fa-phone"></i><a href="tel:02 3322 2777"> 電話：02 3322 2777</a></li>
+                    <li><i class="fas fa-map"></i><a href="https://maps.app.goo.gl/3NMVwufcbbTrfQNz6" target="_blank"> 地址：100台北市中正區濟南路一段321號</a></li>
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d14459.01851827243!2d121.5254698!3d25.0423998!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442a970a11a84ad%3A0x58e05f2528812097!2z5ZyL56uL6Ie65YyX5ZWG5qWt5aSn5a24!5e0!3m2!1szh-TW!2stw!4v1728891709611!5m2!1szh-TW!2stw"
+                        height="250"
+                        style="border:0;"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 欸！愛多益 版權所有</p>
+        </div>
+    </footer>
+
+<script>
+    // 處理選單按鈕的邏輯
+    document.getElementById('menu-btn').addEventListener('click', function() {
+        const navButtons = document.querySelector('.nav-buttons');
+        navButtons.classList.toggle('show-menu');
+    });
+
+    // 取得 CSRF token 的函式
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // 函式：顯示提示訊息
+    function showStatusMessage(message) {
+        const statusMessageDiv = document.getElementById('status-message');
+        if (statusMessageDiv) {
+            statusMessageDiv.textContent = message;
+            statusMessageDiv.classList.add('show');
+
+            // 5 秒後自動消失
+            setTimeout(() => {
+                statusMessageDiv.classList.remove('show');
+            }, 2000); 
+        }
+    }
+
+    // 函式：更新單字卡片為「已熟悉」的狀態
+    function updateCardToFamiliar(card) {
+        if (!card) return;
+        
+        // 移除舊的未熟悉類別，新增已熟悉類別
+        card.classList.remove('not-familiar-card');
+        card.classList.add('familiar-card');
+        
+        // 更新狀態文字和圖示
+        const statusSpan = card.querySelector('.familiar-status');
+        if (statusSpan) {
+            statusSpan.classList.remove('not-familiar');
+            statusSpan.classList.add('familiar');
+            statusSpan.innerHTML = '<i class="fas fa-check-circle"></i> 已熟悉';
+        }
+        
+        // 移除「標記為熟悉」按鈕
+        const toggleButton = card.querySelector('.mark-familiar-btn');
+        if (toggleButton) {
+            toggleButton.remove();
+        }
+    }
+    
+    // 函式：篩選單字卡片並更新計數
+    function filterVocabCards() {
+        const status = document.querySelector('input[name="status"]:checked')?.value || 'all';
+        const vocabCards = document.querySelectorAll('.vocab-card-item');
+        let displayedCount = 0;
+        
+        vocabCards.forEach(card => {
+            const isFamiliar = card.classList.contains('familiar-card');
+            const shouldDisplay = (status === 'all') || 
+                                    (status === 'familiar' && isFamiliar) || 
+                                    (status === 'unfamiliar' && !isFamiliar);
+
+            card.style.display = shouldDisplay ? 'block' : 'none';
+            
+            if (shouldDisplay) {
+                displayedCount++;
+            }
+        });
+        
+        updateRecordCount(displayedCount);
+        updateNoRecordMessage(displayedCount === 0);
+    }
+    
+    // 函式：更新單字總數顯示
+    function updateRecordCount(count) {
+        const recordCountElement = document.querySelector('.record-count');
+        if (recordCountElement) {
+            recordCountElement.textContent = `您已記錄了 ${count} 個單字。`;
+        }
+    }
+    
+    // 函式：處理無單字紀錄的提示訊息顯示
+    function updateNoRecordMessage(shouldShow) {
+        const noRecordMessage = document.querySelector('.no-record-message');
+        const vocabGrid = document.querySelector('.vocab-cards-grid');
+        const recordCount = document.querySelector('.record-count');
+        
+        if (noRecordMessage) noRecordMessage.style.display = shouldShow ? 'block' : 'none';
+        if (vocabGrid) vocabGrid.style.display = shouldShow ? 'none' : 'grid';
+        if (recordCount) recordCount.style.display = shouldShow ? 'none' : 'block';
+    }
+
+    // 當頁面內容載入完成時，執行主要邏輯
+    document.addEventListener('DOMContentLoaded', function() {
+        const csrfToken = getCookie('csrftoken');
+        const vocabListContainer = document.querySelector('.vocab-cards-grid');
+        const filterRadios = document.querySelectorAll('input[name="status"]');
+
+        if (!vocabListContainer) {
+            console.error('錯誤：找不到 .vocab-cards-grid 元素，無法綁定事件。');
+            return;
+        }
+
+        // 使用事件代理，監聽單字卡片內的按鈕點擊事件
+        vocabListContainer.addEventListener('click', function(event) {
+            const clickedButton = event.target.closest('.mark-familiar-btn');
+            if (clickedButton) {
+                const vocabCard = clickedButton.closest('.vocab-card-item'); 
+                const wordId = clickedButton.dataset.wordId;
+                
+                // 立即更新前端，不等待後端回應 (樂觀更新)
+                updateCardToFamiliar(vocabCard);
+                filterVocabCards();
+                
+                // 顯示提示訊息
+                showStatusMessage('單字已成功標記為熟悉！');
+
+                // 同時，發送後端請求
+                fetch('/api/chatbot/mark-familiar/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ word_id: wordId, familiar_status: true })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        alert('更新後端失敗，請稍後再試。');
+                    }
+                    return response.json();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('發生錯誤，請稍後再試。');
+                });
+            }
+        });
+        
+        // 處理篩選按鈕邏輯
+        filterRadios.forEach(radio => {
+            radio.addEventListener('change', filterVocabCards);
+        });
+
+        // 頁面載入時，初始執行一次篩選
+        filterVocabCards();
+    });
+</script>
+</body>
+</html>
