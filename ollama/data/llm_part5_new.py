@@ -54,7 +54,7 @@ prompt = f"""
         "option_d_text": "選項 D",
         "is_correct": "正確選項（A, B, C 或 D）",
         "difficulty_level": "難度（1, 2, 3, 4, 5，數字越大越難）",
-        "explanation": "中文解析（請一定要寫出來，且有邏輯，不可空口無憑）",
+        "explanation": "解析（請一定要寫出來，且有邏輯，不可空口無憑）",
         "created_at": "{datetime.now().isoformat()}",
         "updated_at": "{datetime.now().isoformat()}"
     }}
@@ -70,7 +70,7 @@ prompt = f"""
 - 題目須為商業英文常見句型，語句自然、用字專業
 - 每個選項須與空格的語意及文法高度相關，不可太離題
 - 題目不得出現明顯錯誤、模糊選項、文法不完整的情況
-- explanation 必須用中文清楚指出語法重點或詞性邏輯與選項解釋，不可僅說「這是正確的」
+- explanation 必須清楚指出語法重點或詞性邏輯，不可僅說「這是正確的」
 請直接輸出純 JSON 陣列，**不要加入任何文字說明、標題或註解**，也**不要使用 markdown 格式標籤（```）**。
 
 """

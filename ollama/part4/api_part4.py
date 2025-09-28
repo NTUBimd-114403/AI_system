@@ -23,7 +23,7 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 chroma_client   = chromadb.PersistentClient(path=CHROMA_PATH)
-collection      = chroma_client.get_collection("toeic_part3")
+collection      = chroma_client.get_collection("toeic_part4")
 scenario_collection = chroma_client.get_collection("toeic_scenarios")
 
 # ===== Schema =====
@@ -61,7 +61,7 @@ TOEIC_PART4_SCHEMA = {
                     "question_text": {"type":"string"},
                     "question_type": {"enum":["listen"]},
                     "question_category": {"enum":["pos","tense","syntax","vocab"]},
-                    "part": {"enum":["4"]},
+                    "part": {"enum":["3"]},
                     "option_a_text": {"type":"string"},
                     "option_b_text": {"type":"string"},
                     "option_c_text": {"type":"string"},

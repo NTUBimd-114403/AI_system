@@ -3,7 +3,7 @@ from sentence_transformers import SentenceTransformer
 import chromadb
 from chromadb.config import Settings
 
-CHROMA_PATH = "/app/chroma_db"
+CHROMA_PATH = "C:/Users/Fyn/Desktop/rag/chroma_db"
 COLLECTION_NAME = "toeic_part2"
 
 # 載入嵌入模型
@@ -21,7 +21,7 @@ except:
     existing_ids = set()
 
 # 載入 Part 2 JSON 題組
-with open("C:/Users/Fyn/Desktop/rag/data/part2.json", "r", encoding="utf-8") as f:
+with open("C:/Users/Fyn/Desktop/rag/part2.json", "r", encoding="utf-8") as f:
     data = json.load(f)
 
 new_count = 0
