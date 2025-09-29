@@ -112,7 +112,7 @@ def generate_part4(req: GenerateRequest):
 - listening_material.transcript 必須是 **單人獨白**（announcement / talk / telephone message）。
 - 字數需 **控制在 80–120 words**（過短或過長都不符合 TOEIC 真題標準）。
 - 開頭要包含 "Questions X through Y. Refer to the following ..."，接著才是正文。
-- 商業英文自然專業，情境需真實，符合常見 TOEIC 場景（公司公告、答錄機留言、廣播通知、天氣預報、產品廣告等）。
+- 商業英文自然專業，情境需真實，符合常見 TOEIC 場景（公司公告、答錄機留言、廣播通知、天氣預報、產品廣告等），請均勻分布。
 - 三個問題必須能由 transcript 內容回答且須按照出現順序。
 - question_category 請均勻涵蓋 pos/tense/syntax/vocab。
 - explanation 請用繁體中文撰寫，且需具備教學意義（不只是翻譯）。
