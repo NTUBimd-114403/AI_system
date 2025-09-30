@@ -3,7 +3,7 @@ import chromadb
 
 # 初始化模型與 ChromaDB
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-chroma_client = chromadb.PersistentClient(path="/app/chroma_db")
+chroma_client = chromadb.PersistentClient(path="C:/Users/Fyn/Desktop/rag/chroma_db")
 collection = chroma_client.get_or_create_collection("toeic_scenarios")
 
 # 定義測驗情境資料

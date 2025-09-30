@@ -241,6 +241,8 @@ class Question(models.Model):
         default='vocab',
         verbose_name='分類題目類型'
     )
+    question_num = models.IntegerField(null=True, blank=True, verbose_name='題號')
+
 
 
 class Exam(models.Model):

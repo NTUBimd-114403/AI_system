@@ -6,7 +6,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-
     # ---------- 首頁與帳號相關 ----------
     path("", views.home, name="home"),
     path("login/", views.login_view, name="login"),
@@ -17,6 +16,7 @@ urlpatterns = [
     path('change-password/', views.change_password, name='change-password'),
 
     # ---------- 密碼重置 ----------
+
     path('password_reset/', auth_views.PasswordResetView.as_view(
         template_name='password_reset_form.html',
         email_template_name='password_reset_email.html',
@@ -28,12 +28,14 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
         template_name='password_reset_confirm.html'
     ), name='password_reset_confirm'),
+
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(
         template_name='password_reset_complete.html'
     ), name='password_reset_complete'),
 
     # ---------- 測驗相關 ----------
     path("test/", views.test_page, name="test"),
+
     path('record/', views.record, name='record'),
     path('get-points-history/', views.get_points_history, name='get_points_history'),
     path('api/submit_test_answer/', views.submit_test_answer, name='submit_test_answer'),
@@ -66,3 +68,4 @@ urlpatterns = [
     path("admin/", admin.site.urls),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

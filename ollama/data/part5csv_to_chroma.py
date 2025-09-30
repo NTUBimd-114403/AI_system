@@ -4,14 +4,14 @@ import chromadb
 from chromadb.config import Settings
 
 # ⚙️ 設定你的 ChromaDB 儲存位置
-CHROMA_PATH = "/app/chroma_db"  # << 改成你的實際儲存路徑
-COLLECTION_NAME = "toeic_part5"
+CHROMA_PATH = "C:\\Users\\Fyn\\Desktop\\rag\\chroma_db"  # << 改成你的實際儲存路徑
+COLLECTION_NAME = "toeic_questions"
 
 # 🧠 載入嵌入模型
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # 📄 載入題庫 CSV
-df = pd.read_csv("C:\\Users\\Fyn\\Desktop\\rag\\data\\part5.csv", encoding="big5")
+df = pd.read_csv("part5.csv", encoding="big5")
 
 # 🧠 啟動 ChromaDB
 client = chromadb.PersistentClient(path=CHROMA_PATH)

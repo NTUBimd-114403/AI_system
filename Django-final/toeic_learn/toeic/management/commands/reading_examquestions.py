@@ -22,14 +22,18 @@ class Command(BaseCommand):
                 self.stdout.write(f"跳過文章 {passage.title}，無法取得 part 號碼。")
                 continue
 
-            exam_title = f"Exam for Part {part} - {passage.title}"
+
+            exam_title = f"Part {part} Reading Test - {passage.title} ({passage.passage_id})"
+
             
             # 使用 get_or_create 避免重複建立 Exam
             exam, created = Exam.objects.get_or_create(
                 title=exam_title,
                 defaults={
                     'description': f"自動建立的測驗 (附文章，Part {part})",
-                    'exam_type': 'toeic',
+
+                    'exam_type': 'reading',
+
                     'part': part,
                     'duration_minutes': 20, # 預設文章類測驗時長
                     'total_questions': passage.question_set.count(),
@@ -42,7 +46,8 @@ class Command(BaseCommand):
                 self.stdout.write(f"測驗 '{exam_title}' 已存在，跳過建立題目。")
                 continue # 如果測驗已存在，則跳過為其添加題目，假設題目已存在
 
-            questions = passage.question_set.all().order_by('created_at')
+            questions = passage.question_set.all().order_by('question_num')
+
             for idx, question in enumerate(questions, start=1):
                 ExamQuestion.objects.create(
                     exam=exam,
@@ -77,14 +82,17 @@ class Command(BaseCommand):
                     continue # 避免空批次
 
                 exam_set_number = i + 1 # 測驗組的編號
-                exam_title = f"Exam for Part {part_to_batch} - Set {exam_set_number}"
+
+                exam_title = f"Part {part_to_batch} Reading Test - Set {exam_set_number} "
                 
                 # 為每組題目建立一個新的 Exam
                 exam, created = Exam.objects.get_or_create(
                     title=exam_title,
                     defaults={
                         'description': f"自動建立的測驗 (Part {part_to_batch} 第 {exam_set_number} 組，共 {len(current_batch_questions)} 題)",
-                        'exam_type': 'toeic',
+
+                        'exam_type': 'reading',
+
                         'part': part_to_batch,
                         'duration_minutes': 20, # 5 題建議時長，可根據實際情況調整
                         'total_questions': len(current_batch_questions),

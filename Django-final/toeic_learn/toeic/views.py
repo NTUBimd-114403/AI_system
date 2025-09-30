@@ -61,7 +61,6 @@ def home(request):
 
         today = date.today()
         random.seed(today.day + today.month + today.year)
-        
         if len(all_phrases) >= 3:
             daily_phrases = random.sample(all_phrases, 3)
         else:
@@ -163,7 +162,7 @@ def logout_view(request):
 
     storage = messages.get_messages(request)
     storage.used = True 
-    
+
     messages.success(request, '您已成功登出！')
     
     # 重新導向到登入頁面。
@@ -508,13 +507,17 @@ def check_test_limit(request):
     if part_number == 0:
         if record.mixed_test_count >= record.mixed_test_limit:
             points_needed = EXCHANGE_POINTS_FOR_MIXED_TEST
+
             message = f"今日 {PART_DICT[part_number]} 次數已達上限 ({record.mixed_test_limit} 次)。"
+
             return JsonResponse({'status': 'limit_reached', 'message': message, 'points_needed': points_needed})
     else:
         if record.other_part_test_count >= record.other_part_test_limit:
             points_needed = EXCHANGE_POINTS_FOR_OTHER_PART_TEST
+
             test_name = PART_DICT.get(part_number, f"Part {part_number}")
             message = f"今日 {test_name} 次數已達上限 ({record.other_part_test_limit} 次)。"
+
             return JsonResponse({'status': 'limit_reached', 'message': message, 'points_needed': points_needed})
 
     return JsonResponse({'status': 'ok', 'message': '次數充足'})

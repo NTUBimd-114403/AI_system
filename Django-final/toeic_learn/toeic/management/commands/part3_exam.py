@@ -9,8 +9,10 @@ class Command(BaseCommand):
         self.stdout.write("開始建立聽力 Exam（以 ListeningMaterial 為單位）...")
 
         # 過濾出 Part 3 和 Part 4 的聽力材料
-        materials = ListeningMaterial.objects.all()
-        
+
+         # 只取已審核通過的素材
+        materials = ListeningMaterial.objects.filter(is_approved=True)
+      
         for material in materials:
             first_question = material.question_set.first()
             if not first_question:
@@ -24,14 +26,18 @@ class Command(BaseCommand):
                 continue
 
             # Exam title 加上 material_id，確保唯一性
-            exam_title = f"Listening Exam for Part {part} - {material.topic} ({material.material_id})"
+
+            exam_title = f"Part 3 Listening Test - {material.topic} ({material.material_id})"
+
             
             # 使用 get_or_create 避免重複建立
             exam, created = Exam.objects.get_or_create(
                 title=exam_title,
                 defaults={
                     'description': "自動建立的聽力測驗",
-                    'exam_type': 'toeic',
+
+                    'exam_type': 'listen',
+
                     'part': part,
                     'duration_minutes': 20,
                     'total_questions': material.question_set.count(),
@@ -45,7 +51,9 @@ class Command(BaseCommand):
                 continue
 
             # 建立 ExamQuestion
-            questions = material.question_set.all().order_by('created_at')
+
+            questions = material.question_set.all().order_by('question_num')
+
             for idx, question in enumerate(questions, start=1):
                 ExamQuestion.objects.create(
                     exam=exam,
