@@ -52,39 +52,16 @@
     },
     {
       "parameters": {
-        "jsCode": "// 將 JSON 轉字串\nconst jsonContent = JSON.stringify(items[0].json, null, 0) + \"\\n\";\n\n// 存入 binary\nitems[0].binary = {\n    data: {\n        data: Buffer.from(jsonContent, 'utf8'),\n        mimeType: 'application/json'\n    }\n};\n\nreturn items;\n"
+        "jsCode": "// 將每一行轉成 JSON string，並合併成一個字串\nconst lines = $input.all().map(item => JSON.stringify(item.json)).join(\"\\n\");\n\nreturn [\n  {\n    json: {\n      content: lines,\n    }\n  }\n];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -16,
+        -256,
         -320
       ],
       "id": "f0550ea6-3504-4981-bbfb-93f3c0aecb41",
       "name": "Code"
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0f491c2-0d79-4909-859f-5c77a606d010",
-              "name": "questions",
-              "value": "={{ $json.data.questions }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        -208,
-        -320
-      ],
-      "id": "8df257dc-21d6-430d-9b6d-89f329ccd86f",
-      "name": "Edit Fields"
     },
     {
       "parameters": {
@@ -97,7 +74,7 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1,
       "position": [
-        176,
+        112,
         -320
       ],
       "id": "ffbcda48-62f4-41ab-93f6-c991dc2171f8",
@@ -112,7 +89,65 @@
           "mode": "list",
           "cachedResultName": "toeic_question"
         },
+        "dataMode": "defineBelow",
         "columnToMatchOn": "question_id",
+        "valueToMatchOn": "={{ $json.question_id }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "question_type",
+              "value": "={{ $json.question_type }}"
+            },
+            {
+              "column": "part",
+              "value": "={{ $json.part }}"
+            },
+            {
+              "column": "question_text",
+              "value": "={{ $json.question_text }}"
+            },
+            {
+              "column": "option_a_text",
+              "value": "={{ $json.option_a_text }}"
+            },
+            {
+              "column": "option_b_text",
+              "value": "={{ $json.option_b_text }}"
+            },
+            {
+              "column": "option_c_text",
+              "value": "={{ $json.option_c_text }}"
+            },
+            {
+              "column": "option_d_text",
+              "value": "={{ $json.option_d_text }}"
+            },
+            {
+              "column": "is_correct",
+              "value": "={{ $json.is_correct }}"
+            },
+            {
+              "column": "difficulty_level",
+              "value": "={{ $json.difficulty_level }}"
+            },
+            {
+              "column": "difficulty_level",
+              "value": "={{ $json.difficulty_level }}"
+            },
+            {
+              "column": "explanation",
+              "value": "={{ $json.explanation }}"
+            },
+            {
+              "column": "question_num",
+              "value": "={{ $json.question_num }}"
+            },
+            {
+              "column": "question_category",
+              "value": "={{ $json.question_category }}"
+            }
+          ]
+        },
         "options": {
           "replaceEmptyStrings": false
         }
@@ -120,8 +155,8 @@
       "type": "n8n-nodes-base.mySql",
       "typeVersion": 2.5,
       "position": [
-        -208,
-        -128
+        -256,
+        -96
       ],
       "id": "e40c577e-176c-4efe-becc-337ae5ccbe7d",
       "name": "Insert or update rows in a table",
@@ -135,16 +170,29 @@
     },
     {
       "parameters": {
-        "jsCode": "return items.map(item => {\n  const q = item.json.data.questions;\n  return {\n    json: {\n      question_id: q.question_id,\n      question_type: q.question_type,\n      question_category: q.question_category,\n      question_text: q.question_text,\n      part: q.part,\n      option_a_text: q.option_a_text,\n      option_b_text: q.option_b_text,\n      option_c_text: q.option_c_text,\n      option_d_text: q.option_d_text,\n      is_correct: q.is_correct,\n      difficulty_level: q.difficulty_level,\n      explanation: q.explanation,\n      created_at: q.created_at,\n      updated_at: q.updated_at\n    }\n  };\n});\n"
+        "jsCode": "return items.map(item => {\n  const q = item.json.data.questions;\n  return {\n    json: {\n      question_id: q.question_id,\n      question_type: q.question_type,\n      question_category: q.question_category,\n      question_text: q.question_text,\n      part: q.part,\n      option_a_text: q.option_a_text,\n      option_b_text: q.option_b_text,\n      option_c_text: q.option_c_text,\n      option_d_text: q.option_d_text,\n      is_correct: q.is_correct,\n      difficulty_level: q.difficulty_level,\n      explanation: q.explanation,\n      question_num: 1\n    }\n  };\n});\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -432,
+        -448,
         -320
       ],
       "id": "df428d75-a8b9-4227-bd9b-1349a597242c",
       "name": "Code1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const lines = $input.all().map(item => {\n  // 解開 content 裡面的 JSON 字串\n  const raw = JSON.parse(item.json.content);\n  // 直接輸出整個題目（保持原本的結構）\n  return JSON.stringify({\n    questions: raw\n  });\n});\n\n// JSONL 格式：每行一個題目\nconst jsonl = lines.join('\\n');\n\nreturn [{\n  binary: {\n    data: {\n      data: Buffer.from(jsonl, 'utf-8').toString('base64'),  // base64 編碼\n      mimeType: 'application/x-ndjson',\n      fileName: 'toeic_part5_output.jsonl'\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        -320
+      ],
+      "id": "81686f85-a898-4447-ae22-781038e29b54",
+      "name": "Code2"
     }
   ],
   "pinData": {},
@@ -164,23 +212,7 @@
       "main": [
         [
           {
-            "node": "Edit Fields",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "Code1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Edit Fields": {
-      "main": [
-        [
-          {
-            "node": "Code",
             "type": "main",
             "index": 0
           }
@@ -191,7 +223,7 @@
       "main": [
         [
           {
-            "node": "Read/Write Files from Disk",
+            "node": "Code2",
             "type": "main",
             "index": 0
           }
@@ -210,6 +242,22 @@
             "node": "Insert or update rows in a table",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -219,7 +267,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "0fc2b848-d1ca-46d7-9ff7-da5458d7d351",
+  "versionId": "ba0abe4c-52bb-424e-99b2-5527572cd0ea",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "56d5fc753739ca819a95a90ca86e7ee4890379e37fd5e90d1398ca6f4ac9b444"

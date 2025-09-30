@@ -118,7 +118,7 @@
     },
     {
       "parameters": {
-        "jsCode": "function pickRandom(arr) {\n  return arr[Math.floor(Math.random() * arr.length)];\n}\n\n// 1. 定義資料\nconst voicePools = {\n  american: [\"ZIlrSGI4jZqobxRKprJz\", \"f5HLTX707KIM4SzJYzSz\", \"lxYfHSkYm1EzQzGhdbfc\"],\n  british:  [\"u8GDilEiJPUbRk87Lcqs\", \"ZF6FPAbjXT4488VcRRnw\", \"mZ8K1MPRiT5wDQaasg3i\"],\n  australian: [\"Ho8lEgLAUvibG7H3G3TK\", \"WLKp2jV6nrS8aMkPPDRO\", \"aEO01A4wXwd1O8GPgGlF\"]\n};\n\n// 2. 抽選隨機口音與 voiceId\nconst accents = Object.keys(voicePools);\nconst randomAccent = pickRandom(accents);\nconst randomVoiceId = pickRandom(voicePools[randomAccent]);\n\n// 3. 取得原始資料\nconst data = $json.data;\ndata.toeic_listeningmaterial.accent = randomAccent;  // 更新 accent\n\nconst material = data.toeic_listeningmaterial;\nconst question = data.toeic_questions[0];  // 可改為多題支援\n\n// 4. 組合 TTS 文本\nconst ttsText = `Question: ${question.question_text} A: ${question.option_a_text} B: ${question.option_b_text} C: ${question.option_c_text} D: ${question.option_d_text}`;\n\n// 5. 輸出至下一節點\nreturn [{\n  json: {\n    ttsText,\n    voiceId: randomVoiceId,\n    accent: randomAccent,\n    originalData: data\n  }\n}];\n"
+        "jsCode": "function pickRandom(arr) {\n  return arr[Math.floor(Math.random() * arr.length)];\n}\n\n// 1. 定義資料\nconst voicePools = {\n  american: [\"ZIlrSGI4jZqobxRKprJz\", \"f5HLTX707KIM4SzJYzSz\", \"lxYfHSkYm1EzQzGhdbfc\"],\n  british:  [\"u8GDilEiJPUbRk87Lcqs\", \"ZF6FPAbjXT4488VcRRnw\", \"mZ8K1MPRiT5wDQaasg3i\"],\n  australian: [\"Ho8lEgLAUvibG7H3G3TK\", \"WLKp2jV6nrS8aMkPPDRO\", \"aEO01A4wXwd1O8GPgGlF\"]\n};\n\n// 2. 抽選隨機口音與 voiceId\nconst accents = Object.keys(voicePools);\nconst randomAccent = pickRandom(accents);\nconst randomVoiceId = pickRandom(voicePools[randomAccent]);\n\n// 3. 取得原始資料\nconst data = $json.data;\ndata.toeic_listeningmaterial.accent = randomAccent;  // 更新 accent\n\nconst material = data.toeic_listeningmaterial;\nconst question = data.toeic_questions[0];  // 可改為多題支援\n\n// 4. 組合 TTS 文本\nconst ttsText = `Question: ${question.question_text} A: ${question.option_a_text} B: ${question.option_b_text} C: ${question.option_c_text}`;\n\n// 5. 輸出至下一節點\nreturn [{\n  json: {\n    ttsText,\n    voiceId: randomVoiceId,\n    accent: randomAccent,\n    originalData: data\n  }\n}];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -216,12 +216,8 @@
               "value": "={{ $json.toeic_listeningmaterial.is_approved }}"
             },
             {
-              "column": "created_at",
-              "value": "={{ $json.toeic_listeningmaterial.created_at }}"
-            },
-            {
-              "column": "updated_at",
-              "value": "={{ $json.toeic_listeningmaterial.updated_at }}"
+              "column": "translation",
+              "value": "={{ $json.toeic_listeningmaterial.translation }}"
             }
           ]
         },
@@ -286,19 +282,11 @@
             },
             {
               "column": "difficulty_level",
-              "value": "=3"
+              "value": "={{ $json.toeic_questions[0].difficulty_level }}"
             },
             {
               "column": "explanation",
               "value": "={{ $json.toeic_questions[0].explanation }}"
-            },
-            {
-              "column": "created_at",
-              "value": "={{ $json.toeic_questions[0].created_at }}"
-            },
-            {
-              "column": "updated_at",
-              "value": "={{ $json.toeic_questions[0].updated_at }}"
             },
             {
               "column": "question_category",
@@ -311,6 +299,10 @@
             {
               "column": "passage_id",
               "value": "={{ $json.toeic_questions[0].passage_id }}"
+            },
+            {
+              "column": "question_num",
+              "value": "1"
             }
           ]
         },
@@ -460,7 +452,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "2dd8c6a4-85a1-4d7a-bc10-aad2c8ee928c",
+  "versionId": "34ebde99-ea4c-4d0a-b3c0-23d7e4ae45f5",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "56d5fc753739ca819a95a90ca86e7ee4890379e37fd5e90d1398ca6f4ac9b444"
