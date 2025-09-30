@@ -61,12 +61,8 @@
               "value": "={{ $json.passage.rejection_reason }}"
             },
             {
-              "column": "created_at",
-              "value": "={{ $json.passage.created_at }}"
-            },
-            {
-              "column": "updated_at",
-              "value": "={{ $json.passage.updated_at }}"
+              "column": "translation",
+              "value": "={{ $json.passage.translattion }}"
             }
           ]
         },
@@ -111,7 +107,7 @@
             },
             {
               "column": "question_text",
-              "value": "={{ $json.questions[2].question_text }}"
+              "value": "=__3__"
             },
             {
               "column": "option_a_text",
@@ -142,20 +138,16 @@
               "value": "={{ $json.questions[2].explanation }}"
             },
             {
-              "column": "created_at",
-              "value": "={{ $json.questions[2].created_at }}"
+              "column": "passage_id",
+              "value": "={{ $json.questions[2].passage_id }}"
             },
             {
-              "column": "updated_at",
-              "value": "={{ $json.questions[2].updated_at }}"
+              "column": "question_num",
+              "value": "3"
             },
             {
               "column": "question_category",
               "value": "={{ $json.questions[2].question_category }}"
-            },
-            {
-              "column": "passage_id",
-              "value": "={{ $json.questions[2].passage_id }}"
             }
           ]
         },
@@ -200,7 +192,7 @@
             },
             {
               "column": "question_text",
-              "value": "={{ $json.questions[3].question_text }}"
+              "value": "=__4__"
             },
             {
               "column": "option_a_text",
@@ -231,20 +223,16 @@
               "value": "={{ $json.questions[3].explanation }}"
             },
             {
-              "column": "created_at",
-              "value": "={{ $json.questions[3].created_at }}"
-            },
-            {
-              "column": "updated_at",
-              "value": "={{ $json.questions[3].updated_at }}"
-            },
-            {
               "column": "question_category",
               "value": "={{ $json.questions[3].question_category }}"
             },
             {
               "column": "passage_id",
               "value": "={{ $json.questions[3].passage_id }}"
+            },
+            {
+              "column": "question_num",
+              "value": "4"
             }
           ]
         },
@@ -289,7 +277,7 @@
             },
             {
               "column": "question_text",
-              "value": "={{ $json.questions[1].question_text }}"
+              "value": "=__2__"
             },
             {
               "column": "option_a_text",
@@ -320,20 +308,16 @@
               "value": "={{ $json.questions[1].explanation }}"
             },
             {
-              "column": "created_at",
-              "value": "={{ $json.questions[1].created_at }}"
-            },
-            {
-              "column": "updated_at",
-              "value": "={{ $json.questions[1].updated_at }}"
-            },
-            {
               "column": "question_category",
               "value": "={{ $json.questions[1].question_category }}"
             },
             {
               "column": "passage_id",
               "value": "={{ $json.questions[1].passage_id }}"
+            },
+            {
+              "column": "question_num",
+              "value": "2"
             }
           ]
         },
@@ -378,7 +362,7 @@
             },
             {
               "column": "question_text",
-              "value": "={{ $json.questions[0].question_text }}"
+              "value": "=__1__"
             },
             {
               "column": "option_a_text",
@@ -409,20 +393,16 @@
               "value": "={{ $json.questions[0].explanation }}"
             },
             {
-              "column": "created_at",
-              "value": "={{ $json.questions[0].created_at }}"
-            },
-            {
-              "column": "updated_at",
-              "value": "={{ $json.questions[0].updated_at }}"
-            },
-            {
               "column": "question_category",
               "value": "={{ $json.questions[0].question_category }}"
             },
             {
               "column": "passage_id",
               "value": "={{ $json.questions[0].passage_id }}"
+            },
+            {
+              "column": "question_num",
+              "value": "1"
             }
           ]
         },
@@ -469,7 +449,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const rawPassage = items[0].json.data.reading_passage;\nconst rawQuestions = items[0].json.data.questions;\n\nfunction toMysqlDatetime(isoString) {\n  return new Date(isoString).toISOString().slice(0, 19).replace(\"T\", \" \");\n}\n\nconst passage = {\n  passage_id: rawPassage.passage_id,\n  topic: rawPassage.topic,\n  title: rawPassage.title,\n  reading_level: rawPassage.reading_level,\n  content: rawPassage.content,\n  word_count: rawPassage.word_count,\n  created_at: toMysqlDatetime(rawPassage.created_at),\n  updated_at: toMysqlDatetime(rawPassage.updated_at),\n  is_approved: rawPassage.is_approved,\n  rejection_reason: rawPassage.rejection_reason || \"\"\n};\n\nconst questions = rawQuestions.map(q => ({\n  question_id: q.question_id,\n  passage_id: q.passage_id,\n  question_text: q.question_text,\n  question_type: q.question_type,\n  question_category: q.question_category,\n  question_image_url: (q.question_image_url === \"null\" || q.question_image_url === null) ? null : q.question_image_url,\n  part: q.part,\n  option_a_text: q.option_a_text,\n  option_b_text: q.option_b_text,\n  option_c_text: q.option_c_text,\n  option_d_text: q.option_d_text,\n  is_correct: q.is_correct,\n  difficulty_level: q.difficulty_level,\n  explanation: q.explanation,\n  created_at: toMysqlDatetime(q.created_at),\n  updated_at: toMysqlDatetime(q.updated_at)\n}));\n\nreturn [{\n  json: {\n    passage,\n    questions\n  }\n}];\n"
+        "jsCode": "const rawPassage = items[0].json.data.reading_passage;\nconst rawQuestions = items[0].json.data.questions;\n\nfunction toMysqlDatetime(isoString) {\n  return new Date(isoString).toISOString().slice(0, 19).replace(\"T\", \" \");\n}\nfunction countEnglishWords(text) {\n  if (!text) return 0;\n  const s = String(text)\n    .replace(/<[^>]+>/g, ' ');  // 去掉 HTML\n    // .replace(/-/g, ' ');       // 將連字號視為分隔\n  // 英文字（含像 it's、O'Neill），不把數字算進來\n  const tokens = s.match(/\\b[A-Za-z]+(?:'[A-Za-z]+)?\\b/g);\n  return tokens ? tokens.length : 0;\n}\nconst passage = {\n  passage_id: rawPassage.passage_id,\n  topic: rawPassage.topic,\n  title: rawPassage.title,\n  reading_level: rawPassage.reading_level,\n  content: rawPassage.content,\n  translation :rawPassage.translation,\n  word_count: countEnglishWords(rawPassage.content),\n  created_at: toMysqlDatetime(rawPassage.created_at),\n  updated_at: toMysqlDatetime(rawPassage.updated_at),\n  is_approved: rawPassage.is_approved,\n  rejection_reason: rawPassage.rejection_reason || \"\"\n};\n\nconst questions = rawQuestions.map(q => ({\n  question_id: q.question_id,\n  passage_id: q.passage_id,\n  question_text: q.question_text,\n  question_type: q.question_type,\n  question_category: q.question_category,\n  question_image_url: (q.question_image_url === \"null\" || q.question_image_url === null) ? null : q.question_image_url,\n  part: q.part,\n  option_a_text: q.option_a_text,\n  option_b_text: q.option_b_text,\n  option_c_text: q.option_c_text,\n  option_d_text: q.option_d_text,\n  is_correct: q.is_correct,\n  difficulty_level: q.difficulty_level,\n  explanation: q.explanation,\n  created_at: toMysqlDatetime(q.created_at),\n  updated_at: toMysqlDatetime(q.updated_at)\n}));\n\nreturn [{\n  json: {\n    passage,\n    questions\n  }\n}];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -512,7 +492,7 @@
           "interval": [
             {
               "field": "minutes",
-              "minutesInterval": 10
+              "minutesInterval": 30
             }
           ]
         }
@@ -610,11 +590,11 @@
       ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "b1a4080a-7ae6-47f9-9f43-b546a032d74c",
+  "versionId": "63eaabcb-aef8-4883-9425-5e49a9cce070",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "56d5fc753739ca819a95a90ca86e7ee4890379e37fd5e90d1398ca6f4ac9b444"

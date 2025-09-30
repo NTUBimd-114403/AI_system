@@ -98,7 +98,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const DEFAULT_BUCKET = '114system';\n\nfunction formatDate(date) {\n  return date.toISOString().slice(0, 19).replace('T', ' ');\n}\nconst now = formatDate(new Date());\n\nconst out = [];\n\nfor (const it of items) {\n  const j = it.json || {};\n\n  // 只處理「有 originalData」的那筆\n  if (!j.originalData) continue;\n\n  const data = j.originalData || {};\n  const mat = { ...(data.listening_material || {}) };\n  let qs = Array.isArray(data.questions) ? data.questions : [];\n\n  const bucket = j.bucket || DEFAULT_BUCKET;\n  const name = j.name || (mat.material_id ? `part4/${mat.material_id}.mp3` : null);\n\n  if (name) {\n    mat.audio_url = `https://storage.googleapis.com/${bucket}/${encodeURI(name)}`;\n  }\n\n  mat.question_type = \"listen\";\n  mat.is_approved = 0;\n  mat.created_at = now;\n  mat.updated_at = now;\n\n  qs = qs.map(q => ({\n    ...q,\n    passage_id: null,\n    question_image_url: null,\n    created_at: now,\n    updated_at: now\n  }));\n\n  out.push({\n    json: {\n      toeic_listeningmaterial: mat,\n      toeic_questions: qs\n    }\n  });\n}\n\n// ⚠️ 保證只輸出處理後的 JSON\nreturn out.length > 0 ? [out[out.length - 1]] : [];\n"
+        "jsCode": "const DEFAULT_BUCKET = '114system';\n\nfunction formatDate(date) {\n  return date.toISOString().slice(0, 19).replace('T', ' ');\n}\nconst now = formatDate(new Date());\n\nfunction countEnglishWords(text) {\n  if (!text) return 0;\n  const s = String(text)\n    .replace(/<[^>]+>/g, ' ')  // 去掉 HTML\n    .replace(/-/g, ' ');       // 將連字號視為分隔\n  // 英文字（含像 it's、O'Neill），不把數字算進來\n  const tokens = s.match(/\\b[A-Za-z]+(?:'[A-Za-z]+)?\\b/g);\n  return tokens ? tokens.length : 0;\n}\n\nconst out = [];\n\nfor (const it of items) {\n  const j = it.json || {};\n\n  // 只處理「有 originalData」的那筆\n  if (!j.originalData) continue;\n\n  const data = j.originalData || {};\n  const mat = { ...(data.listening_material || {}) };\n  let qs = Array.isArray(data.questions) ? data.questions : [];\n\n  const bucket = j.bucket || DEFAULT_BUCKET;\n  const name = j.name || (mat.material_id ? `part4/${mat.material_id}.mp3` : null);\n\n  if (name) {\n    mat.audio_url = `https://storage.googleapis.com/${bucket}/${encodeURI(name)}`;\n  }\n  mat.word_count = countEnglishWords(mat.transcript)\n  mat.question_type = \"listen\";\n  mat.is_approved = 0;\n  mat.created_at = now;\n  mat.updated_at = now;\n\n  qs = qs.map(q => ({\n    ...q,\n    passage_id: null,\n    question_image_url: null,\n    created_at: now,\n    updated_at: now\n  }));\n\n  out.push({\n    json: {\n      listeningmaterial: mat,\n      questions: qs\n    }\n  });\n}\n\n// ⚠️ 保證只輸出處理後的 JSON\nreturn out.length > 0 ? [out[out.length - 1]] : [];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -145,7 +145,7 @@
           "interval": [
             {
               "field": "minutes",
-              "minutesInterval": 10
+              "minutesInterval": 30
             }
           ]
         }
@@ -200,40 +200,36 @@
         },
         "dataMode": "defineBelow",
         "columnToMatchOn": "material_id",
-        "valueToMatchOn": "={{ $json.toeic_listeningmaterial.material_id }}",
+        "valueToMatchOn": "={{ $json.listeningmaterial.material_id }}",
         "valuesToSend": {
           "values": [
             {
               "column": "audio_url",
-              "value": "={{ $json.toeic_listeningmaterial.audio_url }}"
+              "value": "={{ $json.listeningmaterial.audio_url }}"
             },
             {
               "column": "transcript",
-              "value": "={{ $json.toeic_listeningmaterial.transcript }}"
+              "value": "={{ $json.listeningmaterial.transcript }}"
             },
             {
               "column": "accent",
-              "value": "={{ $json.toeic_listeningmaterial.accent }}"
+              "value": "={{ $json.listeningmaterial.accent }}"
             },
             {
               "column": "topic",
-              "value": "={{ $json.toeic_listeningmaterial.topic }}"
+              "value": "={{ $json.listeningmaterial.topic }}"
             },
             {
               "column": "listening_level",
-              "value": "={{ $json.toeic_listeningmaterial.listening_level }}"
+              "value": "={{ $json.listeningmaterial.listening_level }}"
             },
             {
               "column": "is_approved",
-              "value": "={{ $json.toeic_listeningmaterial.is_approved }}"
+              "value": "={{ $json.listeningmaterial.is_approved }}"
             },
             {
-              "column": "created_at",
-              "value": "={{ $json.toeic_listeningmaterial.created_at }}"
-            },
-            {
-              "column": "updated_at",
-              "value": "={{ $json.toeic_listeningmaterial.updated_at }}"
+              "column": "translation",
+              "value": "={{ $json.listeningmaterial.translation }}"
             }
           ]
         },
@@ -265,7 +261,7 @@
         },
         "dataMode": "defineBelow",
         "columnToMatchOn": "question_id",
-        "valueToMatchOn": "={{ $json.toeic_questions[0].question_id }}",
+        "valueToMatchOn": "={{ $json.questions[0].question_id }}",
         "valuesToSend": {
           "values": [
             {
@@ -274,55 +270,55 @@
             },
             {
               "column": "part",
-              "value": "=2"
-            },
-            {
-              "column": "question_text",
-              "value": "={{ $json.toeic_questions[0].question_text }}"
-            },
-            {
-              "column": "option_a_text",
-              "value": "={{ $json.toeic_questions[0].option_a_text }}"
-            },
-            {
-              "column": "option_b_text",
-              "value": "={{ $json.toeic_questions[0].option_b_text }}"
-            },
-            {
-              "column": "option_c_text",
-              "value": "={{ $json.toeic_questions[0].option_c_text }}"
-            },
-            {
-              "column": "is_correct",
-              "value": "={{ $json.toeic_questions[0].is_correct }}"
-            },
-            {
-              "column": "difficulty_level",
               "value": "=3"
             },
             {
+              "column": "question_text",
+              "value": "={{ $json.questions[0].question_text }}"
+            },
+            {
+              "column": "option_a_text",
+              "value": "={{ $json.questions[0].option_a_text }}"
+            },
+            {
+              "column": "option_b_text",
+              "value": "={{ $json.questions[0].option_b_text }}"
+            },
+            {
+              "column": "option_c_text",
+              "value": "={{ $json.questions[0].option_c_text }}"
+            },
+            {
+              "column": "is_correct",
+              "value": "={{ $json.questions[0].is_correct }}"
+            },
+            {
+              "column": "difficulty_level",
+              "value": "={{ $json.questions[0].difficulty_level }}"
+            },
+            {
               "column": "explanation",
-              "value": "={{ $json.toeic_questions[0].explanation }}"
-            },
-            {
-              "column": "created_at",
-              "value": "={{ $json.toeic_questions[0].created_at }}"
-            },
-            {
-              "column": "updated_at",
-              "value": "={{ $json.toeic_questions[0].updated_at }}"
+              "value": "={{ $json.questions[0].explanation }}"
             },
             {
               "column": "question_category",
-              "value": "={{ $json.toeic_questions[0].question_category }}"
+              "value": "={{ $json.questions[0].question_category }}"
             },
             {
               "column": "material_id",
-              "value": "={{ $json.toeic_questions[0].material_id }}"
+              "value": "={{ $json.questions[0].material_id }}"
             },
             {
               "column": "passage_id",
-              "value": "={{ $json.toeic_questions[0].passage_id }}"
+              "value": "={{ $json.questions[0].passage_id }}"
+            },
+            {
+              "column": "question_num",
+              "value": "1"
+            },
+            {
+              "column": "option_d_text",
+              "value": "={{ $json.questions[0].option_d_text }}"
             }
           ]
         },
@@ -336,6 +332,184 @@
       ],
       "id": "d17ce210-25a8-4c14-8c84-6235697c0089",
       "name": "存入問題表",
+      "credentials": {
+        "mySql": {
+          "id": "1IRe8k68oOuihi6L",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": {
+          "__rl": true,
+          "value": "toeic_question",
+          "mode": "list",
+          "cachedResultName": "toeic_question"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "question_id",
+        "valueToMatchOn": "={{ $json.questions[1].question_id }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "question_type",
+              "value": "=listen"
+            },
+            {
+              "column": "part",
+              "value": "=3"
+            },
+            {
+              "column": "question_text",
+              "value": "={{ $json.questions[1].question_text }}"
+            },
+            {
+              "column": "option_a_text",
+              "value": "={{ $json.questions[1].option_a_text }}"
+            },
+            {
+              "column": "option_b_text",
+              "value": "={{ $json.questions[1].option_b_text }}"
+            },
+            {
+              "column": "option_c_text",
+              "value": "={{ $json.questions[1].option_c_text }}"
+            },
+            {
+              "column": "is_correct",
+              "value": "={{ $json.questions[1].is_correct }}"
+            },
+            {
+              "column": "difficulty_level",
+              "value": "={{ $json.questions[1].difficulty_level }}"
+            },
+            {
+              "column": "explanation",
+              "value": "={{ $json.questions[1].explanation }}"
+            },
+            {
+              "column": "question_category",
+              "value": "={{ $json.questions[1].question_category }}"
+            },
+            {
+              "column": "material_id",
+              "value": "={{ $json.questions[1].material_id }}"
+            },
+            {
+              "column": "passage_id",
+              "value": "={{ $json.questions[1].passage_id }}"
+            },
+            {
+              "column": "question_num",
+              "value": "2"
+            },
+            {
+              "column": "option_d_text",
+              "value": "={{ $json.questions[1].option_d_text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -288,
+        64
+      ],
+      "id": "24cc0e53-62ef-4522-a059-d11395f4c34e",
+      "name": "存入問題表1",
+      "credentials": {
+        "mySql": {
+          "id": "1IRe8k68oOuihi6L",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": {
+          "__rl": true,
+          "value": "toeic_question",
+          "mode": "list",
+          "cachedResultName": "toeic_question"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "question_id",
+        "valueToMatchOn": "={{ $json.questions[2].question_id }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "question_type",
+              "value": "=listen"
+            },
+            {
+              "column": "part",
+              "value": "=3"
+            },
+            {
+              "column": "question_text",
+              "value": "={{ $json.questions[2].question_text }}"
+            },
+            {
+              "column": "option_a_text",
+              "value": "={{ $json.questions[2].option_a_text }}"
+            },
+            {
+              "column": "option_b_text",
+              "value": "={{ $json.questions[2].option_b_text }}"
+            },
+            {
+              "column": "option_c_text",
+              "value": "={{ $json.questions[2].option_c_text }}"
+            },
+            {
+              "column": "is_correct",
+              "value": "={{ $json.questions[2].is_correct }}"
+            },
+            {
+              "column": "difficulty_level",
+              "value": "={{ $json.questions[2].difficulty_level }}"
+            },
+            {
+              "column": "explanation",
+              "value": "={{ $json.questions[2].explanation }}"
+            },
+            {
+              "column": "question_category",
+              "value": "={{ $json.questions[2].question_category }}"
+            },
+            {
+              "column": "material_id",
+              "value": "={{ $json.questions[2].material_id }}"
+            },
+            {
+              "column": "passage_id",
+              "value": "={{ $json.questions[2].passage_id }}"
+            },
+            {
+              "column": "question_num",
+              "value": "3"
+            },
+            {
+              "column": "option_d_text",
+              "value": "={{ $json.questions[2].option_d_text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -64,
+        -96
+      ],
+      "id": "4d2e3675-1b97-444b-b93b-d031fe26506d",
+      "name": "存入問題表2",
       "credentials": {
         "mySql": {
           "id": "1IRe8k68oOuihi6L",
@@ -412,6 +586,16 @@
             "node": "Code1",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "存入問題表1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "存入問題表2",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -450,11 +634,11 @@
       ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "31bd73f2-7ab9-49ec-990d-73d446bbb726",
+  "versionId": "61c86c4b-49fc-4276-a01b-2a2880feb2d0",
   "meta": {
     "instanceId": "56d5fc753739ca819a95a90ca86e7ee4890379e37fd5e90d1398ca6f4ac9b444"
   },
