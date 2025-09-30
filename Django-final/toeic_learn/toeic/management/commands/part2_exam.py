@@ -10,6 +10,7 @@ class Command(BaseCommand):
         self.stdout.write("開始建立 Part 2 Exam（每份 4 題）...")
 
         # 取得所有 Part 2 題目
+ 
         part2_questions = Question.objects.filter(part=2 , material__is_approved=True).order_by('created_at')
         total_questions = part2_questions.count()
         

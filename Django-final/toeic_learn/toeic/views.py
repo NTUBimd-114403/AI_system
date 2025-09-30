@@ -56,15 +56,11 @@ def home(request):
         username = request.user.email
 
     try:
-        # 取得所有片語
+
         all_phrases = list(Phrase.objects.all())
 
-        # 根據今天的日期設定隨機種子，確保每日片語一致
-        # 這個方法可以保證在同一天內，使用者每次刷新頁面都看到相同的片語
         today = date.today()
         random.seed(today.day + today.month + today.year)
-        
-        # 隨機選擇3個片語，如果片語總數少於3個則選擇全部
         if len(all_phrases) >= 3:
             daily_phrases = random.sample(all_phrases, 3)
         else:
@@ -161,16 +157,12 @@ def logout_view(request):
     """
     自訂的登出視圖，確保清除所有快閃訊息。
     """
-    # 使用 Django 內建的登出函數。
-    # 這會結束目前的使用者會話。
+
     logout(request)
 
-    # 明確地從會話中清除所有訊息。
-    # 這可以防止舊的訊息出現在下一個頁面。
     storage = messages.get_messages(request)
     storage.used = True 
-    
-    # 創建一個新的成功訊息，用於登出操作。
+
     messages.success(request, '您已成功登出！')
     
     # 重新導向到登入頁面。
@@ -443,15 +435,6 @@ def test_result(request):
     
     return render(request, 'result.html', context)
 
-# def get_daily_record_and_counts(user):
-#     """
-#     取得使用者當天的每日測驗紀錄。
-#     """
-#     today = timezone.localdate(timezone.now())
-#     record, created = DailyTestRecord.objects.get_or_create(user=user, date=today)
-#     return record, record.mixed_test_count, record.other_part_test_count
-
-# 獲取當前台灣日期
 def get_taiwan_today():
     """
     取得台灣時區的當天日期，手動計算時差。
@@ -473,24 +456,35 @@ def get_daily_record_and_counts(user):
         record.save()
     return record, record.mixed_test_count, record.other_part_test_count
 
+
 def check_and_update_test_count(user, part_number):
     """
     檢查並更新當天測驗次數。
-    回傳 (is_allowed, message)
     """
     record, mixed_count, other_part_count = get_daily_record_and_counts(user)
-    
+
     if part_number == 0:  # 綜合測驗
         if mixed_count >= record.mixed_test_limit:
-            return False, "今日綜合測驗次數已達上限。"
+            return False, f"今日 {PART_DICT[part_number]} 次數已達上限。"
         record.mixed_test_count += 1
-    else: # 單一 Part 測驗
+    else:  # 單一 Part 測驗
         if other_part_count >= record.other_part_test_limit:
-            return False, f"今日 Part {part_number} 測驗次數已達上限。"
+            return False, f"今日 {PART_DICT[part_number]} 次數已達上限。"
         record.other_part_test_count += 1
-    
+
     record.save()
     return True, "測驗次數已更新。"
+
+# 放在 views.py 或 utils.py 開頭
+PART_CHOICES = [
+    (0, '綜合測驗'),
+    (2, '應答問題'),
+    (3, '簡短獨白'),
+    (5, '句子填空'),
+    (6, '段落填空'),
+    (7, '單篇閱讀'),
+]
+PART_DICT = dict(PART_CHOICES)
 
 @login_required
 @require_POST
@@ -513,15 +507,21 @@ def check_test_limit(request):
     if part_number == 0:
         if record.mixed_test_count >= record.mixed_test_limit:
             points_needed = EXCHANGE_POINTS_FOR_MIXED_TEST
-            message = f"今日綜合測驗次數已達上限 ({record.mixed_test_limit} 次)。"
+
+            message = f"今日 {PART_DICT[part_number]} 次數已達上限 ({record.mixed_test_limit} 次)。"
+
             return JsonResponse({'status': 'limit_reached', 'message': message, 'points_needed': points_needed})
     else:
         if record.other_part_test_count >= record.other_part_test_limit:
             points_needed = EXCHANGE_POINTS_FOR_OTHER_PART_TEST
-            message = f"今日 Part {part_number} 測驗次數已達上限 ({record.other_part_test_limit} 次)。"
+
+            test_name = PART_DICT.get(part_number, f"Part {part_number}")
+            message = f"今日 {test_name} 次數已達上限 ({record.other_part_test_limit} 次)。"
+
             return JsonResponse({'status': 'limit_reached', 'message': message, 'points_needed': points_needed})
 
     return JsonResponse({'status': 'ok', 'message': '次數充足'})
+
 
 @login_required
 def all_test(request):
@@ -1002,7 +1002,7 @@ def record(request):
     # 定義 Part 編號與名稱的映射關係
     part_names = {
         2: "應答問題",
-        3: "簡短對話",
+        3: "簡短獨白",
         5: "句子填空",
         6: "段落填空",
         7: "閱讀測驗",

@@ -43,7 +43,7 @@ DIFFICULTY_LEVEL_CHOICES = [
 PART_CHOICES = [
     (0, 'All - 綜合測驗'), 
     (2, 'Part 2 - 應答問題'),
-    (3, 'Part 3 - 簡短對話'),
+    (3, 'Part 3 - 簡短獨白'),
     (5, 'Part 5 - 句子填空'),
     (6, 'Part 6 - 段落填空'),
     (7, 'Part 7 - 單篇閱讀'),
@@ -242,6 +242,7 @@ class Question(models.Model):
         verbose_name='分類題目類型'
     )
     question_num = models.IntegerField(null=True, blank=True, verbose_name='題號')
+
 
 
 class Exam(models.Model):
