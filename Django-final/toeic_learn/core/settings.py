@@ -30,12 +30,13 @@ SECRET_KEY = "django-insecure-ga393qkdi@vh#*6aqr=5@*wsm!sf5!0-)nhjspu4w8p#6ut1+t
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['ai-toeic.ntub.local','localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['ai-toeic.ntub.local','localhost', '127.0.0.1', '140.131.114.159']
 AUTH_USER_MODEL = 'toeic.User'
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost',
     'http://127.0.0.1', 
+    "http://140.131.114.159:8000",
 ]
 
 

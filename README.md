@@ -6,7 +6,7 @@
 - Create virtual environment & Initialize Virtual Environment
 
 ```
-venv env
+python -m venv env
 ./env/Scripts/activate # Linux or Mac
 .\env\Scripts\activate.bat # Windows CMD
 .\env\Scripts\Activate.ps1 # Windows PowerShell

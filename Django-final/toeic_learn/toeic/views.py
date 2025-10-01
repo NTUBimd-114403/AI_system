@@ -635,7 +635,7 @@ def part2(request):
         q = eq.question
         audio_url = None
         if q.material and q.material.audio_url:
-            audio_url = os.path.join(settings.MEDIA_URL, q.material.audio_url)
+            audio_url = os.path.join(q.material.audio_url)
 
         questions_data.append({
             'question_id': str(q.question_id),
