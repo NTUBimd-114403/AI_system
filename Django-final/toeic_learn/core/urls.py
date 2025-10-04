@@ -66,6 +66,11 @@ urlpatterns = [
 
     # ---------- Django Admin ----------
     path("admin/", admin.site.urls),
+    
+    # ---------- Admin Backend ---------
+    path("mgmt-test/", views.get_mgmt_test, name="mgmt_test"),
+    path("mgmt-login/", views.mgmt_login, name="mgmt_login"),
+    path("mgmt-home/", views.get_mgmt_home, name="mgmt_home")
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

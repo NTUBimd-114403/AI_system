@@ -17,6 +17,7 @@ from django.db.models import Count, Q, F, FloatField, ExpressionWrapper
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
 from django.utils import timezone
+from .permissions import staff_required
 
 from .forms import RegisterForm
 
@@ -166,19 +167,29 @@ def logout_view(request):
     messages.success(request, '您已成功登出！')
     
     # 重新導向到登入頁面。
-    return redirect('login')
+    return redirect('home')
 
 def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, '註冊成功！請登入。')
-            return redirect('login')
+            return JsonResponse({
+                'success': True,
+                'redirect': '/login/'
+            })
         else:
-            messages.error(request, '註冊失敗，請檢查表單內容。')
-    else:
-        form = RegisterForm()
+            # 返回所有表單錯誤
+            errors = {}
+            for field, error_list in form.errors.items():
+                errors[field] = [str(e) for e in error_list]
+            
+            return JsonResponse({
+                'success': False,
+                'errors': errors
+            })
+    
+    form = RegisterForm()
     return render(request, 'register.html', {'form': form})
 
 def test_page(request):
@@ -1383,3 +1394,28 @@ def get_word_relations_by_ai(request, word):
             "synonyms": [],
             "error": f"無法解析 AI 回應: {e}"
         }, status=500)
+
+@staff_required
+def get_mgmt_test(request):
+    return render(request, 'mgmt_base.html')
+
+def get_mgmt_home(request):
+    return render(request, "mgmt_home.html")
+
+def mgmt_login(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        if not email or not password:
+            messages.error(request, '請輸入電子郵件和密碼')
+            
+        user = authenticate(request, username=email, password=password)
+        if user is not None:
+            login(request, user)
+            messages.success(request, '登入成功！')
+            return redirect('mgmt_home')
+        else:
+            messages.error(request, '帳號或密碼錯誤')
+
+    return render(request, 'mgmt_login.html')

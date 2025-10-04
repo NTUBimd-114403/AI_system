@@ -176,6 +176,7 @@
             <p>© 2025 欸！愛多益 版權所有</p>
         </div>
     </footer>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // 你的 JavaScript 腳本將會放在這裡
         function getCookie(name) {
@@ -201,13 +202,28 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('暱稱更新成功！');
+                        Swal.fire({
+                            icon: 'success',
+                            text: '暱稱更新成功！',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
                         document.querySelector('.nav-buttons .nav-btn').innerHTML = `<i class="fas fa-user"></i> 歡迎, ${newNickname}`;
                     } else {
-                        alert('更新失敗：' + data.error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: '更新失敗',
+                            text: data.error
+                        });
                     }
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        text: '發生錯誤，請稍後再試'
+                    });
+                });
             });
 
             // 處理修改密碼表單的提交
@@ -217,12 +233,15 @@
                 const oldPassword = document.getElementById('old-password').value;
                 const newPassword1 = document.getElementById('new-password').value;
                 const newPassword2 = document.getElementById('confirm-password').value;
-
+                
                 if (newPassword1 !== newPassword2) {
-                    alert('兩次輸入的新密碼不一致！');
+                    Swal.fire({
+                        icon: 'warning',
+                        text: '兩次輸入的新密碼不一致！'
+                    });
                     return;
                 }
-
+                
                 fetch('/change-password/', {
                     method: 'POST',
                     headers: {
@@ -238,13 +257,28 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('密碼修改成功！');
-                        changePasswordForm.reset(); // 清空表單
+                        Swal.fire({
+                            icon: 'success',
+                            text: '密碼修改成功！',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        changePasswordForm.reset();
                     } else {
-                        alert('密碼修改失敗：' + data.error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: '密碼修改失敗',
+                            text: data.error
+                        });
                     }
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        text: '發生錯誤，請稍後再試'
+                    });
+                });
             });
         });
     </script>
