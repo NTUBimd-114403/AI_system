@@ -37,17 +37,51 @@
                         <i class="fas fa-sign-out-alt"></i> 登出
                     </button>
                 </form>
-            {% else %}
+                {% else %}
                 <a href="{% url 'login' %}" target="_self">
                     <button class="nav-btn {% if request.path == '/login/' %}current{% endif %}">
                         <i class="fas fa-user"></i> 會員註冊/登入
                     </button>
                 </a>
-            {% endif %}
+                {% endif %}
         </header>
         <div class="container">
             <div class="sidebar" id="sidebar">
-
+                <div class="sidebar-icon">
+                    <img src="{% static 'img/logo.png'%}">
+                </div>
+                <div class="sidebar-title">
+                    <p>後台控制面板</p>
+                </div>
+                <hr>
+                <div class="sidebar-object">
+                    <div class="sidebar-toggle">
+                        <i class="fas fa-user fa-lg"></i>
+                        <p>使用者管理</p>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <a href="">資料管理</a>
+                        <a href="">點數管理</a>
+                    </div>
+                </div>
+                <div class="sidebar-object">
+                    <div class="sidebar-toggle">
+                        <i class="fas fa-user fa-lg"></i>
+                        <p>測驗平台管理</p>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <a href="">測驗題目管理</a>
+                    </div>
+                </div>
+                <div class="sidebar-object">
+                    <div class="sidebar-toggle">
+                        <i class="fas fa-user fa-lg"></i>
+                        <p>平台統計資訊</p>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <a href="">平台使用資訊</a>
+                    </div>
+                </div>
             </div>
             <div class="main">
                 {% block content %}
