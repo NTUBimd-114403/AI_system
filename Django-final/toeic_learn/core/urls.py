@@ -70,7 +70,12 @@ urlpatterns = [
     # ---------- Admin Backend ---------
     path("mgmt-test/", views.get_mgmt_test, name="mgmt_test"),
     path("mgmt-login/", views.mgmt_login, name="mgmt_login"),
-    path("mgmt-home/", views.get_mgmt_home, name="mgmt_home")
+    path("mgmt-home/", views.get_mgmt_home, name="mgmt_home"),
+    path("mgmt-user/", views.mgmt_user, name="mgmt_user"),
+    path('mgmt/api/user/update/', views.update_user_api, name='update_user_api'),
+    path('mgmt/api/user/create/', views.create_user_api, name='create_user_api'),
+    path('mgmt/api/user/delete/', views.delete_user_api, name='delete_user_api'),
+    path('mgmt/api/user/<str:email>/', views.get_user_api, name='get_user_api')
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

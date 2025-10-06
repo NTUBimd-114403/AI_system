@@ -1419,3 +1419,69 @@ def mgmt_login(request):
             messages.error(request, '帳號或密碼錯誤')
 
     return render(request, 'mgmt_login.html')
+
+def mgmt_user(request):
+    users = User.objects.all().order_by('-date_joined')
+    context = {'users': users}
+    return render(request, 'mgmt_user.html', context)
+
+
+def get_user_api(request, email):
+    try:
+        user = User.objects.get(email=email)
+        return JsonResponse({
+            'email': user.email,
+            'nickname': user.nickname,
+            'point': user.point,
+            'is_staff': user.is_staff,
+            'is_active': user.is_active
+        })
+    except User.DoesNotExist:
+        return JsonResponse({'error': '找不到使用者'}, status=404)
+
+@require_POST
+def update_user_api(request):
+    try:
+        data = json.loads(request.body)
+        user = User.objects.get(email=data['email'])
+        user.nickname = data['nickname']
+        user.point = int(data['point'])
+        user.is_staff = data['is_staff']
+        user.is_active = data['is_active']
+        user.save()
+        return JsonResponse({'success': True})
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '找不到使用者'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+@require_POST
+def create_user_api(request):
+    try:
+        data = json.loads(request.body)
+        
+        if User.objects.filter(email=data['email']).exists():
+            return JsonResponse({'success': False, 'error': '此 Email 已存在'})
+        
+        user = User.objects.create_user(
+            email=data['email'],
+            nickname=data['nickname'],
+            password=data['password']
+        )
+        user.point = data.get('point', 0)
+        user.is_staff = data.get('is_staff', False)
+        user.save()
+        
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+@require_POST
+def delete_user_api(request):
+    try:
+        data = json.loads(request.body)
+        user = User.objects.get(email=data['email'])
+        user.delete()
+        return JsonResponse({'success': True})
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '找不到使用者'}, status=404)
