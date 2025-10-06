@@ -293,10 +293,10 @@ hr {
 
 .container-user .toolbar {
     position: fixed;
-    width: 40%;
+    width: 40% !important;
     height: 100px;
     bottom: -40px;
-    left: 30%;
+    left: 30% !important;
     border-radius: 20px;
     display: flex;
     justify-content: center;
@@ -310,7 +310,7 @@ hr {
     bottom: -10px;
 }
 
-.container-user .toolbar  button {
+.container-user .toolbar button {
     margin: 5px 0;
     padding: 0 10px;
     display: block;
@@ -335,6 +335,16 @@ hr {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-family: inherit;
+    resize: vertical;
 }
 
 .modal-content {

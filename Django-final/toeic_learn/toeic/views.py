@@ -2,6 +2,7 @@ import os
 import json
 import random
 import logging
+import csv
 from datetime import datetime, date, timedelta
 import openai
 from django.conf import settings
@@ -1485,3 +1486,164 @@ def delete_user_api(request):
         return JsonResponse({'success': True})
     except User.DoesNotExist:
         return JsonResponse({'success': False, 'error': '找不到使用者'}, status=404)
+    
+@staff_required
+def question_list(request):
+    """題目列表頁面"""
+    questions = Question.objects.all().order_by('-created_at')
+    return render(request, 'mgmt_question.html', {'questions': questions})
+
+@staff_required
+def question_detail(request, question_id):
+    """取得單一題目詳情"""
+    try:
+        question = Question.objects.get(question_id=question_id)
+        return JsonResponse({
+            'question_id': str(question.question_id),
+            'question_num': question.question_num,
+            'question_category': question.question_category,
+            'question_type': question.question_type,
+            'part': question.part,
+            'question_text': question.question_text,
+            'option_a_text': question.option_a_text,
+            'option_b_text': question.option_b_text,
+            'option_c_text': question.option_c_text,
+            'option_d_text': question.option_d_text,
+            'is_correct': question.is_correct,
+            'difficulty_level': question.difficulty_level,
+            'explanation': question.explanation,
+        })
+    except Question.DoesNotExist:
+        return JsonResponse({'error': '題目不存在'}, status=404)
+
+@staff_required
+@require_http_methods(["POST"])
+def question_create(request):
+    """新增題目"""
+    try:
+        data = json.loads(request.body)
+        question = Question.objects.create(
+            question_num=data.get('question_num'),
+            question_category=data['question_category'],
+            question_type=data['question_type'],
+            part=data.get('part'),
+            question_text=data['question_text'],
+            option_a_text=data['option_a_text'],
+            option_b_text=data['option_b_text'],
+            option_c_text=data['option_c_text'],
+            option_d_text=data['option_d_text'],
+            is_correct=data['is_correct'],
+            difficulty_level=data['difficulty_level'],
+            explanation=data.get('explanation', '')
+        )
+        return JsonResponse({'success': True, 'question_id': str(question.question_id)})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@staff_required
+@require_http_methods(["POST"])
+def question_update(request):
+    """更新題目"""
+    try:
+        data = json.loads(request.body)
+        question = Question.objects.get(question_id=data['question_id'])
+        
+        question.question_num = data.get('question_num')
+        question.question_category = data['question_category']
+        question.question_type = data['question_type']
+        question.part = data.get('part')
+        question.question_text = data['question_text']
+        question.option_a_text = data['option_a_text']
+        question.option_b_text = data['option_b_text']
+        question.option_c_text = data['option_c_text']
+        question.option_d_text = data['option_d_text']
+        question.is_correct = data['is_correct']
+        question.difficulty_level = data['difficulty_level']
+        question.explanation = data.get('explanation', '')
+        question.save()
+        
+        return JsonResponse({'success': True})
+    except Question.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '題目不存在'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@staff_required
+@require_http_methods(["POST"])
+def question_delete(request):
+    """刪除題目"""
+    try:
+        data = json.loads(request.body)
+        question = Question.objects.get(question_id=data['question_id'])
+        question.delete()
+        return JsonResponse({'success': True})
+    except Question.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '題目不存在'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@staff_required
+def question_export(request):
+    """匯出 CSV"""
+    response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+    response['Content-Disposition'] = 'attachment; filename="questions.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow([
+        '題號', '分類', '題型', 'Part', '題目內容', 
+        '選項A', '選項B', '選項C', '選項D', 
+        '正確答案', '難度', '解析'
+    ])
+    
+    questions = Question.objects.all().order_by('question_num')
+    for q in questions:
+        writer.writerow([
+            q.question_num or '',
+            q.question_category,
+            q.question_type,
+            q.part or '',
+            q.question_text,
+            q.option_a_text,
+            q.option_b_text,
+            q.option_c_text,
+            q.option_d_text,
+            q.is_correct,
+            q.difficulty_level,
+            q.explanation
+        ])
+    
+    return response
+
+@staff_required
+@require_http_methods(["POST"])
+def question_import(request):
+    """匯入 CSV"""
+    try:
+        csv_file = request.FILES['file']
+        if not csv_file.name.endswith('.csv'):
+            return JsonResponse({'success': False, 'error': '請上傳 CSV 檔案'}, status=400)
+        
+        decoded_file = csv_file.read().decode('utf-8-sig').splitlines()
+        reader = csv.DictReader(decoded_file)
+        
+        count = 0
+        for row in reader:
+            Question.objects.create(
+                question_num=int(row['題號']) if row['題號'] else None,
+                question_category=row['分類'],
+                question_type=row['題型'],
+                part=int(row['Part']) if row['Part'] else None,
+                question_text=row['題目內容'],
+                option_a_text=row['選項A'],
+                option_b_text=row['選項B'],
+                option_c_text=row['選項C'],
+                option_d_text=row['選項D'],
+                is_correct=row['正確答案'],
+                difficulty_level=int(row['難度']),
+                explanation=row['解析']
+            )
+            count += 1
+        
+        return JsonResponse({'success': True, 'count': count})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)

@@ -72,10 +72,19 @@ urlpatterns = [
     path("mgmt-login/", views.mgmt_login, name="mgmt_login"),
     path("mgmt-home/", views.get_mgmt_home, name="mgmt_home"),
     path("mgmt-user/", views.mgmt_user, name="mgmt_user"),
+    path('mgmt-question/', views.question_list, name='question_list'),    
+    
+    # ------- Admin API Endpoint -------
     path('mgmt/api/user/update/', views.update_user_api, name='update_user_api'),
     path('mgmt/api/user/create/', views.create_user_api, name='create_user_api'),
     path('mgmt/api/user/delete/', views.delete_user_api, name='delete_user_api'),
-    path('mgmt/api/user/<str:email>/', views.get_user_api, name='get_user_api')
+    path('mgmt/api/user/<str:email>/', views.get_user_api, name='get_user_api'),
+    path('mgmt/api/question/create/', views.question_create, name='question_create'),
+    path('mgmt/api/question/update/', views.question_update, name='question_update'),
+    path('mgmt/api/question/delete/', views.question_delete, name='question_delete'),
+    path('mgmt/api/question/export/', views.question_export, name='question_export'),
+    path('mgmt/api/question/import/', views.question_import, name='question_import'),
+    path('mgmt/api/question/<uuid:question_id>/', views.question_detail, name='question_detail'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
