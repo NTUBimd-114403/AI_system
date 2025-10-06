@@ -1402,7 +1402,48 @@ def get_mgmt_test(request):
 
 @staff_required
 def get_mgmt_home(request):
-    return render(request, "mgmt_home.html")
+    return render(request, 'mgmt_home.html', {
+        'current_time': timezone.now()
+    })
+
+@staff_required
+def mgmt_home_stats(request):
+    today = timezone.now().date()
+    
+    # 今日新增用戶
+    today_users = User.objects.filter(date_joined__date=today).count()
+    
+    # 今日測驗次數
+    today_exams = ExamSession.objects.filter(start_time__date=today).count()
+    
+    # 待審核項目 (閱讀 + 聽力)
+    pending_reading = ReadingPassage.objects.filter(is_approved=False).count()
+    pending_listening = ListeningMaterial.objects.filter(is_approved=False).count()
+    pending_approval = pending_reading + pending_listening
+    
+    # 最新註冊用戶 (5筆)
+    recent_users = User.objects.order_by('-date_joined')[:5]
+    recent_users_data = [{
+        'nickname': u.nickname,
+        'email': u.email,
+        'date': u.date_joined.strftime('%m/%d %H:%M')
+    } for u in recent_users]
+    
+    # 最新點數交易 (5筆)
+    recent_transactions = PointTransaction.objects.select_related('user').order_by('-created_at')[:5]
+    recent_trans_data = [{
+        'user': t.user.nickname,
+        'amount': t.change_amount,
+        'reason': t.get_reason_display()
+    } for t in recent_transactions]
+    
+    return JsonResponse({
+        'today_users': today_users,
+        'today_exams': today_exams,
+        'pending_approval': pending_approval,
+        'recent_users': recent_users_data,
+        'recent_transactions': recent_trans_data
+    })
 
 def mgmt_login(request):
     if request.method == 'POST':

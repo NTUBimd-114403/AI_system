@@ -77,6 +77,7 @@ urlpatterns = [
     path('mgmt-dashboard/', views.dashboard_view, name='dashboard'),
     
     # ------- Admin API Endpoint -------
+    path('mgmt/api/home/stats/', views.mgmt_home_stats, name='home_stats'),
     path('mgmt/api/user/update/', views.update_user_api, name='update_user_api'),
     path('mgmt/api/user/create/', views.create_user_api, name='create_user_api'),
     path('mgmt/api/user/delete/', views.delete_user_api, name='delete_user_api'),
