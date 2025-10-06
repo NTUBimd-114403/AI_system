@@ -6,6 +6,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="{% static 'css/mgmt.css' %}">
+        <link rel="stylesheet" href="{% static 'css/mgmt_dashboard.css' %}">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     </head>
     <body>
@@ -60,8 +61,8 @@
                         <p>使用者管理</p>
                     </div>
                     <div class="sidebar-submenu">
-                        <a href="">資料管理</a>
-                        <a href="">點數管理</a>
+                        <a href="/mgmt-user">資料管理</a>
+                        <a href="/mgmt-point">點數管理</a>
                     </div>
                 </div>
                 <div class="sidebar-object">
@@ -70,7 +71,7 @@
                         <p>測驗平台管理</p>
                     </div>
                     <div class="sidebar-submenu">
-                        <a href="">測驗題目管理</a>
+                        <a href="/mgmt-question">測驗題目管理</a>
                     </div>
                 </div>
                 <div class="sidebar-object">
@@ -79,7 +80,7 @@
                         <p>平台統計資訊</p>
                     </div>
                     <div class="sidebar-submenu">
-                        <a href="">平台使用資訊</a>
+                        <a href="/mgmt-dashboard">平台使用資訊</a>
                     </div>
                 </div>
             </div>

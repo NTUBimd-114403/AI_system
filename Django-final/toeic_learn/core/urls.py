@@ -72,7 +72,8 @@ urlpatterns = [
     path("mgmt-login/", views.mgmt_login, name="mgmt_login"),
     path("mgmt-home/", views.get_mgmt_home, name="mgmt_home"),
     path("mgmt-user/", views.mgmt_user, name="mgmt_user"),
-    path('mgmt-question/', views.question_list, name='question_list'),    
+    path('mgmt-question/', views.question_list, name='question_list'),
+    path('mgmt-dashboard/', views.dashboard_view, name='dashboard'),
     
     # ------- Admin API Endpoint -------
     path('mgmt/api/user/update/', views.update_user_api, name='update_user_api'),
@@ -85,6 +86,7 @@ urlpatterns = [
     path('mgmt/api/question/export/', views.question_export, name='question_export'),
     path('mgmt/api/question/import/', views.question_import, name='question_import'),
     path('mgmt/api/question/<uuid:question_id>/', views.question_detail, name='question_detail'),
+    path('mgmt/api/dashboard/stats/', views.dashboard_stats, name='dashboard_stats'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

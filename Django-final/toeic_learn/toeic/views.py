@@ -7,14 +7,14 @@ from datetime import datetime, date, timedelta
 import openai
 from django.conf import settings
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse, Http404
+from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Count, Q, F, FloatField, ExpressionWrapper
+from django.db.models import Count, Avg, Sum, Q
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
 from django.utils import timezone
@@ -1647,3 +1647,170 @@ def question_import(request):
         return JsonResponse({'success': True, 'count': count})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    
+@staff_required
+def dashboard_view(request):
+    """儀表板頁面"""
+    return render(request, 'mgmt_dashboard.html')
+
+@staff_required
+def dashboard_stats(request):
+    """統計數據 API"""
+    
+    # 基本統計
+    total_users = User.objects.count()
+    total_exams = ExamSession.objects.count()
+    total_questions = Question.objects.count()
+    total_vocab = DailyVocabulary.objects.count()
+    vocab_records = UserVocabularyRecord.objects.count()
+    
+    # 點數流通量
+    total_points = User.objects.aggregate(Sum('point'))['point__sum'] or 0
+    
+    # 平均分數
+    avg_stats = ExamResult.objects.aggregate(
+        avg_score=Avg('total_score'),
+        avg_listen=Avg('listen_score'),
+        avg_reading=Avg('reading_score')
+    )
+    
+    # 完成率
+    completed_count = ExamSession.objects.filter(status='completed').count()
+    completion_rate = (completed_count / total_exams * 100) if total_exams > 0 else 0
+    
+    # 熟悉單字比例
+    familiar_count = UserVocabularyRecord.objects.filter(is_familiar=True).count()
+    familiar_rate = (familiar_count / vocab_records * 100) if vocab_records > 0 else 0
+    
+    # 新增用戶趨勢 (近30天)
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    user_trend = []
+    for i in range(30):
+        date = thirty_days_ago + timedelta(days=i)
+        count = User.objects.filter(
+            date_joined__date=date.date()
+        ).count()
+        user_trend.append({
+            'date': date.strftime('%m/%d'),
+            'count': count
+        })
+    
+    # 測驗趨勢 (近30天)
+    exam_trend = []
+    for i in range(30):
+        date = thirty_days_ago + timedelta(days=i)
+        count = ExamSession.objects.filter(
+            start_time__date=date.date()
+        ).count()
+        exam_trend.append({
+            'date': date.strftime('%m/%d'),
+            'count': count
+        })
+    
+    # 綜合測驗 vs 單一Part (透過 Exam 的 part 欄位判斷)
+    mixed_count = ExamSession.objects.filter(exam__part=0).count()
+    single_count = ExamSession.objects.exclude(exam__part=0).count()
+    
+    # 各 Part 測驗分布
+    exam_part_dist = ExamSession.objects.filter(
+        exam__part__isnull=False
+    ).values('exam__part').annotate(
+        count=Count('session_id')
+    ).order_by('exam__part')
+    
+    # 各 Part 題目分布
+    question_part_dist = Question.objects.filter(
+        part__isnull=False
+    ).values('part').annotate(
+        count=Count('question_id')
+    ).order_by('part')
+    
+    # 各難度題目分布
+    difficulty_dist = Question.objects.values('difficulty_level').annotate(
+        count=Count('question_id')
+    ).order_by('difficulty_level')
+    
+    # 題目審核狀態 (Reading + Listening)
+    approved_reading = ReadingPassage.objects.filter(is_approved=True).count()
+    pending_reading = ReadingPassage.objects.filter(is_approved=False).count()
+    approved_listening = ListeningMaterial.objects.filter(is_approved=True).count()
+    pending_listening = ListeningMaterial.objects.filter(is_approved=False).count()
+    
+    # 交易原因分布
+    transaction_dist = PointTransaction.objects.values('reason').annotate(
+        count=Count('id')
+    )
+    
+    # 轉換 Part choices 為中文標籤
+    PART_LABELS = {
+        0: '綜合測驗',
+        2: 'Part 2',
+        3: 'Part 3',
+        5: 'Part 5',
+        6: 'Part 6',
+        7: 'Part 7'
+    }
+    
+    # 交易原因標籤
+    REASON_LABELS = {
+        'exam_exchange': '測驗兌換',
+        'test_completion': '完成測驗',
+        'other': '其他'
+    }
+    
+    response_data = {
+        # 數字卡片
+        'total_users': total_users,
+        'total_exams': total_exams,
+        'avg_score': avg_stats['avg_score'] or 0,
+        'total_points': total_points,
+        'total_questions': total_questions,
+        'total_vocab': total_vocab,
+        'avg_listen_score': avg_stats['avg_listen'] or 0,
+        'avg_reading_score': avg_stats['avg_reading'] or 0,
+        'vocab_records': vocab_records,
+        
+        # 進度條
+        'completion_rate': completion_rate,
+        'familiar_rate': familiar_rate,
+        
+        # 折線圖
+        'user_trend': {
+            'dates': [d['date'] for d in user_trend],
+            'counts': [d['count'] for d in user_trend]
+        },
+        'exam_trend': {
+            'dates': [d['date'] for d in exam_trend],
+            'counts': [d['count'] for d in exam_trend]
+        },
+        
+        # 圓餅圖
+        'exam_type_ratio': {
+            'mixed': mixed_count,
+            'single': single_count
+        },
+        'transaction_reasons': {
+            'labels': [REASON_LABELS.get(t['reason'], t['reason']) for t in transaction_dist],
+            'counts': [t['count'] for t in transaction_dist]
+        },
+        'approval_status': {
+            'approved': approved_reading + approved_listening,
+            'pending': pending_reading + pending_listening
+        },
+        
+        # 長條圖
+        'exam_part_dist': {
+            'labels': [PART_LABELS.get(d['exam__part'], f"Part {d['exam__part']}") for d in exam_part_dist],
+            'counts': [d['count'] for d in exam_part_dist]
+        },
+        'question_part_dist': {
+            'labels': [PART_LABELS.get(d['part'], f"Part {d['part']}") for d in question_part_dist],
+            'counts': [d['count'] for d in question_part_dist]
+        },
+        'difficulty_dist': {
+            'labels': [f"Level {d['difficulty_level']}" for d in difficulty_dist],
+            'counts': [d['count'] for d in difficulty_dist]
+        }
+    }
+    
+    return JsonResponse(response_data)

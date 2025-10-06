@@ -1,0 +1,262 @@
+{% extends "mgmt_base.html" %}
+{% block title %}欸！愛多益 - 後台統計儀表板{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- 關鍵指標卡片區 -->
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+                <h3>總用戶數</h3>
+                <p class="stat-value" id="totalUsers">-</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📝</div>
+            <div class="stat-content">
+                <h3>總測驗次數</h3>
+                <p class="stat-value" id="totalExams">-</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+                <h3>平均分數</h3>
+                <p class="stat-value" id="avgScore">-</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-content">
+                <h3>點數流通量</h3>
+                <p class="stat-value" id="totalPoints">-</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">❓</div>
+            <div class="stat-content">
+                <h3>總題目數</h3>
+                <p class="stat-value" id="totalQuestions">-</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <div class="stat-content">
+                <h3>總單字數</h3>
+                <p class="stat-value" id="totalVocab">-</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 進度條區 -->
+    <div class="progress-section">
+        <div class="progress-card">
+            <h4>平均完成率</h4>
+            <div class="progress-bar">
+                <div class="progress-fill" id="completionRate" style="width: 0%"></div>
+            </div>
+            <p class="progress-text" id="completionText">0%</p>
+        </div>
+        <div class="progress-card">
+            <h4>熟悉單字比例</h4>
+            <div class="progress-bar">
+                <div class="progress-fill" id="familiarRate" style="width: 0%"></div>
+            </div>
+            <p class="progress-text" id="familiarText">0%</p>
+        </div>
+    </div>
+
+    <!-- 圖表區 -->
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3>新增用戶趨勢 (近30天)</h3>
+            <canvas id="userTrendChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>每日測驗次數趨勢 (近30天)</h3>
+            <canvas id="examTrendChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>綜合測驗 vs 單一Part</h3>
+            <canvas id="examTypeChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>各類交易原因分布</h3>
+            <canvas id="transactionChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>各 Part 測驗次數分布</h3>
+            <canvas id="examPartChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>各 Part 題目分布</h3>
+            <canvas id="questionPartChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>各難度題目數量</h3>
+            <canvas id="difficultyChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>題目審核狀態</h3>
+            <canvas id="approvalChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 分數明細 -->
+    <div class="score-section">
+        <div class="score-card">
+            <h4>🎧 聽力平均分數</h4>
+            <p class="score-value" id="listenScore">-</p>
+        </div>
+        <div class="score-card">
+            <h4>📖 閱讀平均分數</h4>
+            <p class="score-value" id="readingScore">-</p>
+        </div>
+        <div class="score-card">
+            <h4>📈 學習記錄數</h4>
+            <p class="score-value" id="vocabRecords">-</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    fetch('/mgmt/api/dashboard/stats/')
+        .then(r => r.json())
+        .then(data => {
+            // 更新數字卡片
+            document.getElementById('totalUsers').textContent = data.total_users.toLocaleString();
+            document.getElementById('totalExams').textContent = data.total_exams.toLocaleString();
+            document.getElementById('avgScore').textContent = data.avg_score.toFixed(1);
+            document.getElementById('totalPoints').textContent = data.total_points.toLocaleString();
+            document.getElementById('totalQuestions').textContent = data.total_questions.toLocaleString();
+            document.getElementById('totalVocab').textContent = data.total_vocab.toLocaleString();
+            document.getElementById('listenScore').textContent = data.avg_listen_score.toFixed(1);
+            document.getElementById('readingScore').textContent = data.avg_reading_score.toFixed(1);
+            document.getElementById('vocabRecords').textContent = data.vocab_records.toLocaleString();
+
+            // 更新進度條
+            const completionRate = data.completion_rate;
+            document.getElementById('completionRate').style.width = completionRate + '%';
+            document.getElementById('completionText').textContent = completionRate.toFixed(1) + '%';
+
+            const familiarRate = data.familiar_rate;
+            document.getElementById('familiarRate').style.width = familiarRate + '%';
+            document.getElementById('familiarText').textContent = familiarRate.toFixed(1) + '%';
+
+            // 新增用戶趨勢圖
+            new Chart(document.getElementById('userTrendChart'), {
+                type: 'line',
+                data: {
+                    labels: data.user_trend.dates,
+                    datasets: [{
+                        label: '新增用戶數',
+                        data: data.user_trend.counts,
+                        borderColor: '#c0e686',
+                        backgroundColor: 'rgba(192, 230, 134, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {responsive: true, maintainAspectRatio: true}
+            });
+
+            // 測驗趨勢圖
+            new Chart(document.getElementById('examTrendChart'), {
+                type: 'line',
+                data: {
+                    labels: data.exam_trend.dates,
+                    datasets: [{
+                        label: '測驗次數',
+                        data: data.exam_trend.counts,
+                        borderColor: '#58585b',
+                        backgroundColor: 'rgba(88, 88, 91, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {responsive: true, maintainAspectRatio: true}
+            });
+
+            // 綜合vs單一Part圓餅圖
+            new Chart(document.getElementById('examTypeChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['綜合測驗', '單一Part測驗'],
+                    datasets: [{
+                        data: [data.exam_type_ratio.mixed, data.exam_type_ratio.single],
+                        backgroundColor: ['#c0e686', '#d9ecbd']
+                    }]
+                },
+                options: {responsive: true, maintainAspectRatio: true}
+            });
+
+            // 交易原因分布
+            new Chart(document.getElementById('transactionChart'), {
+                type: 'pie',
+                data: {
+                    labels: data.transaction_reasons.labels,
+                    datasets: [{
+                        data: data.transaction_reasons.counts,
+                        backgroundColor: ['#c0e686', '#d9ecbd', '#e9f6da']
+                    }]
+                },
+                options: {responsive: true, maintainAspectRatio: true}
+            });
+
+            // Part測驗分布
+            new Chart(document.getElementById('examPartChart'), {
+                type: 'bar',
+                data: {
+                    labels: data.exam_part_dist.labels,
+                    datasets: [{
+                        label: '測驗次數',
+                        data: data.exam_part_dist.counts,
+                        backgroundColor: '#c0e686'
+                    }]
+                },
+                options: {responsive: true, maintainAspectRatio: true}
+            });
+
+            // Part題目分布
+            new Chart(document.getElementById('questionPartChart'), {
+                type: 'bar',
+                data: {
+                    labels: data.question_part_dist.labels,
+                    datasets: [{
+                        label: '題目數量',
+                        data: data.question_part_dist.counts,
+                        backgroundColor: '#58585b'
+                    }]
+                },
+                options: {responsive: true, maintainAspectRatio: true}
+            });
+
+            // 難度分布
+            new Chart(document.getElementById('difficultyChart'), {
+                type: 'bar',
+                data: {
+                    labels: data.difficulty_dist.labels,
+                    datasets: [{
+                        label: '題目數量',
+                        data: data.difficulty_dist.counts,
+                        backgroundColor: '#d9ecbd'
+                    }]
+                },
+                options: {responsive: true, maintainAspectRatio: true}
+            });
+
+            // 審核狀態
+            new Chart(document.getElementById('approvalChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['已審核', '待審核'],
+                    datasets: [{
+                        data: [data.approval_status.approved, data.approval_status.pending],
+                        backgroundColor: ['#c0e686', '#ff6b6b']
+                    }]
+                },
+                options: {responsive: true, maintainAspectRatio: true}
+            });
+        });
+</script>
+{% endblock %}
