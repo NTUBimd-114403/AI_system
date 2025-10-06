@@ -1400,6 +1400,7 @@ def get_word_relations_by_ai(request, word):
 def get_mgmt_test(request):
     return render(request, 'mgmt_base.html')
 
+@staff_required
 def get_mgmt_home(request):
     return render(request, "mgmt_home.html")
 
@@ -1421,12 +1422,13 @@ def mgmt_login(request):
 
     return render(request, 'mgmt_login.html')
 
+@staff_required
 def mgmt_user(request):
     users = User.objects.all().order_by('-date_joined')
     context = {'users': users}
     return render(request, 'mgmt_user.html', context)
 
-
+@staff_required
 def get_user_api(request, email):
     try:
         user = User.objects.get(email=email)
@@ -1440,6 +1442,7 @@ def get_user_api(request, email):
     except User.DoesNotExist:
         return JsonResponse({'error': '找不到使用者'}, status=404)
 
+@staff_required
 @require_POST
 def update_user_api(request):
     try:
@@ -1455,7 +1458,8 @@ def update_user_api(request):
         return JsonResponse({'success': False, 'error': '找不到使用者'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
-    
+
+@staff_required
 @require_POST
 def create_user_api(request):
     try:
@@ -1476,7 +1480,8 @@ def create_user_api(request):
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
-    
+
+@staff_required
 @require_POST
 def delete_user_api(request):
     try:
@@ -1486,6 +1491,113 @@ def delete_user_api(request):
         return JsonResponse({'success': True})
     except User.DoesNotExist:
         return JsonResponse({'success': False, 'error': '找不到使用者'}, status=404)
+    
+@staff_required
+def point_list(request):
+    """點數交易列表頁面"""
+    transactions = PointTransaction.objects.select_related('user').order_by('-created_at')
+    users = User.objects.all().order_by('email')
+    return render(request, 'mgmt_point.html', {
+        'transactions': transactions,
+        'users': users
+    })
+
+@staff_required
+def point_detail(request, transaction_id):
+    """取得單一交易詳情"""
+    try:
+        t = PointTransaction.objects.select_related('user').get(id=transaction_id)
+        return JsonResponse({
+            'id': str(t.id),
+            'user_email': t.user.email,
+            'user_nickname': t.user.nickname,
+            'change_amount': t.change_amount,
+            'reason': t.reason,
+            'reason_display': t.get_reason_display(),
+            'created_at': t.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        })
+    except PointTransaction.DoesNotExist:
+        return JsonResponse({'error': '交易不存在'}, status=404)
+
+@staff_required
+@require_http_methods(["POST"])
+def point_create(request):
+    """新增點數交易"""
+    try:
+        data = json.loads(request.body)
+        user = User.objects.get(email=data['user_email'])
+        
+        with transaction.atomic():
+            # 更新用戶點數
+            user.point += data['change_amount']
+            user.save()
+            
+            # 建立交易記錄
+            point_transaction = PointTransaction.objects.create(
+                user=user,
+                change_amount=data['change_amount'],
+                reason=data['reason']
+            )
+        
+        return JsonResponse({
+            'success': True,
+            'transaction_id': str(point_transaction.id)
+        })
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '用戶不存在'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@staff_required
+@require_http_methods(["POST"])
+def point_delete(request):
+    """刪除點數交易（同時回滾點數）"""
+    try:
+        data = json.loads(request.body)
+        point_transaction = PointTransaction.objects.select_related('user').get(
+            id=data['transaction_id']
+        )
+        
+        with transaction.atomic():
+            # 回滾用戶點數
+            user = point_transaction.user
+            user.point -= point_transaction.change_amount
+            user.save()
+            
+            # 刪除交易記錄
+            point_transaction.delete()
+        
+        return JsonResponse({'success': True})
+    except PointTransaction.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '交易不存在'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@staff_required
+def point_export(request):
+    """匯出 CSV"""
+    response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+    response['Content-Disposition'] = 'attachment; filename="point_transactions.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow([
+        '交易ID', '用戶Email', '用戶暱稱', '變動金額', 
+        '當前點數', '交易原因', '交易時間'
+    ])
+    
+    transactions = PointTransaction.objects.select_related('user').order_by('-created_at')
+    for t in transactions:
+        writer.writerow([
+            str(t.id),
+            t.user.email,
+            t.user.nickname,
+            t.change_amount,
+            t.user.point,
+            t.get_reason_display(),
+            t.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        ])
+    
+    return response
     
 @staff_required
 def question_list(request):
