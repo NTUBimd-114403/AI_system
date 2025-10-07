@@ -1,0 +1,323 @@
+{% extends "mgmt_base.html" %}
+{% block title %}欣愛多益 - 後台聽力素材管理{% endblock %}
+
+{% block content %}
+<div class="container-user">
+    <div class="information"></div>
+    <div class="data">
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>主題</th>
+                    <th>口音</th>
+                    <th>難度</th>
+                    <th>審核狀態</th>
+                    <th>建立時間</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in materials %}
+                <tr>
+                    <td>{{ m.topic }}</td>
+                    <td>{{ m.get_accent_display }}</td>
+                    <td>{{ m.get_listening_level_display }}</td>
+                    <td>
+                        {% if m.is_approved %}
+                            <span class="badge badge-user">已審核</span>
+                        {% else %}
+                            <span class="badge badge-admin">待審核</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ m.created_at|date:"Y-m-d H:i" }}</td>
+                    <td class="button_td">
+                        <button onclick="viewMaterial('{{ m.material_id }}')">查看</button>
+                        <button onclick="editMaterial('{{ m.material_id }}')">編輯</button>
+                        <button onclick="deleteMaterial('{{ m.material_id }}')">刪除</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="toolbar">
+        <button onclick="openAddModal()" class="btn-primary">
+            <i class="fa-solid fa-plus fa-lg"></i>
+            <p>新增素材</p>
+        </button>
+    </div>
+</div>
+
+<!-- 查看 Modal -->
+<div id="viewModal" class="modal">
+    <div class="modal-content" style="max-width: 900px;">
+        <span class="close" onclick="closeViewModal()">&times;</span>
+        <h3 id="viewTitle"></h3>
+        <div id="viewContent" style="max-height: 500px; overflow-y: auto;"></div>
+        <div class="form-actions">
+            <button type="button" class="btn-cancel" onclick="closeViewModal()">關閉</button>
+        </div>
+    </div>
+</div>
+
+<!-- 編輯 Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content" style="max-width: 900px;">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h3>編輯聽力素材</h3>
+        <form id="editForm">
+            <input type="hidden" id="edit-id">
+            
+            <label>主題</label>
+            <input type="text" id="edit-topic" required>
+            
+            <label>口音</label>
+            <select id="edit-accent">
+                <option value="american">American</option>
+                <option value="british">British</option>
+                <option value="australian">Australian</option>
+                <option value="canadian">Canadian</option>
+            </select>
+            
+            <label>難度等級</label>
+            <select id="edit-level" required>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+            </select>
+            
+            <label>音檔 URL</label>
+            <input type="url" id="edit-audio">
+            
+            <label>逐字稿</label>
+            <textarea id="edit-transcript" rows="8" required></textarea>
+            
+            <label>中文翻譯</label>
+            <textarea id="edit-translation" rows="6"></textarea>
+            
+            <label>審核狀態</label>
+            <select id="edit-approved">
+                <option value="false">待審核</option>
+                <option value="true">已審核</option>
+            </select>
+            
+            <label>拒絕原因</label>
+            <textarea id="edit-rejection" rows="2"></textarea>
+            
+            <div class="form-actions">
+                <button type="submit">儲存</button>
+                <button type="button" class="btn-cancel" onclick="closeEditModal()">取消</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 新增 Modal -->
+<div id="addModal" class="modal">
+    <div class="modal-content" style="max-width: 900px;">
+        <span class="close" onclick="closeAddModal()">&times;</span>
+        <h3>新增聽力素材</h3>
+        <form id="addForm">
+            <label>主題</label>
+            <input type="text" id="add-topic" required>
+            
+            <label>口音</label>
+            <select id="add-accent">
+                <option value="american">American</option>
+                <option value="british">British</option>
+                <option value="australian">Australian</option>
+                <option value="canadian">Canadian</option>
+            </select>
+            
+            <label>難度等級</label>
+            <select id="add-level" required>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+            </select>
+            
+            <label>音檔 URL</label>
+            <input type="url" id="add-audio">
+            
+            <label>逐字稿</label>
+            <textarea id="add-transcript" rows="8" required></textarea>
+            
+            <label>中文翻譯</label>
+            <textarea id="add-translation" rows="6"></textarea>
+            
+            <div class="form-actions">
+                <button type="submit">新增</button>
+                <button type="button" class="btn-cancel" onclick="closeAddModal()">取消</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function openAddModal() {
+        document.getElementById('addModal').style.display = 'block';
+    }
+
+    function closeAddModal() {
+        document.getElementById('addModal').style.display = 'none';
+        document.getElementById('addForm').reset();
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+
+    function closeViewModal() {
+        document.getElementById('viewModal').style.display = 'none';
+    }
+
+    function viewMaterial(materialId) {
+        fetch(`/mgmt/api/listening/${materialId}/`)
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('viewTitle').textContent = data.topic;
+                const content = `
+                    <p><strong>口音:</strong> ${data.accent}</p>
+                    <p><strong>難度:</strong> ${data.listening_level}</p>
+                    ${data.audio_url ? `<p><strong>音檔:</strong> <a href="${data.audio_url}" target="_blank">播放</a></p>` : ''}
+                    <hr>
+                    <h4>逐字稿</h4>
+                    <p style="white-space: pre-wrap;">${data.transcript}</p>
+                    ${data.translation ? `<hr><h4>中文翻譯</h4><p style="white-space: pre-wrap;">${data.translation}</p>` : ''}
+                `;
+                document.getElementById('viewContent').innerHTML = content;
+                document.getElementById('viewModal').style.display = 'block';
+            });
+    }
+
+    function editMaterial(materialId) {
+        fetch(`/mgmt/api/listening/${materialId}/`)
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('edit-id').value = data.material_id;
+                document.getElementById('edit-topic').value = data.topic;
+                document.getElementById('edit-accent').value = data.accent || 'american';
+                document.getElementById('edit-level').value = data.listening_level;
+                document.getElementById('edit-audio').value = data.audio_url || '';
+                document.getElementById('edit-transcript').value = data.transcript;
+                document.getElementById('edit-translation').value = data.translation || '';
+                document.getElementById('edit-approved').value = data.is_approved;
+                document.getElementById('edit-rejection').value = data.rejection_reason || '';
+                document.getElementById('editModal').style.display = 'block';
+            });
+    }
+
+    function deleteMaterial(materialId) {
+        Swal.fire({
+            title: '確認刪除',
+            text: '確定要刪除此素材嗎？此操作無法復原！',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: '確定刪除',
+            cancelButtonText: '取消'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/mgmt/api/listening/delete/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ material_id: materialId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire('已刪除', '素材已刪除', 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('錯誤', data.error || '刪除失敗', 'error');
+                    }
+                });
+            }
+        });
+    }
+
+    document.getElementById('addForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            topic: document.getElementById('add-topic').value,
+            accent: document.getElementById('add-accent').value,
+            listening_level: document.getElementById('add-level').value,
+            audio_url: document.getElementById('add-audio').value,
+            transcript: document.getElementById('add-transcript').value,
+            translation: document.getElementById('add-translation').value
+        };
+        
+        fetch('/mgmt/api/listening/create/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                closeAddModal();
+                Swal.fire('成功', '素材新增成功', 'success').then(() => location.reload());
+            } else {
+                Swal.fire('錯誤', data.error || '新增失敗', 'error');
+            }
+        });
+    });
+
+    document.getElementById('editForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            material_id: document.getElementById('edit-id').value,
+            topic: document.getElementById('edit-topic').value,
+            accent: document.getElementById('edit-accent').value,
+            listening_level: document.getElementById('edit-level').value,
+            audio_url: document.getElementById('edit-audio').value,
+            transcript: document.getElementById('edit-transcript').value,
+            translation: document.getElementById('edit-translation').value,
+            is_approved: document.getElementById('edit-approved').value === 'true',
+            rejection_reason: document.getElementById('edit-rejection').value || null
+        };
+        
+        fetch('/mgmt/api/listening/update/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                closeEditModal();
+                Swal.fire('成功', '素材已更新', 'success').then(() => location.reload());
+            } else {
+                Swal.fire('錯誤', data.error || '更新失敗', 'error');
+            }
+        });
+    });
+</script>
+{% endblock %}

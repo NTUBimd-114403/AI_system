@@ -75,6 +75,7 @@ urlpatterns = [
     path('mgmt-point/', views.point_list, name='point_list'),
     path('mgmt-question/', views.question_list, name='question_list'),
     path('mgmt-reading/', views.reading_list, name='reading_list'),
+    path('mgmt-listening/', views.listening_list, name='listening_list'),
     path('mgmt-dashboard/', views.dashboard_view, name='dashboard'),
     
     # ------- Admin API Endpoint -------
@@ -97,6 +98,10 @@ urlpatterns = [
     path('mgmt/api/reading/update/', views.reading_update, name='reading_update'),
     path('mgmt/api/reading/delete/', views.reading_delete, name='reading_delete'),
     path('mgmt/api/reading/<uuid:passage_id>/', views.reading_detail, name='reading_detail'),
+    path('mgmt/api/listening/create/', views.listening_create, name='listening_create'),
+    path('mgmt/api/listening/update/', views.listening_update, name='listening_update'),
+    path('mgmt/api/listening/delete/', views.listening_delete, name='listening_delete'),
+    path('mgmt/api/listening/<uuid:material_id>/', views.listening_detail, name='listening_detail'),
     path('mgmt/api/dashboard/stats/', views.dashboard_stats, name='dashboard_stats'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -2049,3 +2049,85 @@ def reading_delete(request):
         return JsonResponse({'success': False, 'error': '文章不存在'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@staff_required
+def listening_list(request):
+    """聽力素材列表頁面"""
+    materials = ListeningMaterial.objects.all().order_by('-created_at')
+    return render(request, 'mgmt_listening.html', {'materials': materials})
+
+@staff_required
+def listening_detail(request, material_id):
+    """取得單一素材詳情"""
+    try:
+        material = ListeningMaterial.objects.get(material_id=material_id)
+        return JsonResponse({
+            'material_id': str(material.material_id),
+            'audio_url': material.audio_url,
+            'transcript': material.transcript,
+            'translation': material.translation,
+            'accent': material.accent,
+            'topic': material.topic,
+            'listening_level': material.listening_level,
+            'is_approved': material.is_approved,
+            'rejection_reason': material.rejection_reason,
+        })
+    except ListeningMaterial.DoesNotExist:
+        return JsonResponse({'error': '素材不存在'}, status=404)
+
+@staff_required
+@require_http_methods(["POST"])
+def listening_create(request):
+    """新增素材"""
+    try:
+        data = json.loads(request.body)
+        material = ListeningMaterial.objects.create(
+            audio_url=data.get('audio_url', ''),
+            transcript=data['transcript'],
+            translation=data.get('translation', ''),
+            accent=data.get('accent'),
+            topic=data['topic'],
+            listening_level=data['listening_level'],
+            is_approved=False
+        )
+        return JsonResponse({'success': True, 'material_id': str(material.material_id)})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@staff_required
+@require_http_methods(["POST"])
+def listening_update(request):
+    """更新素材"""
+    try:
+        data = json.loads(request.body)
+        material = ListeningMaterial.objects.get(material_id=data['material_id'])
+        
+        material.audio_url = data.get('audio_url', '')
+        material.transcript = data['transcript']
+        material.translation = data.get('translation', '')
+        material.accent = data.get('accent')
+        material.topic = data['topic']
+        material.listening_level = data['listening_level']
+        material.is_approved = data['is_approved']
+        material.rejection_reason = data.get('rejection_reason')
+        material.save()
+        
+        return JsonResponse({'success': True})
+    except ListeningMaterial.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '素材不存在'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@staff_required
+@require_http_methods(["POST"])
+def listening_delete(request):
+    """刪除素材"""
+    try:
+        data = json.loads(request.body)
+        material = ListeningMaterial.objects.get(material_id=data['material_id'])
+        material.delete()
+        return JsonResponse({'success': True})
+    except ListeningMaterial.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '素材不存在'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
