@@ -1967,3 +1967,85 @@ def dashboard_stats(request):
     }
     
     return JsonResponse(response_data)
+
+@staff_required
+def reading_list(request):
+    """閱讀文章列表頁面"""
+    passages = ReadingPassage.objects.all().order_by('-created_at')
+    return render(request, 'mgmt_reading.html', {'passages': passages})
+
+@staff_required
+def reading_detail(request, passage_id):
+    """取得單一文章詳情"""
+    try:
+        passage = ReadingPassage.objects.get(passage_id=passage_id)
+        return JsonResponse({
+            'passage_id': str(passage.passage_id),
+            'title': passage.title,
+            'content': passage.content,
+            'translation': passage.translation,
+            'word_count': passage.word_count,
+            'reading_level': passage.reading_level,
+            'topic': passage.topic,
+            'is_approved': passage.is_approved,
+            'rejection_reason': passage.rejection_reason,
+        })
+    except ReadingPassage.DoesNotExist:
+        return JsonResponse({'error': '文章不存在'}, status=404)
+
+@staff_required
+@require_http_methods(["POST"])
+def reading_create(request):
+    """新增文章"""
+    try:
+        data = json.loads(request.body)
+        passage = ReadingPassage.objects.create(
+            title=data['title'],
+            content=data['content'],
+            translation=data.get('translation', ''),
+            word_count=data['word_count'],
+            reading_level=data['reading_level'],
+            topic=data['topic'],
+            is_approved=False
+        )
+        return JsonResponse({'success': True, 'passage_id': str(passage.passage_id)})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@staff_required
+@require_http_methods(["POST"])
+def reading_update(request):
+    """更新文章"""
+    try:
+        data = json.loads(request.body)
+        passage = ReadingPassage.objects.get(passage_id=data['passage_id'])
+        
+        passage.title = data['title']
+        passage.content = data['content']
+        passage.translation = data.get('translation', '')
+        passage.word_count = data['word_count']
+        passage.reading_level = data['reading_level']
+        passage.topic = data['topic']
+        passage.is_approved = data['is_approved']
+        passage.rejection_reason = data.get('rejection_reason')
+        passage.save()
+        
+        return JsonResponse({'success': True})
+    except ReadingPassage.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '文章不存在'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@staff_required
+@require_http_methods(["POST"])
+def reading_delete(request):
+    """刪除文章"""
+    try:
+        data = json.loads(request.body)
+        passage = ReadingPassage.objects.get(passage_id=data['passage_id'])
+        passage.delete()
+        return JsonResponse({'success': True})
+    except ReadingPassage.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '文章不存在'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
