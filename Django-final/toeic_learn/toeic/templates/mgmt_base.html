@@ -1,0 +1,110 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-TW">
+    <head>
+        <title>{% block title %}MGMT testing page{% endblock %}</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="{% static 'css/mgmt.css' %}">
+        <link rel="stylesheet" href="{% static 'css/mgmt_dashboard.css' %}">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    </head>
+    <body>
+        <header class="header">
+            <button class="menu-btn" id="hamburgerbutton">☰</button>
+            <h1>欸！愛多益 後台管理系統</h1>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <div class="nav-buttons">
+                <a href="{% url 'mgmt_home' %}" target="_self">
+                    <button class="nav-btn {% if request.path == '/mgmt-home' %}current{% endif %}">
+                        <i class="fas fa-home"></i> 首頁
+                    </button>
+                </a>
+                <a href="{% url 'home' %}" target="_self">
+                    <button class="nav-btn {% if request.path == '/' %}current{% endif %}">
+                        <i class="fas fa-file-alt"></i> 使用者端
+                    </button>
+                </a>
+                {% if user.is_authenticated %}
+                <p> | </p>
+                <a href="{% url 'profile-settings' %}" target="_self">
+                            <button class="nav-btn {% if request.path == '/profile-settings/' %}current{% endif %}">
+                                <i class="fas fa-cog"></i> 歡迎, {{ user.nickname }}
+                            </button>
+                        </a>
+                <form id="logout-form" action="{% url 'logout' %}" method="POST" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-btn">
+                        <i class="fas fa-sign-out-alt"></i> 登出
+                    </button>
+                </form>
+                {% else %}
+                <a href="{% url 'login' %}" target="_self">
+                    <button class="nav-btn {% if request.path == '/login/' %}current{% endif %}">
+                        <i class="fas fa-user"></i> 會員註冊/登入
+                    </button>
+                </a>
+                {% endif %}
+        </header>
+        <div class="container">
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-icon">
+                    <img src="{% static 'img/logo.png'%}">
+                </div>
+                <div class="sidebar-title">
+                    <p>後台控制面板</p>
+                </div>
+                <hr>
+                <div class="sidebar-object">
+                    <div class="sidebar-toggle">
+                        <i class="fas fa-user fa-lg"></i>
+                        <p>使用者管理</p>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <a href="/mgmt-user">資料管理</a>
+                        <a href="/mgmt-point">點數管理</a>
+                    </div>
+                </div>
+                <div class="sidebar-object">
+                    <div class="sidebar-toggle">
+                        <i class="fas fa-user fa-lg"></i>
+                        <p>測驗平台管理</p>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <a href="/mgmt-question">測驗題目管理</a>
+                    </div>
+                </div>
+                <div class="sidebar-object">
+                    <div class="sidebar-toggle">
+                        <i class="fas fa-user fa-lg"></i>
+                        <p>平台統計資訊</p>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <a href="/mgmt-dashboard">平台使用資訊</a>
+                    </div>
+                </div>
+            </div>
+            <div class="main">
+                {% block content %}
+                <div class="container">
+                    <h1>This is Default mgmt page base</h1>
+                </div>
+                {% endblock %}
+            </div>
+        </div>
+        {% if messages %}
+        <script>
+            {% for message in messages %}
+                Swal.fire({
+                    icon: '{% if message.tags == "error" %}error{% else %}info{% endif %}',
+                    title: '{{ message.tags|title }}',
+                    text: '{{ message }}',
+                    confirmButtonText: '確定'
+                });
+            {% endfor %}
+        </script>
+        {% endif %}
+        <script src="{% static 'script/mgmt.js' %}"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </body>
+</html>

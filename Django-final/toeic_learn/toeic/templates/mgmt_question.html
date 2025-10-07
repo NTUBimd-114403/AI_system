@@ -1,0 +1,401 @@
+{% extends "mgmt_base.html" %}
+{% block title %}
+欣愛多益 - 後台題目管理
+{% endblock %}
+
+{% block content %}
+<div class="container-user">
+    <div class="data">
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>分類</th>
+                    <th>題型</th>
+                    <th>Part</th>
+                    <th>難度</th>
+                    <th>正解</th>
+                    <th>建立時間</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for q in questions %}
+                <tr>
+                    <td>{{ q.get_question_category_display }}</td>
+                    <td>{{ q.get_question_type_display }}</td>
+                    <td>{{ q.part|default:"--" }}</td>
+                    <td>{{ q.get_difficulty_level_display }}</td>
+                    <td>{{ q.is_correct }}</td>
+                    <td>{{ q.created_at|date:"Y-m-d H:i" }}</td>
+                    <td class="button_td">
+                        <button onclick="editQuestion('{{ q.question_id }}')">編輯</button>
+                        <button onclick="deleteQuestion('{{ q.question_id }}')">刪除</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="toolbar">
+        <button onclick="openAddModal()" class="btn-primary">
+            <i class="fa-solid fa-plus fa-lg"></i>
+            <p>新增題目</p>
+        </button>
+        <button onclick="importCSV()" class="btn-primary">
+            <i class="fa-solid fa-file-import fa-lg"></i>
+            <p>匯入CSV</p>
+        </button>
+        <button onclick="exportCSV()" class="btn-primary">
+            <i class="fa-solid fa-file-export fa-lg"></i>
+            <p>匯出CSV</p>
+        </button>
+    </div>
+</div>
+
+<!-- 編輯 Modal -->
+<div id="editQuestionModal" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h3>編輯題目</h3>
+        <form id="editQuestionForm">
+            <input type="hidden" id="edit-question-id">
+            
+            <label>題號</label>
+            <input type="number" id="edit-question-num">
+            
+            <label>分類</label>
+            <select id="edit-question-category">
+                <option value="vocab">字彙</option>
+                <option value="grammar">文法</option>
+                <option value="syntax">句型結構</option>
+                <option value="pos">詞性</option>
+            </select>
+            
+            <label>題型</label>
+            <select id="edit-question-type">
+                <option value="reading">閱讀</option>
+                <option value="listening">聽力</option>
+            </select>
+            
+            <label>Part</label>
+            <input type="number" id="edit-part" min="1" max="7">
+            
+            <label>題目內容</label>
+            <textarea id="edit-question-text" rows="3"></textarea>
+            
+            <label>選項 A</label>
+            <input type="text" id="edit-option-a">
+            
+            <label>選項 B</label>
+            <input type="text" id="edit-option-b">
+            
+            <label>選項 C</label>
+            <input type="text" id="edit-option-c">
+            
+            <label>選項 D</label>
+            <input type="text" id="edit-option-d">
+            
+            <label>正確答案</label>
+            <select id="edit-is-correct">
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+            </select>
+            
+            <label>難度</label>
+            <select id="edit-difficulty">
+                <option value="1">簡單</option>
+                <option value="2">中等</option>
+                <option value="3">困難</option>
+            </select>
+            
+            <label>解析</label>
+            <textarea id="edit-explanation" rows="3"></textarea>
+            
+            <div class="form-actions">
+                <button type="submit">儲存</button>
+                <button type="button" class="btn-cancel" onclick="closeEditModal()">取消</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 新增 Modal -->
+<div id="addQuestionModal" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+        <span class="close" onclick="closeAddModal()">&times;</span>
+        <h3>新增題目</h3>
+        <form id="addQuestionForm">
+            <label>題號</label>
+            <input type="number" id="add-question-num">
+            
+            <label>分類</label>
+            <select id="edit-question-category">
+                <option value="vocab">字彙</option>
+                <option value="grammar">文法</option>
+                <option value="syntax">句型結構</option>
+                <option value="pos">詞性</option>
+            </select>
+            
+            <label>題型</label>
+            <select id="edit-question-type">
+                <option value="reading">閱讀</option>
+                <option value="listening">聽力</option>
+            </select>
+            
+            <label>Part</label>
+            <input type="number" id="add-part" min="1" max="7">
+            
+            <label>題目內容</label>
+            <textarea id="add-question-text" rows="3" required></textarea>
+            
+            <label>選項 A</label>
+            <input type="text" id="add-option-a" required>
+            
+            <label>選項 B</label>
+            <input type="text" id="add-option-b" required>
+            
+            <label>選項 C</label>
+            <input type="text" id="add-option-c" required>
+            
+            <label>選項 D</label>
+            <input type="text" id="add-option-d" required>
+            
+            <label>正確答案</label>
+            <select id="add-is-correct" required>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+            </select>
+            
+            <label>難度</label>
+            <select id="add-difficulty" required>
+                <option value="1">簡單</option>
+                <option value="2">中等</option>
+                <option value="3">困難</option>
+            </select>
+            
+            <label>解析</label>
+            <textarea id="add-explanation" rows="3"></textarea>
+            
+            <div class="form-actions">
+                <button type="submit">新增</button>
+                <button type="button" class="btn-cancel" onclick="closeAddModal()">取消</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- CSV 匯入 Modal -->
+<div id="importModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeImportModal()">&times;</span>
+        <h3>匯入 CSV</h3>
+        <form id="importForm" enctype="multipart/form-data">
+            <input type="file" id="csvFile" accept=".csv" required>
+            <div class="form-actions">
+                <button type="submit">匯入</button>
+                <button type="button" class="btn-cancel" onclick="closeImportModal()">取消</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function openAddModal() {
+        document.getElementById('addQuestionModal').style.display = 'block';
+    }
+
+    function closeAddModal() {
+        document.getElementById('addQuestionModal').style.display = 'none';
+        document.getElementById('addQuestionForm').reset();
+    }
+
+    function closeEditModal() {
+        document.getElementById('editQuestionModal').style.display = 'none';
+    }
+
+    function editQuestion(questionId) {
+        fetch(`/mgmt/api/question/${questionId}/`)
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('edit-question-id').value = data.question_id;
+                document.getElementById('edit-question-num').value = data.question_num || '';
+                document.getElementById('edit-question-category').value = data.question_category;
+                document.getElementById('edit-question-type').value = data.question_type;
+                document.getElementById('edit-part').value = data.part || '';
+                document.getElementById('edit-question-text').value = data.question_text;
+                document.getElementById('edit-option-a').value = data.option_a_text;
+                document.getElementById('edit-option-b').value = data.option_b_text;
+                document.getElementById('edit-option-c').value = data.option_c_text;
+                document.getElementById('edit-option-d').value = data.option_d_text;
+                document.getElementById('edit-is-correct').value = data.is_correct;
+                document.getElementById('edit-difficulty').value = data.difficulty_level;
+                document.getElementById('edit-explanation').value = data.explanation;
+                document.getElementById('editQuestionModal').style.display = 'block';
+            });
+    }
+
+    function deleteQuestion(questionId) {
+        Swal.fire({
+            title: '確認刪除',
+            text: '確定要刪除此題目嗎?此操作無法復原!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: '確定刪除',
+            cancelButtonText: '取消'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/mgmt/api/question/delete/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ question_id: questionId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire('已刪除', '題目已刪除', 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('錯誤', data.error || '刪除失敗', 'error');
+                    }
+                });
+            }
+        });
+    }
+
+    document.getElementById('addQuestionForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            question_num: document.getElementById('add-question-num').value || null,
+            question_category: document.getElementById('add-question-category').value,
+            question_type: document.getElementById('add-question-type').value,
+            part: document.getElementById('add-part').value || null,
+            question_text: document.getElementById('add-question-text').value,
+            option_a_text: document.getElementById('add-option-a').value,
+            option_b_text: document.getElementById('add-option-b').value,
+            option_c_text: document.getElementById('add-option-c').value,
+            option_d_text: document.getElementById('add-option-d').value,
+            is_correct: document.getElementById('add-is-correct').value,
+            difficulty_level: document.getElementById('add-difficulty').value,
+            explanation: document.getElementById('add-explanation').value
+        };
+        
+        fetch('/mgmt/api/question/create/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                closeAddModal();
+                Swal.fire('成功', '題目新增成功', 'success').then(() => location.reload());
+            } else {
+                Swal.fire('錯誤', data.error || '新增失敗', 'error');
+            }
+        });
+    });
+
+    document.getElementById('editQuestionForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            question_id: document.getElementById('edit-question-id').value,
+            question_num: document.getElementById('edit-question-num').value || null,
+            question_category: document.getElementById('edit-question-category').value,
+            question_type: document.getElementById('edit-question-type').value,
+            part: document.getElementById('edit-part').value || null,
+            question_text: document.getElementById('edit-question-text').value,
+            option_a_text: document.getElementById('edit-option-a').value,
+            option_b_text: document.getElementById('edit-option-b').value,
+            option_c_text: document.getElementById('edit-option-c').value,
+            option_d_text: document.getElementById('edit-option-d').value,
+            is_correct: document.getElementById('edit-is-correct').value,
+            difficulty_level: document.getElementById('edit-difficulty').value,
+            explanation: document.getElementById('edit-explanation').value
+        };
+        
+        fetch('/mgmt/api/question/update/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                closeEditModal();
+                Swal.fire('成功', '題目已更新', 'success').then(() => location.reload());
+            } else {
+                Swal.fire('錯誤', data.error || '更新失敗', 'error');
+            }
+        });
+    });
+
+    function exportCSV() {
+        window.location.href = '/mgmt/api/question/export/';
+    }
+
+    function importCSV() {
+        document.getElementById('importModal').style.display = 'block';
+    }
+
+    function closeImportModal() {
+        document.getElementById('importModal').style.display = 'none';
+        document.getElementById('importForm').reset();
+    }
+
+    document.getElementById('importForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData();
+        formData.append('file', document.getElementById('csvFile').files[0]);
+        
+        fetch('/mgmt/api/question/import/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                closeImportModal();
+                Swal.fire('成功', `成功匯入 ${data.count} 筆題目`, 'success').then(() => location.reload());
+            } else {
+                Swal.fire('錯誤', data.error || '匯入失敗', 'error');
+            }
+        });
+    });
+</script>
+{% endblock %}

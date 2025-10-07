@@ -1,0 +1,137 @@
+{% extends "mgmt_base.html" %}
+{% block title %}欸！愛多益 - 後台管理系統{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <!-- 歡迎區 -->
+    <div class="welcome-section">
+        <div class="welcome-text">
+            <h1>歡迎回來，{{ request.user.nickname }}</h1>
+            <p>管理員控制面板</p>
+        </div>
+        <div class="welcome-info">
+            <p><i class="fa-solid fa-clock"></i> {{ current_time|date:"Y-m-d H:i" }}</p>
+        </div>
+    </div>
+
+    <!-- 快速統計 -->
+    <div class="quick-stats">
+        <div class="stat-card-home">
+            <div class="stat-icon-home">📈</div>
+            <div class="stat-info">
+                <h3 id="todayUsers">-</h3>
+                <p>今日新增用戶</p>
+            </div>
+        </div>
+        <div class="stat-card-home">
+            <div class="stat-icon-home">✅</div>
+            <div class="stat-info">
+                <h3 id="todayExams">-</h3>
+                <p>今日測驗次數</p>
+            </div>
+        </div>
+        <div class="stat-card-home">
+            <div class="stat-icon-home">⏳</div>
+            <div class="stat-info">
+                <h3 id="pendingApproval">-</h3>
+                <p>待審核項目</p>
+            </div>
+        </div>
+        <div class="stat-card-home">
+            <div class="stat-icon-home">💚</div>
+            <div class="stat-info">
+                <h3>運行中</h3>
+                <p>系統狀態</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 快捷操作 -->
+    <div class="quick-actions">
+        <h2>快捷操作</h2>
+        <div class="action-grid">
+            <a href="/mgmt-user/" class="action-card">
+                <i class="fa-solid fa-users fa-2x"></i>
+                <h3>用戶管理</h3>
+                <p>管理平台用戶</p>
+            </a>
+            <a href="/mgmt-point/" class="action-card">
+                <i class="fa-solid fa-coins fa-2x"></i>
+                <h3>點數管理</h3>
+                <p>查看交易記錄</p>
+            </a>
+            <a href="/mgmt-question/" class="action-card">
+                <i class="fa-solid fa-question-circle fa-2x"></i>
+                <h3>題目管理</h3>
+                <p>新增、編輯題目</p>
+            </a>
+            <a href="/mgmt-dashboard/" class="action-card">
+                <i class="fa-solid fa-chart-line fa-2x"></i>
+                <h3>統計儀表板</h3>
+                <p>數據分析報表</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- 最近活動 -->
+    <div class="recent-activity">
+        <h2>最近活動</h2>
+        <div class="activity-columns">
+            <div class="activity-card">
+                <h3>最新註冊用戶</h3>
+                <ul id="recentUsers">
+                    <li>載入中...</li>
+                </ul>
+            </div>
+            <div class="activity-card">
+                <h3>最新點數交易</h3>
+                <ul id="recentTransactions">
+                    <li>載入中...</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 操作說明 -->
+    <div class="help-section">
+        <div class="help-card">
+            <i class="fa-solid fa-bars fa-2x"></i>
+            <div>
+                <h3>使用導覽</h3>
+                <p>點擊左上角的 <strong>☰</strong> 按鈕打開側邊選單，即可訪問所有管理功能</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 載入統計數據
+    fetch('/mgmt/api/home/stats/')
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('todayUsers').textContent = data.today_users;
+            document.getElementById('todayExams').textContent = data.today_exams;
+            document.getElementById('pendingApproval').textContent = data.pending_approval;
+
+            // 最新用戶
+            const usersList = document.getElementById('recentUsers');
+            if (data.recent_users.length > 0) {
+                usersList.innerHTML = data.recent_users.map(u => 
+                    `<li><strong>${u.nickname}</strong> (${u.email}) - ${u.date}</li>`
+                ).join('');
+            } else {
+                usersList.innerHTML = '<li>暫無資料</li>';
+            }
+
+            // 最新交易
+            const transList = document.getElementById('recentTransactions');
+            if (data.recent_transactions.length > 0) {
+                transList.innerHTML = data.recent_transactions.map(t => 
+                    `<li><strong>${t.user}</strong> ${t.amount > 0 ? '+' : ''}${t.amount} 點 - ${t.reason}</li>`
+                ).join('');
+            } else {
+                transList.innerHTML = '<li>暫無資料</li>';
+            }
+        });
+</script>
+{% endblock %}

@@ -1,0 +1,207 @@
+{% extends "mgmt_base.html" %}
+{% block title %}欸！愛多益 - 後台點數交易管理{% endblock %}
+
+{% block content %}
+<div class="container-user">
+    <div class="data">
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>交易ID</th>
+                    <th>用戶Email</th>
+                    <th>用戶暱稱</th>
+                    <th>變動金額</th>
+                    <th>當前點數</th>
+                    <th>交易原因</th>
+                    <th>交易時間</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transactions %}
+                <tr>
+                    <td style="font-size: 12px;">{{ t.id|truncatechars:13 }}</td>
+                    <td>{{ t.user.email }}</td>
+                    <td>{{ t.user.nickname }}</td>
+                    <td style="font-weight: bold; color: {% if t.change_amount > 0 %}#51cf66{% else %}#ff6b6b{% endif %}">
+                        {% if t.change_amount > 0 %}+{% endif %}{{ t.change_amount }}
+                    </td>
+                    <td>{{ t.user.point }}</td>
+                    <td>{{ t.get_reason_display }}</td>
+                    <td>{{ t.created_at|date:"Y-m-d H:i:s" }}</td>
+                    <td class="button_td">
+                        <button onclick="viewDetail('{{ t.id }}')">詳情</button>
+                        <button onclick="deleteTransaction('{{ t.id }}')">刪除</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="toolbar">
+        <button onclick="openAddModal()" class="btn-primary">
+            <i class="fa-solid fa-plus fa-lg"></i>
+            <p>新增交易</p>
+        </button>
+        <button onclick="exportCSV()" class="btn-primary">
+            <i class="fa-solid fa-file-export fa-lg"></i>
+            <p>匯出CSV</p>
+        </button>
+    </div>
+</div>
+
+<!-- 新增交易 Modal -->
+<div id="addTransactionModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeAddModal()">&times;</span>
+        <h3>新增點數交易</h3>
+        <form id="addTransactionForm">
+            <label>用戶Email</label>
+            <input type="email" id="add-user-email" required list="userList">
+            <datalist id="userList">
+                {% for user in users %}
+                <option value="{{ user.email }}">{{ user.nickname }}</option>
+                {% endfor %}
+            </datalist>
+            
+            <label>變動金額</label>
+            <input type="number" id="add-amount" required placeholder="正數為增加，負數為扣除">
+            
+            <label>交易原因</label>
+            <select id="add-reason" required>
+                <option value="exam_exchange">測驗兌換</option>
+                <option value="test_completion">完成測驗</option>
+                <option value="other">其他</option>
+            </select>
+            
+            <div class="form-actions">
+                <button type="submit">新增</button>
+                <button type="button" class="btn-cancel" onclick="closeAddModal()">取消</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 詳情 Modal -->
+<div id="detailModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeDetailModal()">&times;</span>
+        <h3>交易詳情</h3>
+        <div id="detailContent"></div>
+        <div class="form-actions">
+            <button type="button" class="btn-cancel" onclick="closeDetailModal()">關閉</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function openAddModal() {
+        document.getElementById('addTransactionModal').style.display = 'block';
+    }
+
+    function closeAddModal() {
+        document.getElementById('addTransactionModal').style.display = 'none';
+        document.getElementById('addTransactionForm').reset();
+    }
+
+    function closeDetailModal() {
+        document.getElementById('detailModal').style.display = 'none';
+    }
+
+    function viewDetail(transactionId) {
+        fetch(`/mgmt/api/point/${transactionId}/`)
+            .then(r => r.json())
+            .then(data => {
+                const content = `
+                    <p><strong>交易ID:</strong> ${data.id}</p>
+                    <p><strong>用戶:</strong> ${data.user_email} (${data.user_nickname})</p>
+                    <p><strong>變動金額:</strong> <span style="color: ${data.change_amount > 0 ? '#51cf66' : '#ff6b6b'}">${data.change_amount > 0 ? '+' : ''}${data.change_amount}</span></p>
+                    <p><strong>交易原因:</strong> ${data.reason_display}</p>
+                    <p><strong>交易時間:</strong> ${data.created_at}</p>
+                `;
+                document.getElementById('detailContent').innerHTML = content;
+                document.getElementById('detailModal').style.display = 'block';
+            });
+    }
+
+    function deleteTransaction(transactionId) {
+        Swal.fire({
+            title: '確認刪除',
+            text: '確定要刪除此交易記錄嗎？此操作無法復原！',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: '確定刪除',
+            cancelButtonText: '取消'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/mgmt/api/point/delete/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ transaction_id: transactionId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire('已刪除', '交易記錄已刪除', 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('錯誤', data.error || '刪除失敗', 'error');
+                    }
+                });
+            }
+        });
+    }
+
+    function exportCSV() {
+        window.location.href = '/mgmt/api/point/export/';
+    }
+
+    document.getElementById('addTransactionForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            user_email: document.getElementById('add-user-email').value,
+            change_amount: parseInt(document.getElementById('add-amount').value),
+            reason: document.getElementById('add-reason').value
+        };
+        
+        fetch('/mgmt/api/point/create/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                closeAddModal();
+                Swal.fire('成功', '交易記錄新增成功', 'success').then(() => location.reload());
+            } else {
+                Swal.fire('錯誤', data.error || '新增失敗', 'error');
+            }
+        });
+    });
+</script>
+{% endblock %}

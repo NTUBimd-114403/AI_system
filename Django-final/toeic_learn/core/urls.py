@@ -66,6 +66,33 @@ urlpatterns = [
 
     # ---------- Django Admin ----------
     path("admin/", admin.site.urls),
+    
+    # ---------- Admin Backend ---------
+    path("mgmt-test/", views.get_mgmt_test, name="mgmt_test"),
+    path("mgmt-login/", views.mgmt_login, name="mgmt_login"),
+    path("mgmt-home/", views.get_mgmt_home, name="mgmt_home"),
+    path("mgmt-user/", views.mgmt_user, name="mgmt_user"),
+    path('mgmt-point/', views.point_list, name='point_list'),
+    path('mgmt-question/', views.question_list, name='question_list'),
+    path('mgmt-dashboard/', views.dashboard_view, name='dashboard'),
+    
+    # ------- Admin API Endpoint -------
+    path('mgmt/api/home/stats/', views.mgmt_home_stats, name='home_stats'),
+    path('mgmt/api/user/update/', views.update_user_api, name='update_user_api'),
+    path('mgmt/api/user/create/', views.create_user_api, name='create_user_api'),
+    path('mgmt/api/user/delete/', views.delete_user_api, name='delete_user_api'),
+    path('mgmt/api/user/<str:email>/', views.get_user_api, name='get_user_api'),
+    path('mgmt/api/point/create/', views.point_create, name='point_create'),
+    path('mgmt/api/point/delete/', views.point_delete, name='point_delete'),
+    path('mgmt/api/point/export/', views.point_export, name='point_export'),
+    path('mgmt/api/point/<uuid:transaction_id>/', views.point_detail, name='point_detail'),
+    path('mgmt/api/question/create/', views.question_create, name='question_create'),
+    path('mgmt/api/question/update/', views.question_update, name='question_update'),
+    path('mgmt/api/question/delete/', views.question_delete, name='question_delete'),
+    path('mgmt/api/question/export/', views.question_export, name='question_export'),
+    path('mgmt/api/question/import/', views.question_import, name='question_import'),
+    path('mgmt/api/question/<uuid:question_id>/', views.question_detail, name='question_detail'),
+    path('mgmt/api/dashboard/stats/', views.dashboard_stats, name='dashboard_stats'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

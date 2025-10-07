@@ -2,21 +2,23 @@ import os
 import json
 import random
 import logging
+import csv
 from datetime import datetime, date, timedelta
 import openai
 from django.conf import settings
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse, Http404
+from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Count, Q, F, FloatField, ExpressionWrapper
+from django.db.models import Count, Avg, Sum, Q
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
 from django.utils import timezone
+from .permissions import staff_required
 
 from .forms import RegisterForm
 
@@ -166,19 +168,29 @@ def logout_view(request):
     messages.success(request, '您已成功登出！')
     
     # 重新導向到登入頁面。
-    return redirect('login')
+    return redirect('home')
 
 def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, '註冊成功！請登入。')
-            return redirect('login')
+            return JsonResponse({
+                'success': True,
+                'redirect': '/login/'
+            })
         else:
-            messages.error(request, '註冊失敗，請檢查表單內容。')
-    else:
-        form = RegisterForm()
+            # 返回所有表單錯誤
+            errors = {}
+            for field, error_list in form.errors.items():
+                errors[field] = [str(e) for e in error_list]
+            
+            return JsonResponse({
+                'success': False,
+                'errors': errors
+            })
+    
+    form = RegisterForm()
     return render(request, 'register.html', {'form': form})
 
 def test_page(request):
@@ -1383,3 +1395,575 @@ def get_word_relations_by_ai(request, word):
             "synonyms": [],
             "error": f"無法解析 AI 回應: {e}"
         }, status=500)
+
+@staff_required
+def get_mgmt_test(request):
+    return render(request, 'mgmt_base.html')
+
+@staff_required
+def get_mgmt_home(request):
+    return render(request, 'mgmt_home.html', {
+        'current_time': timezone.now()
+    })
+
+@staff_required
+def mgmt_home_stats(request):
+    today = timezone.now().date()
+    
+    # 今日新增用戶
+    today_users = User.objects.filter(date_joined__date=today).count()
+    
+    # 今日測驗次數
+    today_exams = ExamSession.objects.filter(start_time__date=today).count()
+    
+    # 待審核項目 (閱讀 + 聽力)
+    pending_reading = ReadingPassage.objects.filter(is_approved=False).count()
+    pending_listening = ListeningMaterial.objects.filter(is_approved=False).count()
+    pending_approval = pending_reading + pending_listening
+    
+    # 最新註冊用戶 (5筆)
+    recent_users = User.objects.order_by('-date_joined')[:5]
+    recent_users_data = [{
+        'nickname': u.nickname,
+        'email': u.email,
+        'date': u.date_joined.strftime('%m/%d %H:%M')
+    } for u in recent_users]
+    
+    # 最新點數交易 (5筆)
+    recent_transactions = PointTransaction.objects.select_related('user').order_by('-created_at')[:5]
+    recent_trans_data = [{
+        'user': t.user.nickname,
+        'amount': t.change_amount,
+        'reason': t.get_reason_display()
+    } for t in recent_transactions]
+    
+    return JsonResponse({
+        'today_users': today_users,
+        'today_exams': today_exams,
+        'pending_approval': pending_approval,
+        'recent_users': recent_users_data,
+        'recent_transactions': recent_trans_data
+    })
+
+def mgmt_login(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        if not email or not password:
+            messages.error(request, '請輸入電子郵件和密碼')
+            
+        user = authenticate(request, username=email, password=password)
+        if user is not None:
+            login(request, user)
+            messages.success(request, '登入成功！')
+            return redirect('mgmt_home')
+        else:
+            messages.error(request, '帳號或密碼錯誤')
+
+    return render(request, 'mgmt_login.html')
+
+@staff_required
+def mgmt_user(request):
+    users = User.objects.all().order_by('-date_joined')
+    context = {'users': users}
+    return render(request, 'mgmt_user.html', context)
+
+@staff_required
+def get_user_api(request, email):
+    try:
+        user = User.objects.get(email=email)
+        return JsonResponse({
+            'email': user.email,
+            'nickname': user.nickname,
+            'point': user.point,
+            'is_staff': user.is_staff,
+            'is_active': user.is_active
+        })
+    except User.DoesNotExist:
+        return JsonResponse({'error': '找不到使用者'}, status=404)
+
+@staff_required
+@require_POST
+def update_user_api(request):
+    try:
+        data = json.loads(request.body)
+        user = User.objects.get(email=data['email'])
+        user.nickname = data['nickname']
+        user.point = int(data['point'])
+        user.is_staff = data['is_staff']
+        user.is_active = data['is_active']
+        user.save()
+        return JsonResponse({'success': True})
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '找不到使用者'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@staff_required
+@require_POST
+def create_user_api(request):
+    try:
+        data = json.loads(request.body)
+        
+        if User.objects.filter(email=data['email']).exists():
+            return JsonResponse({'success': False, 'error': '此 Email 已存在'})
+        
+        user = User.objects.create_user(
+            email=data['email'],
+            nickname=data['nickname'],
+            password=data['password']
+        )
+        user.point = data.get('point', 0)
+        user.is_staff = data.get('is_staff', False)
+        user.save()
+        
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@staff_required
+@require_POST
+def delete_user_api(request):
+    try:
+        data = json.loads(request.body)
+        user = User.objects.get(email=data['email'])
+        user.delete()
+        return JsonResponse({'success': True})
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '找不到使用者'}, status=404)
+    
+@staff_required
+def point_list(request):
+    """點數交易列表頁面"""
+    transactions = PointTransaction.objects.select_related('user').order_by('-created_at')
+    users = User.objects.all().order_by('email')
+    return render(request, 'mgmt_point.html', {
+        'transactions': transactions,
+        'users': users
+    })
+
+@staff_required
+def point_detail(request, transaction_id):
+    """取得單一交易詳情"""
+    try:
+        t = PointTransaction.objects.select_related('user').get(id=transaction_id)
+        return JsonResponse({
+            'id': str(t.id),
+            'user_email': t.user.email,
+            'user_nickname': t.user.nickname,
+            'change_amount': t.change_amount,
+            'reason': t.reason,
+            'reason_display': t.get_reason_display(),
+            'created_at': t.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        })
+    except PointTransaction.DoesNotExist:
+        return JsonResponse({'error': '交易不存在'}, status=404)
+
+@staff_required
+@require_http_methods(["POST"])
+def point_create(request):
+    """新增點數交易"""
+    try:
+        data = json.loads(request.body)
+        user = User.objects.get(email=data['user_email'])
+        
+        with transaction.atomic():
+            # 更新用戶點數
+            user.point += data['change_amount']
+            user.save()
+            
+            # 建立交易記錄
+            point_transaction = PointTransaction.objects.create(
+                user=user,
+                change_amount=data['change_amount'],
+                reason=data['reason']
+            )
+        
+        return JsonResponse({
+            'success': True,
+            'transaction_id': str(point_transaction.id)
+        })
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '用戶不存在'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@staff_required
+@require_http_methods(["POST"])
+def point_delete(request):
+    """刪除點數交易（同時回滾點數）"""
+    try:
+        data = json.loads(request.body)
+        point_transaction = PointTransaction.objects.select_related('user').get(
+            id=data['transaction_id']
+        )
+        
+        with transaction.atomic():
+            # 回滾用戶點數
+            user = point_transaction.user
+            user.point -= point_transaction.change_amount
+            user.save()
+            
+            # 刪除交易記錄
+            point_transaction.delete()
+        
+        return JsonResponse({'success': True})
+    except PointTransaction.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '交易不存在'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@staff_required
+def point_export(request):
+    """匯出 CSV"""
+    response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+    response['Content-Disposition'] = 'attachment; filename="point_transactions.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow([
+        '交易ID', '用戶Email', '用戶暱稱', '變動金額', 
+        '當前點數', '交易原因', '交易時間'
+    ])
+    
+    transactions = PointTransaction.objects.select_related('user').order_by('-created_at')
+    for t in transactions:
+        writer.writerow([
+            str(t.id),
+            t.user.email,
+            t.user.nickname,
+            t.change_amount,
+            t.user.point,
+            t.get_reason_display(),
+            t.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        ])
+    
+    return response
+    
+@staff_required
+def question_list(request):
+    """題目列表頁面"""
+    questions = Question.objects.all().order_by('-created_at')
+    return render(request, 'mgmt_question.html', {'questions': questions})
+
+@staff_required
+def question_detail(request, question_id):
+    """取得單一題目詳情"""
+    try:
+        question = Question.objects.get(question_id=question_id)
+        return JsonResponse({
+            'question_id': str(question.question_id),
+            'question_num': question.question_num,
+            'question_category': question.question_category,
+            'question_type': question.question_type,
+            'part': question.part,
+            'question_text': question.question_text,
+            'option_a_text': question.option_a_text,
+            'option_b_text': question.option_b_text,
+            'option_c_text': question.option_c_text,
+            'option_d_text': question.option_d_text,
+            'is_correct': question.is_correct,
+            'difficulty_level': question.difficulty_level,
+            'explanation': question.explanation,
+        })
+    except Question.DoesNotExist:
+        return JsonResponse({'error': '題目不存在'}, status=404)
+
+@staff_required
+@require_http_methods(["POST"])
+def question_create(request):
+    """新增題目"""
+    try:
+        data = json.loads(request.body)
+        question = Question.objects.create(
+            question_num=data.get('question_num'),
+            question_category=data['question_category'],
+            question_type=data['question_type'],
+            part=data.get('part'),
+            question_text=data['question_text'],
+            option_a_text=data['option_a_text'],
+            option_b_text=data['option_b_text'],
+            option_c_text=data['option_c_text'],
+            option_d_text=data['option_d_text'],
+            is_correct=data['is_correct'],
+            difficulty_level=data['difficulty_level'],
+            explanation=data.get('explanation', '')
+        )
+        return JsonResponse({'success': True, 'question_id': str(question.question_id)})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@staff_required
+@require_http_methods(["POST"])
+def question_update(request):
+    """更新題目"""
+    try:
+        data = json.loads(request.body)
+        question = Question.objects.get(question_id=data['question_id'])
+        
+        question.question_num = data.get('question_num')
+        question.question_category = data['question_category']
+        question.question_type = data['question_type']
+        question.part = data.get('part')
+        question.question_text = data['question_text']
+        question.option_a_text = data['option_a_text']
+        question.option_b_text = data['option_b_text']
+        question.option_c_text = data['option_c_text']
+        question.option_d_text = data['option_d_text']
+        question.is_correct = data['is_correct']
+        question.difficulty_level = data['difficulty_level']
+        question.explanation = data.get('explanation', '')
+        question.save()
+        
+        return JsonResponse({'success': True})
+    except Question.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '題目不存在'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@staff_required
+@require_http_methods(["POST"])
+def question_delete(request):
+    """刪除題目"""
+    try:
+        data = json.loads(request.body)
+        question = Question.objects.get(question_id=data['question_id'])
+        question.delete()
+        return JsonResponse({'success': True})
+    except Question.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '題目不存在'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@staff_required
+def question_export(request):
+    """匯出 CSV"""
+    response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+    response['Content-Disposition'] = 'attachment; filename="questions.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow([
+        '題號', '分類', '題型', 'Part', '題目內容', 
+        '選項A', '選項B', '選項C', '選項D', 
+        '正確答案', '難度', '解析'
+    ])
+    
+    questions = Question.objects.all().order_by('question_num')
+    for q in questions:
+        writer.writerow([
+            q.question_num or '',
+            q.question_category,
+            q.question_type,
+            q.part or '',
+            q.question_text,
+            q.option_a_text,
+            q.option_b_text,
+            q.option_c_text,
+            q.option_d_text,
+            q.is_correct,
+            q.difficulty_level,
+            q.explanation
+        ])
+    
+    return response
+
+@staff_required
+@require_http_methods(["POST"])
+def question_import(request):
+    """匯入 CSV"""
+    try:
+        csv_file = request.FILES['file']
+        if not csv_file.name.endswith('.csv'):
+            return JsonResponse({'success': False, 'error': '請上傳 CSV 檔案'}, status=400)
+        
+        decoded_file = csv_file.read().decode('utf-8-sig').splitlines()
+        reader = csv.DictReader(decoded_file)
+        
+        count = 0
+        for row in reader:
+            Question.objects.create(
+                question_num=int(row['題號']) if row['題號'] else None,
+                question_category=row['分類'],
+                question_type=row['題型'],
+                part=int(row['Part']) if row['Part'] else None,
+                question_text=row['題目內容'],
+                option_a_text=row['選項A'],
+                option_b_text=row['選項B'],
+                option_c_text=row['選項C'],
+                option_d_text=row['選項D'],
+                is_correct=row['正確答案'],
+                difficulty_level=int(row['難度']),
+                explanation=row['解析']
+            )
+            count += 1
+        
+        return JsonResponse({'success': True, 'count': count})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    
+@staff_required
+def dashboard_view(request):
+    """儀表板頁面"""
+    return render(request, 'mgmt_dashboard.html')
+
+@staff_required
+def dashboard_stats(request):
+    """統計數據 API"""
+    
+    # 基本統計
+    total_users = User.objects.count()
+    total_exams = ExamSession.objects.count()
+    total_questions = Question.objects.count()
+    total_vocab = DailyVocabulary.objects.count()
+    vocab_records = UserVocabularyRecord.objects.count()
+    
+    # 點數流通量
+    total_points = User.objects.aggregate(Sum('point'))['point__sum'] or 0
+    
+    # 平均分數
+    avg_stats = ExamResult.objects.aggregate(
+        avg_score=Avg('total_score'),
+        avg_listen=Avg('listen_score'),
+        avg_reading=Avg('reading_score')
+    )
+    
+    # 完成率
+    completed_count = ExamSession.objects.filter(status='completed').count()
+    completion_rate = (completed_count / total_exams * 100) if total_exams > 0 else 0
+    
+    # 熟悉單字比例
+    familiar_count = UserVocabularyRecord.objects.filter(is_familiar=True).count()
+    familiar_rate = (familiar_count / vocab_records * 100) if vocab_records > 0 else 0
+    
+    # 新增用戶趨勢 (近30天)
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    user_trend = []
+    for i in range(30):
+        date = thirty_days_ago + timedelta(days=i)
+        count = User.objects.filter(
+            date_joined__date=date.date()
+        ).count()
+        user_trend.append({
+            'date': date.strftime('%m/%d'),
+            'count': count
+        })
+    
+    # 測驗趨勢 (近30天)
+    exam_trend = []
+    for i in range(30):
+        date = thirty_days_ago + timedelta(days=i)
+        count = ExamSession.objects.filter(
+            start_time__date=date.date()
+        ).count()
+        exam_trend.append({
+            'date': date.strftime('%m/%d'),
+            'count': count
+        })
+    
+    # 綜合測驗 vs 單一Part (透過 Exam 的 part 欄位判斷)
+    mixed_count = ExamSession.objects.filter(exam__part=0).count()
+    single_count = ExamSession.objects.exclude(exam__part=0).count()
+    
+    # 各 Part 測驗分布
+    exam_part_dist = ExamSession.objects.filter(
+        exam__part__isnull=False
+    ).values('exam__part').annotate(
+        count=Count('session_id')
+    ).order_by('exam__part')
+    
+    # 各 Part 題目分布
+    question_part_dist = Question.objects.filter(
+        part__isnull=False
+    ).values('part').annotate(
+        count=Count('question_id')
+    ).order_by('part')
+    
+    # 各難度題目分布
+    difficulty_dist = Question.objects.values('difficulty_level').annotate(
+        count=Count('question_id')
+    ).order_by('difficulty_level')
+    
+    # 題目審核狀態 (Reading + Listening)
+    approved_reading = ReadingPassage.objects.filter(is_approved=True).count()
+    pending_reading = ReadingPassage.objects.filter(is_approved=False).count()
+    approved_listening = ListeningMaterial.objects.filter(is_approved=True).count()
+    pending_listening = ListeningMaterial.objects.filter(is_approved=False).count()
+    
+    # 交易原因分布
+    transaction_dist = PointTransaction.objects.values('reason').annotate(
+        count=Count('id')
+    )
+    
+    # 轉換 Part choices 為中文標籤
+    PART_LABELS = {
+        0: '綜合測驗',
+        2: 'Part 2',
+        3: 'Part 3',
+        5: 'Part 5',
+        6: 'Part 6',
+        7: 'Part 7'
+    }
+    
+    # 交易原因標籤
+    REASON_LABELS = {
+        'exam_exchange': '測驗兌換',
+        'test_completion': '完成測驗',
+        'other': '其他'
+    }
+    
+    response_data = {
+        # 數字卡片
+        'total_users': total_users,
+        'total_exams': total_exams,
+        'avg_score': avg_stats['avg_score'] or 0,
+        'total_points': total_points,
+        'total_questions': total_questions,
+        'total_vocab': total_vocab,
+        'avg_listen_score': avg_stats['avg_listen'] or 0,
+        'avg_reading_score': avg_stats['avg_reading'] or 0,
+        'vocab_records': vocab_records,
+        
+        # 進度條
+        'completion_rate': completion_rate,
+        'familiar_rate': familiar_rate,
+        
+        # 折線圖
+        'user_trend': {
+            'dates': [d['date'] for d in user_trend],
+            'counts': [d['count'] for d in user_trend]
+        },
+        'exam_trend': {
+            'dates': [d['date'] for d in exam_trend],
+            'counts': [d['count'] for d in exam_trend]
+        },
+        
+        # 圓餅圖
+        'exam_type_ratio': {
+            'mixed': mixed_count,
+            'single': single_count
+        },
+        'transaction_reasons': {
+            'labels': [REASON_LABELS.get(t['reason'], t['reason']) for t in transaction_dist],
+            'counts': [t['count'] for t in transaction_dist]
+        },
+        'approval_status': {
+            'approved': approved_reading + approved_listening,
+            'pending': pending_reading + pending_listening
+        },
+        
+        # 長條圖
+        'exam_part_dist': {
+            'labels': [PART_LABELS.get(d['exam__part'], f"Part {d['exam__part']}") for d in exam_part_dist],
+            'counts': [d['count'] for d in exam_part_dist]
+        },
+        'question_part_dist': {
+            'labels': [PART_LABELS.get(d['part'], f"Part {d['part']}") for d in question_part_dist],
+            'counts': [d['count'] for d in question_part_dist]
+        },
+        'difficulty_dist': {
+            'labels': [f"Level {d['difficulty_level']}" for d in difficulty_dist],
+            'counts': [d['count'] for d in difficulty_dist]
+        }
+    }
+    
+    return JsonResponse(response_data)
